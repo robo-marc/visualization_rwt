@@ -2,5 +2,5 @@
   <arg name="launch_roswww" default="true" />
   <include file="$(find rwt_image_view)/launch/rwt_image_view.launch"
            if="$(arg launch_roswww)" />
-  <node pkg="usb_cam" type="usb_cam_node" name="usb_cam_node" />
+  <node pkg="uvc_camera" type="uvc_camera_node" name="uvc_camera_node" />
 </launch>
