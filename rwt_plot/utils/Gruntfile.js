@@ -40,7 +40,8 @@ module.exports = function (grunt) {
       },
       files: [
         'Gruntfile.js',
-        '../www/js/rwt_plot.js'
+        '../src/*.js',
+        '../www/js/rwt_plot_main.js'
       ]
     },
     watch: {
