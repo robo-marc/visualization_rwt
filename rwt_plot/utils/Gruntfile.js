@@ -1,4 +1,4 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   var pkg = grunt.file.readJSON('package.json');
   grunt.initConfig({
     less: {
@@ -22,7 +22,7 @@ module.exports = function(grunt) {
     concat: {
       build: {
         src: ['../src/*.js'],
-        dest: '../www/rwt_plot.js'
+        dest: '../www/js/rwt_plot.js'
       }
     },
     uglify: {
@@ -30,8 +30,8 @@ module.exports = function(grunt) {
         report: 'min'
       },
       build: {
-        src: '../www/rwt_plot.js',
-        dest: '../www/rwt_plot.min.js'
+        src: '../www/js/rwt_plot.js',
+        dest: '../www/js/rwt_plot.min.js'
       }
     },
     jshint: {
@@ -40,7 +40,7 @@ module.exports = function(grunt) {
       },
       files: [
         'Gruntfile.js',
-        '../www/rwt_plot.js'
+        '../www/js/rwt_plot.js'
       ]
     },
     watch: {
@@ -58,12 +58,12 @@ module.exports = function(grunt) {
   });
 
   // reading npm tasks
-  for(var taskName in pkg.devDependencies) {
-    if(taskName.substring(0, 6) === 'grunt-'.toString()) {
+  for (var taskName in pkg.devDependencies) {
+    if (taskName.substring(0, 6) === 'grunt-'.toString()) {
       grunt.loadNpmTasks(taskName);
     }
   }
-  
+
   grunt.registerTask('build', ['concat', 'jshint', 'uglify', 'less']);
   grunt.registerTask('default', ['build']);
   grunt.registerTask('doc', ['jsdoc']);
