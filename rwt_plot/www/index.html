@@ -25,8 +25,8 @@
         </div>
         <div class="form-group">
           <label class="sr-only" for="field-accessor">field-accessor</label>
-          <input type="name" class="form-control" name="field-accessor" id="field-accessor"
-            placeholder="specify field like data" />
+          <select id="type-select" name="type-select" class="form-control">
+          </select>
         </div>
         <div class="form-group">
           <button type="button" id="subscribe-topic-button" class="btn btn-success"><span
@@ -83,7 +83,8 @@
 
     <div class="row">
       <div id="plot-area" class="col-md-8" style="height: 400px;"></div>
-      <div id="message-detail" class="col-md-4">
+      <div id="message-detail" class="col-md-4 hidden">
+        <!-- TODO: deprecated -->
         <div class="row">
           <h2>topic type info</h2>
         </div>
