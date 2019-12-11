@@ -15,6 +15,7 @@
       <h1><span class="glyphicon glyphicon-star"></span>rwt_plot <small>robotwebtools plot</small> <span
           id="config-button"></span></h1>
     </div>
+
     <div id="topic-area">
       <form id="topic-form" role="form" class="form-inline">
         <div class="form-group">
@@ -27,30 +28,59 @@
           <input type="name" class="form-control" name="field-accessor" id="field-accessor"
             placeholder="specify field like data" />
         </div>
-        <button type="submit" class="btn btn-primary">plot</button>
+        <div class="form-group">
+          <button type="button" id="subscribe-topic-button" class="btn btn-success"><span
+              class="glyphicon glyphicon-plus"></span></button>
+        </div>
+        <div class="form-group dropdown">
+          <button class="btn btn-danger dropdown-toggle" type="button" data-toggle="dropdown">
+            <span class="glyphicon glyphicon glyphicon-minus"></span>
+            &nbsp;
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a href="#">/array_sin_cos/data</a></li>
+            <li><a href="#">/sin/data</a></li>
+          </ul>
+        </div>
+        <div class="form-group">
+          <button type="button" id="pause-button" class="btn btn-warning"><span
+              class="glyphicon glyphicon glyphicon-pause"></span></button>
+          <button type="button" id="start-button" class="btn btn-info"><span
+              class="glyphicon glyphicon glyphicon-play"></span></button>
+          <button type="button" id="clear-button" class="btn btn-default"><span
+              class="glyphicon glyphicon glyphicon glyphicon-refresh"></span></button>
+        </div>
       </form>
     </div>
-    <div id="config-area">
+
+    <div id="config-area" class="well">
       <form id="config-form" role="form" class="form-inline">
-        <div class="form-group">
-          <label class="sr-only" for="x-min">X-min</label>
-          <input type="number" class="form-control" name="x-min" id="x-min" placeholder="X-axis minimum" />
+        <div class="well-sm">
+          <div class="form-group">
+            <label class="sr-only" for="x-sec">X-min</label>
+            <input type="text" class="form-control" name="x-sec" id="x-sec" placeholder="X-axis sec" />
+          </div>
         </div>
-        <div class="form-group">
-          <label class="sr-only" for="x-max">X-max</label>
-          <input type="number" class="form-control" name="x-max" id="x-max" placeholder="X-axis maximum" />
-        </div>
-        <div class="form-group">
-          <label class="sr-only" for="y-min">Y-min</label>
-          <input type="number" class="form-control" name="y-min" id="y-min" placeholder="Y-axis minimum" />
-        </div>
-        <div class="form-group">
-          <label class="sr-only" for="y-max">Y-max</label>
-          <input type="number" class="form-control" name="y-max" id="y-max" placeholder="Y-axis maximum" />
+        <div class="well-sm">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="y-auto-check" id="y-auto-check" /> Y-axis auto scale
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="sr-only" for="y-min">Y-min</label>
+            <input type="text" class="form-control" name="y-min" id="y-min" placeholder="Y-axis minimum" />
+          </div>
+          <div class="form-group">
+            <label class="sr-only" for="y-max">Y-max</label>
+            <input type="text" class="form-control" name="y-max" id="y-max" placeholder="Y-axis maximum" />
+          </div>
         </div>
         <button type="button" class="btn btn-primary" id="apply-config-button">apply</button>
       </form>
     </div>
+
     <div class="row">
       <div id="plot-area" class="col-md-8" style="height: 400px;"></div>
       <div id="message-detail" class="col-md-4">
@@ -65,6 +95,7 @@
 
     </div>
   </div>
+
   <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
   <script type="text/javascript" src="3rdparty/ros/js/eventemitter2.js"></script>
   <script type="text/javascript" src="3rdparty/ros/js/roslib.js"></script>

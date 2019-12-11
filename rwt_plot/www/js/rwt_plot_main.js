@@ -1,18 +1,77 @@
 
 $(function () {
 
+  ////////////////////////////////////////
+  // variables
+
   var plot = new ROSLIB.RWTPlot({
     max_data: 2,          // when using timestamp, it is regarded as seconds
     timestamp: true
   });
 
-  plot.initializePlot($("#plot-area"), {
+  var ros = new ROSLIB.Ros();
+
+  var spec = {
     yaxis: {
       auto_scale: true,
       auto_scale_margin: 0.2,
       min: 0.1
     }
-  });
+  };
+
+  var sub = null;
+
+  ////////////////////////////////////////
+  // functions
+
+  // initialize screen
+  function initScreen() {
+
+    plot.initializePlot($("#plot-area"), spec);
+
+    // subscribe topic
+    ros.install_config_button("config-button");
+
+    $("#y-auto-check").click();
+    $("#pause-button").show();
+    $("#start-button").hide();
+
+    printXAxisSec();
+    printYAxisDomain();
+  }
+
+  function printXAxisSec() {
+    var x_sec = plot.getXAxisSec();
+    $("#x-sec").val(Math.round(x_sec));
+  }
+
+  function printYAxisDomain() {
+    var y_domain = plot.getYAxisMinMax();
+    var y_min = y_domain.min;
+    var y_max = y_domain.max;
+    $("#y-min").val(round10(y_min));
+    $("#y-max").val(round10(y_max));
+  }
+
+  function toInt(value) {
+    if ($.isNumeric(value)) {
+      return Math.round(parseFloat(value));
+    } else {
+      return undefined;
+    }
+  }
+
+  function toFloat(value) {
+    if ($.isNumeric(value)) {
+      return parseFloat(value);
+    } else {
+      return undefined;
+    }
+  }
+
+  function round10(value) {
+    return Math.round(value * 10) / 10;
+  }
 
   function getValFromAccessor(msg, accessor) {
     if (accessor.length === 0) {
@@ -28,13 +87,10 @@ $(function () {
     }
   }
 
-  // subscribe topic
-  var ros = new ROSLIB.Ros();
-  ros.install_config_button("config-button");
+  ////////////////////////////////////////
+  // screen events
 
-  var sub = null;
-  $("#topic-form").submit(function (e) {
-    e.preventDefault();
+  $("#subscribe-topic-button").on("click", function () {
     var topic_name = $("#topic-select").val();
     var accessor = $("#field-accessor").val().split("/");
 
@@ -73,6 +129,10 @@ $(function () {
         plot.addData(now,
           getValFromAccessor(msg, accessor));
 
+        if ($("#y-auto-check").prop("checked")) {
+          printYAxisDomain();
+        }
+
         var diff = now.substract(prev);
         //if (diff.toSec() > 1.0) {
         //console.log('sec: ' + diff.toSec());
@@ -83,7 +143,7 @@ $(function () {
     return false;
   });
 
-  $("#topic-select").change(function () {
+  $("#topic-select").on("change", function () {
     var topic_name = $("#topic-select").val();
     ros.getTopicType(topic_name, function (topic_type) {
       ros.getMessageDetails(topic_type, function (details) {
@@ -92,6 +152,65 @@ $(function () {
       });
     });
   });
+
+  $("#y-auto-check").on("change", function () {
+    var is_auto = $(this).prop('checked');
+
+    $("#y-min").prop("disabled", is_auto);
+    $("#y-max").prop("disabled", is_auto);
+
+    if ($("#y-auto-check").prop('checked')) {
+      printYAxisDomain();
+    }
+
+  });
+
+  $("#apply-config-button").on("click", function () {
+    if (!plot) {
+      return;
+    }
+
+    //set X-axis
+    var x_sec = toInt($("#x-sec").val());
+    plot.setXAxisScale(x_sec);
+
+    // set Y-axis
+    var is_auto = $("#y-auto-check").prop('checked');
+    if (is_auto) {
+      plot.setYAxisScaleAuto();
+    } else {
+      var y_min = toFloat($("#y-min").val());
+      var y_max = toFloat($("#y-max").val());
+
+      plot.setYAxisMinMaxMnually(y_min, y_max);
+    }
+
+    printXAxisSec();
+    printYAxisDomain();
+  });
+
+  $("#pause-button").on("click", function () {
+    plot.pause();
+    $("#pause-button").hide();
+    $("#start-button").show();
+  });
+
+  $("#start-button").on("click", function () {
+    plot.start();
+    $("#pause-button").show();
+    $("#start-button").hide();
+  });
+
+  $("#clear-button").on("click", function () {
+    if (spec.yaxis.auto_scale !== $("#y-auto-check").prop('checked')) {
+      $("#y-auto-check").click();
+    }
+
+    plot.clearData();
+  });
+
+  ////////////////////////////////////////
+  // ros events
 
   ros.on("connection", function () {
     ros.getTopics(function (topic_info) {
@@ -108,33 +227,7 @@ $(function () {
     $("#topic-select").empty();
   });
 
-  $("#apply-config-button").on("click", function () {
-    if (plot) {
-      console.log(plot);
-    } else {
-      return;
-    }
-
-    var x_min = toFloat($("#x-min").val());
-    var x_max = toFloat($("#x-max").val());
-    var y_min = toFloat($("#y-min").val());
-    var y_max = toFloat($("#y-max").val());
-
-    $("#x-min").val(x_min);
-    $("#x-max").val(x_max);
-    $("#y-min").val(y_min);
-    $("#y-max").val(y_max);
-
-    plot.setYAxisMinMax(y_min, y_max);
-
-  });
-
+  ////////////////////////////////////////
+  // start screen
+  initScreen();
 });
-
-function toFloat(value) {
-  if ($.isNumeric(value)) {
-    return parseFloat(value);
-  } else {
-    return undefined;
-  }
-}
