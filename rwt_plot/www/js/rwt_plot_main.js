@@ -15,7 +15,7 @@ $(function () {
   });
 
   function getValFromAccessor(msg, accessor) {
-    if (accessor.length === 0) {
+    if (accessor.length == 0) {
       return msg;
     }
     else {
@@ -126,6 +126,8 @@ $(function () {
     $("#y-max").val(y_max);
 
     plot.setYAxisMinMax(y_min, y_max);
+
+
 
   });
 
