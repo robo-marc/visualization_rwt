@@ -1,7 +1,7 @@
 {
   "globals": {
     "module": true,
-    "EventEmitter2": true,
+    "EventEmitter2" : true,
     "ROSLIB": true,
     "_": true,
     "$": true,
@@ -15,14 +15,14 @@
   "noarg": true,
   "sub": true,
   "undef": true,
-  // "unused": true,
   "boss": false,
   "eqnull": false,
   "browser": true,
   "devel": true,
   "strict": false,
   "trailing": true,
-  //"quotmark": "single",
+  "quotmark": "single",
   "proto": true,
   "laxbreak": true
 }
+
