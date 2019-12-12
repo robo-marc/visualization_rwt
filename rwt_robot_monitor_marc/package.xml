@@ -4,9 +4,9 @@
   <version>0.0.3</version>
   <description>The rwt_robot_monitor_marc package</description>
 
-  <maintainer email="">robo-marc</maintainer>
-  <author email="">robo-marc</author>
-  <url type="website">http://wiki.ros.org/rwt_robot_monitor</url>
+  <maintainer email="F-ROSROBO@fsi.co.jp">F-ROSROBO</maintainer>
+  <author email="F-ROSROBO@fsi.co.jp">F-ROSROBO</author>
+  <url type="website">http://wiki.ros.org/rwt_robot_monitor_marc</url>
   <url type="bugtracker">https://github.com/robo-marc/visualization_rwt/issues</url>
   <url type="repository">https://github.com/robo-marc/visualization_rwt</url>
 

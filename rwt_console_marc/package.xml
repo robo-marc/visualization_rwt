@@ -2,8 +2,8 @@
   <name>rwt_console_marc</name>
   <version>0.0.0</version>
   <description>rwt_console_marc</description>
-  <maintainer email="">robo-marc</maintainer>
-  <author email="">robo-marc</author>
+  <maintainer email="F-ROSROBO@fsi.co.jp">F-ROSROBO</maintainer>
+  <author email="F-ROSROBO@fsi.co.jp">F-ROSROBO</author>
   <license>BSD</license>
   <url type="website">http://wiki.ros.org/rwt_console_marc</url>
   <url type="bugtracker">https://github.com/robo-marc/visualization_rwt/issues</url>
