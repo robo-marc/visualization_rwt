@@ -386,10 +386,14 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (stamp, data) {
   if (this.is_paused) {
     return;
   }
-
+  var oldest_stamp = this.data[0].stamp;
+  // this.x_scale.domain([oldest_stamp.toDate(),
+  // oldest_stamp.add(ROSLIB.Time.fromSec(this.max_data)).toDate()]);
+  // this.x.scale(this.x_scale);
+  // this.svg.select('.x.axis')
+  //   .call(this.x);
   this.refreshXAxisDomain();
 
-  var oldest_stamp = this.data[0].stamp;
   for (var i = 0; i < data.length; i++) { // x_i := i
     var plot_data = [];
     for (var j = 0; j < this.data.length; j++) {
