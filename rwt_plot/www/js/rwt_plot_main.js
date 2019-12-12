@@ -87,54 +87,12 @@ $(function () {
     }
   }
 
-  function getMemberList(type_info) {
-    var type_list = [];
-
-    $.each(type_info, function (member_name, member_type) {
-      if ($.isArray(member_type)) {
-        // console.log("[name, type]: [" + member_name + ", " + member_type + "] is array");
-        type_list.push(member_name);
-
-        // // Parse object array. Is this necessary?
-        // $.each(member_type, function (index, child_type) {
-        //   if (typeof child_type === "object") {
-        //     var grand_children = getMemberList(child_type);
-        //     $.each(grand_children, function (index, grand_child) {
-        //       var s = member_name + "/" + grand_child;
-        //       type_list.push(s);
-        //     });
-        //   }
-        // });
-
-      } else if (typeof member_type === "object") {
-        // console.log("[name, type]: [" + member_name + ", " + member_type + "] is object");
-        // type_list.push(member_name); // For set all member, but not implemented.
-        var children = getMemberList(member_type);
-        $.each(children, function (index, child) {
-          var s = member_name + "/" + child;
-          type_list.push(s);
-        });
-
-      } else {
-        if (isNumericTypeName(member_type)) {
-          type_list.push(member_name);
-        }
-      }
-    });
-
-    return type_list;
-  }
-
-  function isNumericTypeName(name) {
-    return (/^(int|uint|float|ufloat)/.test(name));
-  }
-
   ////////////////////////////////////////
   // screen events
 
   $("#subscribe-topic-button").on("click", function () {
     var topic_name = $("#topic-select").val();
-    var accessor = $("#type-select").val().split("/");
+    var accessor = $("#field-accessor").val().split("/");
 
     if (sub) {
       console.log("unsubscribe");
@@ -190,18 +148,7 @@ $(function () {
     ros.getTopicType(topic_name, function (topic_type) {
       ros.getMessageDetails(topic_type, function (details) {
         var decoded = ros.decodeTypeDefs(details);
-
-        // TODO: deprecated
         $("#message-detail").find("pre").html(JSON.stringify(decoded, null, "  ")); // pretty print
-
-        var type_list = getMemberList(decoded);
-        $("#type-select").empty();
-        $.each(type_list, function (index, value) {
-          $("<option>", {
-            value: value,
-            text: value,
-          }).appendTo("#type-select");
-        });
       });
     });
   });
