@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package>
+  <name>rwt_image_view_marc</name>
+  <version>0.0.3</version>
+  <description>The rwt_image_view_marc package</description>
+
+  <maintainer email="">robo-marc</maintainer>
+  <license>BSD</license>
+  <author email="">robo-marc</author>
+  <url type="website">http://wiki.ros.org/rwt_image_view</url>
+  <url type="bugtracker">https://github.com/robo-marc/visualization_rwt/issues</url>
+  <url type="repository">https://github.com/robo-marc/visualization_rwt</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>web_video_server</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>rwt_utils_3rdparty</build_depend>
+  <build_depend>std_srvs</build_depend>
+  <build_depend>roswww</build_depend>
+  <run_depend>web_video_server</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>rwt_utils_3rdparty</run_depend>
+  <run_depend>std_srvs</run_depend>
+  <run_depend>roswww</run_depend>
+  <run_depend>message_runtime</run_depend>
+
+  <export>
+  </export>
+</package>
