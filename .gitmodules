@@ -10,6 +10,3 @@
 [submodule "rwt_utils_3rdparty/www/lodash"]
 	path = rwt_utils_3rdparty/www/lodash
 	url = https://github.com/lodash/lodash
-[submodule "rwt_utils_3rdparty/www/roslibjs"]
-	path = rwt_utils_3rdparty/www/roslibjs
-	url = https://github.com/robo-marc/roslibjs
