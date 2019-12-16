@@ -133,7 +133,7 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
     this.line = d3.svg.line()
       .x(function (d, i) { return that.x_scale(d[0].toDate()); })
       .y(function (d, i) { return that.y_scale(d[1]); });
-    this.refreshXAxisDomain();
+    this.refreshXAxisDomain(ROSLIB.Time.now());
   }
   else {
     this.line = d3.svg.line()
@@ -231,18 +231,27 @@ ROSLIB.RWTPlot.prototype.setXAxisScale = function (sec) {
 
   if (this.use_timestamp) {
     this.max_data = sec;
-    this.refreshXAxisDomain();
+
+    var last_stamp;
+    if (this.data.length > 0) {
+      last_stamp = this.data[this.data.length - 1].stamp;
+    } else {
+      last_stamp = ROSLIB.Time.now();
+    }
+    this.refreshXAxisDomain(last_stamp);
   } else {
     // cannot change domain
   }
 };
 
-ROSLIB.RWTPlot.prototype.refreshXAxisDomain = function () {
+ROSLIB.RWTPlot.prototype.refreshXAxisDomain = function (x_end_time) {
   if (this.use_timestamp) {
     var st = this.start_ts;
     var ticks = this.max_data + 1;
 
-    var x_end_time = ROSLIB.Time.now();
+    if (!x_end_time) {
+      x_end_time = ROSLIB.Time.now();
+    }
     var x_begin_time = x_end_time.substract(ROSLIB.Time.fromSec(this.max_data));
 
     this.x_scale.domain([x_begin_time.toDate(), x_end_time.toDate()]);
@@ -387,7 +396,7 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (stamp, data) {
     return;
   }
 
-  this.refreshXAxisDomain();
+  this.refreshXAxisDomain(stamp);
 
   var oldest_stamp = this.data[0].stamp;
   for (var i = 0; i < data.length; i++) { // x_i := i
