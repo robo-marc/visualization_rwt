@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>rwt_utils_3rdparty</name>
+  <name>rwt_utils_marc</name>
   <version>0.0.3</version>
-  <description>The rwt_utils_3rdparty package</description>
+  <description>The rwt_utils_marc package</description>
 
   <maintainer email="garaemon@gmail.com">Ryohei Ueda</maintainer>
   <maintainer email="iiysaito@opensource-robotics.tokyo.jp">Isaac IY Saito</maintainer>
