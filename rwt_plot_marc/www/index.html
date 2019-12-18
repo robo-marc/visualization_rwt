@@ -29,20 +29,21 @@
           </select>
         </div>
         <div class="form-group">
-          <button type="button" id="subscribe-topic-button" class="btn btn-success"><span
+          <button type="button" id="add-topic-button" class="btn btn-success"><span
               class="glyphicon glyphicon-plus"></span></button>
         </div>
-        <div class="form-group dropdown">
-          <button class="btn btn-danger dropdown-toggle" type="button" data-toggle="dropdown">
-            <span class="glyphicon glyphicon glyphicon-minus"></span>
-            &nbsp;
-            <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu">
-            <li><a href="#">/array_sin_cos/data</a></li>
-            <li><a href="#">/sin/data</a></li>
-          </ul>
+
+        <div class="form-group">
+          <label class="sr-only" for="subscribed-select">topic</label>
+          <select id="subscribed-select" class="form-control">
+          </select>
         </div>
+        <div class="form-group">
+          <button type="button" id="remove-topic-button" class="btn btn-danger"><span
+              class="glyphicon glyphicon-minus"></span>
+          </button>
+        </div>
+
         <div class="form-group">
           <button type="button" id="pause-button" class="btn btn-warning"><span
               class="glyphicon glyphicon glyphicon-pause"></span></button>
