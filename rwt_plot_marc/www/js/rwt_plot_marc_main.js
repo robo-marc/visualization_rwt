@@ -19,7 +19,9 @@ $(function () {
     }
   };
 
-  var sub = null;
+  // Key: msgFieldPath(topicName + '/' + accessor)
+  // Value: ROSLIB.Topic object
+  var subscribingMap = {};
 
   ////////////////////////////////////////
   // functions
@@ -29,7 +31,7 @@ $(function () {
 
     plot.initializePlot($("#plot-area"), spec);
 
-    // subscribe topic
+    // TODO: deprecated
     ros.install_config_button("config-button");
 
     $("#y-auto-check").click();
@@ -91,7 +93,7 @@ $(function () {
     var type_list = [];
 
     $.each(type_info, function (member_name, member_type) {
-      if ($.isArray(member_type)) {
+      if (_.isArray(member_type)) {
         // console.log("[name, type]: [" + member_name + ", " + member_type + "] is array");
         type_list.push(member_name);
 
@@ -129,26 +131,47 @@ $(function () {
     return (/^(int|uint|float|ufloat)/.test(name));
   }
 
+  function containsKey(map, key) {
+    return key in map;
+  }
+
   ////////////////////////////////////////
   // screen events
 
-  $("#subscribe-topic-button").on("click", function () {
-    var topic_name = $("#topic-select").val();
-    var accessor = $("#type-select").val().split("/");
-
-    if (sub) {
-      console.log("unsubscribe");
-      sub.unsubscribe();
+  $("#remove-topic-button").on("click", function () {
+    var msgFieldPath = $("#subscribed-select").val();
+    if (subscribingMap[msgFieldPath]) {
+      console.log("unsubscribe: %s", msgFieldPath);
+      subscribingMap[msgFieldPath].unsubscribe();
+      delete subscribingMap[msgFieldPath];
+      plot.removeSeries(msgFieldPath);
+      $("#subscribed-select option[value='" + msgFieldPath + "']").remove();
     }
-    ros.getTopicType(topic_name, function (topic_type) {
-      sub = new ROSLIB.Topic({
+  });
+
+  $("#add-topic-button").on("click", function () {
+    var topicName = $("#topic-select").val();
+    var typeName = $("#type-select").val();
+    var accessor = typeName.split("/");
+
+    var msgFieldPath = topicName + "/" + typeName;
+    if (containsKey(subscribingMap, msgFieldPath)) {
+      console.log("topic already subscribed: %s", msgFieldPath);
+      return;
+    }
+    subscribingMap[msgFieldPath] = undefined;
+    $("<option>", {
+      value: msgFieldPath,
+      text: msgFieldPath,
+    }).appendTo("#subscribed-select");
+
+    ros.getTopicType(topicName, function (topicType) {
+      var sub = new ROSLIB.Topic({
         ros: ros,
-        name: topic_name,
-        messageType: topic_type
+        name: topicName,
+        messageType: topicType
       });
-      plot.clearData();
-      var i = 0;
-      var prev = ROSLIB.Time.now();
+      subscribingMap[msgFieldPath] = sub;
       accessor = _.map(accessor, function (a) {
         if (a.match(/\[[\d]+\]/)) {
           var array_index = parseInt(a.match(/\[([\d]+)\]/)[1], 10);
@@ -167,19 +190,12 @@ $(function () {
           now = ROSLIB.Time.now();
         }
 
-        //plot.addData(getValFromAccessor(msg, accessor));
-        plot.addData(now,
+        plot.addData(msgFieldPath, now,
           getValFromAccessor(msg, accessor));
 
         if ($("#y-auto-check").prop("checked")) {
           printYAxisDomain();
         }
-
-        var diff = now.substract(prev);
-        //if (diff.toSec() > 1.0) {
-        //console.log('sec: ' + diff.toSec());
-        //}
-        prev = now;
       });
     });
     return false;
@@ -215,7 +231,6 @@ $(function () {
     if ($("#y-auto-check").prop('checked')) {
       printYAxisDomain();
     }
-
   });
 
   $("#apply-config-button").on("click", function () {
