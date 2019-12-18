@@ -5,16 +5,16 @@ $(function () {
   // variables
 
   var plot = new ROSLIB.RWTPlot({
-    max_data: 2,          // when using timestamp, it is regarded as seconds
+    maxData: 2,          // when using timestamp, it is regarded as seconds
     timestamp: true
   });
 
   var ros = new ROSLIB.Ros();
 
-  var spec = {
+  var initPlotSpec = {
     yaxis: {
-      auto_scale: true,
-      auto_scale_margin: 0.2,
+      autoScale: true,
+      autoScaleMargin: 0.2,
       min: 0.1
     }
   };
@@ -29,30 +29,30 @@ $(function () {
   // initialize screen
   function initScreen() {
 
-    plot.initializePlot($("#plot-area"), spec);
+    plot.initializePlot($('#plot-area'), initPlotSpec);
 
     // TODO: deprecated
-    ros.install_config_button("config-button");
+    ros.install_config_button('config-button');
 
-    $("#y-auto-check").click();
-    $("#pause-button").show();
-    $("#start-button").hide();
+    $('#y-auto-check').click();
+    $('#pause-button').show();
+    $('#start-button').hide();
 
     printXAxisSec();
     printYAxisDomain();
   }
 
   function printXAxisSec() {
-    var x_sec = plot.getXAxisSec();
-    $("#x-sec").val(Math.round(x_sec));
+    var xSec = plot.getXAxisSec();
+    $('#x-sec').val(Math.round(xSec));
   }
 
   function printYAxisDomain() {
-    var y_domain = plot.getYAxisMinMax();
-    var y_min = y_domain.min;
-    var y_max = y_domain.max;
-    $("#y-min").val(round10(y_min));
-    $("#y-max").val(round10(y_max));
+    var yDomain = plot.getYAxisMinMax();
+    var yMin = yDomain.min;
+    var yMax = yDomain.max;
+    $('#y-min').val(round10(yMin));
+    $('#y-max').val(round10(yMax));
   }
 
   function toInt(value) {
@@ -89,42 +89,42 @@ $(function () {
     }
   }
 
-  function getMemberList(type_info) {
-    var type_list = [];
+  function getFieldList(typeInfo) {
+    var typeList = [];
 
-    $.each(type_info, function (member_name, member_type) {
-      if (_.isArray(member_type)) {
-        // console.log("[name, type]: [" + member_name + ", " + member_type + "] is array");
-        type_list.push(member_name);
+    $.each(typeInfo, function (fieldName, fieldType) {
+      if (_.isArray(fieldType)) {
+        // console.log('[name, type]: [' + fieldName + ', ' + fieldType + '] is array');
+        typeList.push(fieldName);
 
         // // Parse object array. Is this necessary?
-        // $.each(member_type, function (index, child_type) {
-        //   if (typeof child_type === "object") {
-        //     var grand_children = getMemberList(child_type);
-        //     $.each(grand_children, function (index, grand_child) {
-        //       var s = member_name + "/" + grand_child;
-        //       type_list.push(s);
+        // $.each(fieldType, function (index, childType) {
+        //   if (typeof childType === 'object') {
+        //     var grandChildren = getMemberList(childType);
+        //     $.each(grandChildren, function (index, grandChild) {
+        //       var s = fieldName + '/' + grandChild;
+        //       typeList.push(s);
         //     });
         //   }
         // });
 
-      } else if (typeof member_type === "object") {
-        // console.log("[name, type]: [" + member_name + ", " + member_type + "] is object");
-        // type_list.push(member_name); // For set all member, but not implemented.
-        var children = getMemberList(member_type);
+      } else if (typeof fieldType === 'object') {
+        // console.log('[name, type]: [' + fieldName + ', ' + fieldType + '] is object');
+        // typeList.push(fieldName); // For set all member, but not implemented.
+        var children = getFieldList(fieldType);
         $.each(children, function (index, child) {
-          var s = member_name + "/" + child;
-          type_list.push(s);
+          var s = fieldName + '/' + child;
+          typeList.push(s);
         });
 
       } else {
-        if (isNumericTypeName(member_type)) {
-          type_list.push(member_name);
+        if (isNumericTypeName(fieldType)) {
+          typeList.push(fieldName);
         }
       }
     });
 
-    return type_list;
+    return typeList;
   }
 
   function isNumericTypeName(name) {
@@ -138,32 +138,32 @@ $(function () {
   ////////////////////////////////////////
   // screen events
 
-  $("#remove-topic-button").on("click", function () {
-    var msgFieldPath = $("#subscribed-select").val();
+  $('#remove-topic-button').on('click', function () {
+    var msgFieldPath = $('#subscribed-select').val();
     if (subscribingMap[msgFieldPath]) {
-      console.log("unsubscribe: %s", msgFieldPath);
+      console.log('unsubscribe: %s', msgFieldPath);
       subscribingMap[msgFieldPath].unsubscribe();
       delete subscribingMap[msgFieldPath];
       plot.removeSeries(msgFieldPath);
-      $("#subscribed-select option[value='" + msgFieldPath + "']").remove();
+      $('#subscribed-select option[value="' + msgFieldPath + '"]').remove();
     }
   });
 
-  $("#add-topic-button").on("click", function () {
-    var topicName = $("#topic-select").val();
-    var typeName = $("#type-select").val();
-    var accessor = typeName.split("/");
+  $('#add-topic-button').on('click', function () {
+    var topicName = $('#topic-select').val();
+    var typeName = $('#type-select').val();
+    var accessor = typeName.split('/');
 
-    var msgFieldPath = topicName + "/" + typeName;
+    var msgFieldPath = topicName + '/' + typeName;
     if (containsKey(subscribingMap, msgFieldPath)) {
-      console.log("topic already subscribed: %s", msgFieldPath);
+      console.log('topic already subscribed: %s', msgFieldPath);
       return;
     }
     subscribingMap[msgFieldPath] = undefined;
-    $("<option>", {
+    $('<option>', {
       value: msgFieldPath,
       text: msgFieldPath,
-    }).appendTo("#subscribed-select");
+    }).appendTo('#subscribed-select');
 
     ros.getTopicType(topicName, function (topicType) {
       var sub = new ROSLIB.Topic({
@@ -174,8 +174,8 @@ $(function () {
       subscribingMap[msgFieldPath] = sub;
       accessor = _.map(accessor, function (a) {
         if (a.match(/\[[\d]+\]/)) {
-          var array_index = parseInt(a.match(/\[([\d]+)\]/)[1], 10);
-          return [a.split("[")[0], array_index];
+          var arrayIndex = parseInt(a.match(/\[([\d]+)\]/)[1], 10);
+          return [a.split('[')[0], arrayIndex];
         }
         else {
           return a;
@@ -193,7 +193,7 @@ $(function () {
         plot.addData(msgFieldPath, now,
           getValFromAccessor(msg, accessor));
 
-        if ($("#y-auto-check").prop("checked")) {
+        if ($('#y-auto-check').prop('checked')) {
           printYAxisDomain();
         }
       });
@@ -201,77 +201,77 @@ $(function () {
     return false;
   });
 
-  $("#topic-select").on("change", function () {
-    var topic_name = $("#topic-select").val();
-    ros.getTopicType(topic_name, function (topic_type) {
-      ros.getMessageDetails(topic_type, function (details) {
+  $('#topic-select').on('change', function () {
+    var topicName = $('#topic-select').val();
+    ros.getTopicType(topicName, function (topicType) {
+      ros.getMessageDetails(topicType, function (details) {
         var decoded = ros.decodeTypeDefs(details);
 
         // TODO: deprecated
-        $("#message-detail").find("pre").html(JSON.stringify(decoded, null, "  ")); // pretty print
+        $('#message-detail').find('pre').html(JSON.stringify(decoded, null, '  ')); // pretty print
 
-        var type_list = getMemberList(decoded);
-        $("#type-select").empty();
-        $.each(type_list, function (index, value) {
-          $("<option>", {
+        var typeList = getFieldList(decoded);
+        $('#type-select').empty();
+        $.each(typeList, function (index, value) {
+          $('<option>', {
             value: value,
             text: value,
-          }).appendTo("#type-select");
+          }).appendTo('#type-select');
         });
       });
     });
   });
 
-  $("#y-auto-check").on("change", function () {
-    var is_auto = $(this).prop('checked');
+  $('#y-auto-check').on('change', function () {
+    var isAuto = $(this).prop('checked');
 
-    $("#y-min").prop("disabled", is_auto);
-    $("#y-max").prop("disabled", is_auto);
+    $('#y-min').prop('disabled', isAuto);
+    $('#y-max').prop('disabled', isAuto);
 
-    if ($("#y-auto-check").prop('checked')) {
+    if ($('#y-auto-check').prop('checked')) {
       printYAxisDomain();
     }
   });
 
-  $("#apply-config-button").on("click", function () {
+  $('#apply-config-button').on('click', function () {
     if (!plot) {
       return;
     }
 
     //set X-axis
-    var x_sec = toInt($("#x-sec").val());
-    plot.setXAxisScale(x_sec);
+    var xSec = toInt($('#x-sec').val());
+    plot.setXAxisScale(xSec);
 
     // set Y-axis
-    var is_auto = $("#y-auto-check").prop('checked');
-    if (is_auto) {
+    var isAuto = $('#y-auto-check').prop('checked');
+    if (isAuto) {
       plot.setYAxisScaleAuto();
     } else {
-      var y_min = toFloat($("#y-min").val());
-      var y_max = toFloat($("#y-max").val());
+      var yMin = toFloat($('#y-min').val());
+      var yMax = toFloat($('#y-max').val());
 
-      plot.setYAxisMinMaxMnually(y_min, y_max);
+      plot.setYAxisMinMaxMnually(yMin, yMax);
     }
 
     printXAxisSec();
     printYAxisDomain();
   });
 
-  $("#pause-button").on("click", function () {
+  $('#pause-button').on('click', function () {
     plot.pause();
-    $("#pause-button").hide();
-    $("#start-button").show();
+    $('#pause-button').hide();
+    $('#start-button').show();
   });
 
-  $("#start-button").on("click", function () {
+  $('#start-button').on('click', function () {
     plot.start();
-    $("#pause-button").show();
-    $("#start-button").hide();
+    $('#pause-button').show();
+    $('#start-button').hide();
   });
 
-  $("#clear-button").on("click", function () {
-    if (spec.yaxis.auto_scale !== $("#y-auto-check").prop('checked')) {
-      $("#y-auto-check").click();
+  $('#clear-button').on('click', function () {
+    if (initPlotSpec.yaxis.autoScale !== $('#y-auto-check').prop('checked')) {
+      $('#y-auto-check').click();
     }
 
     plot.clearData();
@@ -280,19 +280,19 @@ $(function () {
   ////////////////////////////////////////
   // ros events
 
-  ros.on("connection", function () {
-    ros.getTopics(function (topic_info) {
-      var topics = topic_info.topics;
+  ros.on('connection', function () {
+    ros.getTopics(function (topicInfo) {
+      var topics = topicInfo.topics;
       topics.sort();
-      $("#topic-select").append(_.map(topics, function (topic) {
-        return '<option value="' + topic + '">' + topic + "</option>";
-      }).join("\n"));
-      $("#topic-select").change();
+      $('#topic-select').append(_.map(topics, function (topic) {
+        return '<option value="' + topic + '">' + topic + '</option>';
+      }).join('\n'));
+      $('#topic-select').change();
     });
   });
 
-  ros.on("close", function () {
-    $("#topic-select").empty();
+  ros.on('close', function () {
+    $('#topic-select').empty();
   });
 
   ////////////////////////////////////////

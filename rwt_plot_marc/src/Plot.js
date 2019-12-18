@@ -13,27 +13,27 @@
  * @param spec
  */
 ROSLIB.RWTPlot = function (spec) {
-  this.max_data = spec.max_data || 100; // defaults to 100
-  this.use_timestamp = spec.timestamp;
+  this.maxData = spec.maxData || 100; // defaults to 100
+  this.useTimestamp = spec.timestamp;
 
   this.plot = null;
   this.drawingp = false;
-  this.is_paused = false;
-  this.start_ts = Date.now();
+  this.isPaused = false;
+  this.startTs = Date.now();
   this.clearData();
 };
 
 
 ROSLIB.RWTPlot.prototype.clearData = function () {
-  if (this.use_timestamp) {
+  if (this.useTimestamp) {
     // Key: msgFieldPath without array index number
     // Value: dataItem array of series
     this.seriesMap = {};
   }
   else {
-    this.data = new ROSLIB.RingBuffer({ bufferCount: this.max_data });
+    this.data = new ROSLIB.RingBuffer({ bufferCount: this.maxData });
   }
-  this.need_to_animate = false;
+  this.needToAnimate = false;
   if (this.spec) {
     $('#' + this.content.attr('id')).find('svg').remove();
     this.initializePlot(this.content, this.spec);
@@ -41,11 +41,11 @@ ROSLIB.RWTPlot.prototype.clearData = function () {
 };
 
 ROSLIB.RWTPlot.prototype.pause = function () {
-  this.is_paused = true;
+  this.isPaused = true;
 };
 
 ROSLIB.RWTPlot.prototype.start = function () {
-  this.is_paused = false;
+  this.isPaused = false;
 };
 
 ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
@@ -56,37 +56,37 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
   var margin = spec.margin || { top: 20, right: 20, bottom: 20, left: 40 };
   var that = this;
   var color = spec.color || false;
-  var yaxis_spec = spec.yaxis || {};
-  var yaxis_min = yaxis_spec.min || 0.0;
-  var yaxis_max = yaxis_spec.max || 1.0;
-  var yaxis_tick = yaxis_spec.tick || false;
+  var yaxisSpec = spec.yaxis || {};
+  var yaxisMin = yaxisSpec.min || 0.0;
+  var yaxisMax = yaxisSpec.max || 1.0;
+  var yaxisTick = yaxisSpec.tick || false;
 
-  this.y_autoscale = yaxis_spec.auto_scale || false;
-  this.y_min_value = yaxis_min;
-  this.y_max_value = yaxis_max;
-  this.y_autoscale_margin = yaxis_spec.auto_scale_margin || 0.2;
-  this.yaxis_tick = yaxis_tick;
-  this.specified_color = color;
+  this.yAutoscale = yaxisSpec.autoScale || false;
+  this.yMinValue = yaxisMin;
+  this.yMaxValue = yaxisMax;
+  this.yAutoscaleMargin = yaxisSpec.autoScaleMargin || 0.2;
+  this.yaxisTick = yaxisTick;
+  this.specifiedColor = color;
 
-  if (this.use_timestamp) {
-    //this.x_scale = d3.scale.linear().domain([0, this.max_data]).range([0, width - margin.left - margin.right]);
-    this.x_scale = d3.time.scale().range([0, width - margin.left - margin.right]);
-    //this.x_scale.ticks(d3.time.second, 1);
-    //.domain([0, this.max_data])
+  if (this.useTimestamp) {
+    //this.xScale = d3.scale.linear().domain([0, this.maxData]).range([0, width - margin.left - margin.right]);
+    this.xScale = d3.time.scale().range([0, width - margin.left - margin.right]);
+    //this.xScale.ticks(d3.time.second, 1);
+    //.domain([0, this.maxData])
   }
   else {
-    this.x_scale = d3.scale.linear()
-      .domain([0, this.max_data - 1])
+    this.xScale = d3.scale.linear()
+      .domain([0, this.maxData - 1])
       .range([0, width - margin.left - margin.right]);
   }
-  if (this.y_autoscale) {
-    this.y_scale = d3.scale.linear()
-      .domain(this.axisMinMaxWithMargin(this.y_min_value, this.y_max_value, this.y_autoscale_margin))
+  if (this.yAutoscale) {
+    this.yScale = d3.scale.linear()
+      .domain(this.axisMinMaxWithMargin(this.yMinValue, this.yMaxValue, this.yAutoscaleMargin))
       .range([height - margin.top - margin.bottom, 0]);
   }
   else {
-    this.y_scale = d3.scale.linear()
-      .domain([yaxis_min, yaxis_max])
+    this.yScale = d3.scale.linear()
+      .domain([yaxisMin, yaxisMax])
       .range([height - margin.top - margin.bottom, 0]);
   }
 
@@ -104,10 +104,10 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
     .attr('height', height - margin.top - margin.bottom);
 
   // draw x axis
-  var st = this.start_ts;
-  var ticks = this.max_data + 1;
+  var st = this.startTs;
+  var ticks = this.maxData + 1;
   this.x = d3.svg.axis()
-    .scale(this.x_scale)
+    .scale(this.xScale)
     .orient('bottom')
     .ticks(ticks)
     .tickFormat(function (d, i) {
@@ -115,32 +115,32 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
       if (i % tmp === 0) {
         return Math.floor((d.getTime() - st) / 1000.0);
       } else {
-        return "";
+        return '';
       }
     });
 
   this.svg.append('g')
     .attr('class', 'x axis')
-    .attr('transform', 'translate(0,' + this.y_scale(0) + ')')
+    .attr('transform', 'translate(0,' + this.yScale(0) + ')')
     .call(this.x);
-  this.y = d3.svg.axis().scale(this.y_scale).orient('left');
-  if (this.yaxis_tick) {
-    this.y = this.y.ticks(this.yaxis_tick);
+  this.y = d3.svg.axis().scale(this.yScale).orient('left');
+  if (this.yaxisTick) {
+    this.y = this.y.ticks(this.yaxisTick);
   }
   this.svg.append('g')
     .attr('class', 'y axis')
     .call(this.y);
 
-  if (this.use_timestamp) {
+  if (this.useTimestamp) {
     this.line = d3.svg.line()
-      .x(function (d, i) { return that.x_scale(d[0].toDate()); })
-      .y(function (d, i) { return that.y_scale(d[1]); });
+      .x(function (d, i) { return that.xScale(d[0].toDate()); })
+      .y(function (d, i) { return that.yScale(d[1]); });
     this.refreshXAxisDomain(ROSLIB.Time.now());
   }
   else {
     this.line = d3.svg.line()
-      .x(function (d, i) { return that.x_scale(i); })
-      .y(function (d, i) { return that.y_scale(d); });
+      .x(function (d, i) { return that.xScale(i); })
+      .y(function (d, i) { return that.yScale(d); });
   }
   this.color = d3.scale.category10();
 
@@ -151,16 +151,16 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
 
 // TODO: deprecated
 // ROSLIB.RWTPlot.prototype.setColor = function (color) {
-//   this.specified_color = color;
-//   var ret_func = function (_) { return color; };
+//   this.specifiedColor = color;
+//   var retFunc = function (_) { return color; };
 //   for (var i = 0; i < this.paths.length; i++) {
-//     this.paths[i].style('stroke', ret_func);
+//     this.paths[i].style('stroke', retFunc);
 //   }
 // };
 
 ROSLIB.RWTPlot.prototype.getFieldPathWithIndex = function (msgFieldPath, index) {
-  var s = msgFieldPath + '/' + String(index); // like "/array_sin_cos/data/0"
-  s = s.replace(/\//g, '__'); // like "__array_sin_cos__data__0"
+  var s = msgFieldPath + '/' + String(index); // like '/array_sin_cos/data/0'
+  s = s.replace(/\//g, '__'); // like '__array_sin_cos__data__0'
   return s;
 };
 
@@ -173,7 +173,7 @@ ROSLIB.RWTPlot.prototype.allocatePath = function (id, num) {
     .append('path')
     .datum([])
     .attr('class', 'line line' + num)
-    .style('stroke', function (d) { return that.specified_color || that.color(num - 1); })
+    .style('stroke', function (d) { return that.specifiedColor || that.color(num - 1); })
     .attr('d', this.line);
 };
 
@@ -181,7 +181,7 @@ ROSLIB.RWTPlot.prototype.allocatePathForArr = function (msgFieldPath, dataItem) 
   var colorIndex = _.size(this.paths);
   for (var i = 0; i < dataItem.length; i++) {
     var pathWithIndex = this.getFieldPathWithIndex(msgFieldPath, i);
-    if (!(pathWithIndex in this.paths)) { // "A in B" means "B contains key A"
+    if (!(pathWithIndex in this.paths)) { // 'A in B' means 'B contains key A'
       colorIndex++;
       this.paths[pathWithIndex] = this.allocatePath(pathWithIndex, colorIndex % 7);
     }
@@ -189,61 +189,61 @@ ROSLIB.RWTPlot.prototype.allocatePathForArr = function (msgFieldPath, dataItem) 
 };
 
 ROSLIB.RWTPlot.prototype.axisMinMaxWithMargin = function (min, max, margin) {
-  var y_middle = (max + min) / 2.0;
-  var y_min = (min - y_middle) * (1.0 + margin) + y_middle;
-  var y_max = (max - y_middle) * (1.0 + margin) + y_middle;
-  return [y_min, y_max];
+  var yMiddle = (max + min) / 2.0;
+  var yMin = (min - yMiddle) * (1.0 + margin) + yMiddle;
+  var yMax = (max - yMiddle) * (1.0 + margin) + yMiddle;
+  return [yMin, yMax];
 };
 
 ROSLIB.RWTPlot.prototype.checkYAxisMinMax = function (data) {
-  var need_to_update = false;
+  var needToUpdate = false;
   for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
     var val = data[dataIndex];
-    if (val < this.y_min_value) {
-      this.y_min_value = val;
-      need_to_update = true;
+    if (val < this.yMinValue) {
+      this.yMinValue = val;
+      needToUpdate = true;
     }
-    if (val > this.y_max_value) {
-      this.y_max_value = val;
-      need_to_update = true;
+    if (val > this.yMaxValue) {
+      this.yMaxValue = val;
+      needToUpdate = true;
     }
   }
-  if (this.y_autoscale && need_to_update) {
-    this.y_scale.domain(this.axisMinMaxWithMargin(this.y_min_value, this.y_max_value,
-      this.y_autoscale_margin));
-    var axis = d3.svg.axis().scale(this.y_scale).orient('left');
-    if (this.yaxis_tick) {
-      axis = axis.ticks(this.yaxis_tick);
+  if (this.yAutoscale && needToUpdate) {
+    this.yScale.domain(this.axisMinMaxWithMargin(this.yMinValue, this.yMaxValue,
+      this.yAutoscaleMargin));
+    var axis = d3.svg.axis().scale(this.yScale).orient('left');
+    if (this.yaxisTick) {
+      axis = axis.ticks(this.yaxisTick);
     }
     this.svg.select('.y.axis').call(axis);
   }
 };
 
 ROSLIB.RWTPlot.prototype.setYAxisMinMaxMnually = function (min, max) {
-  var min_to_set = min;
-  var max_to_set = max;
-  if (!min_to_set) {
-    min_to_set = this.y_min_value;
+  var minToSet = min;
+  var maxToSet = max;
+  if (!minToSet) {
+    minToSet = this.yMinValue;
   }
-  if (!max_to_set) {
-    max_to_set = this.y_max_value;
+  if (!maxToSet) {
+    maxToSet = this.yMaxValue;
   }
-  this.y_autoscale = false;
-  this.y_scale.domain(this.axisMinMaxWithMargin(min_to_set, max_to_set,
-    this.y_autoscale_margin));
-  var axis = d3.svg.axis().scale(this.y_scale).orient('left');
-  if (this.yaxis_tick) {
-    axis = axis.ticks(this.yaxis_tick);
+  this.yAutoscale = false;
+  this.yScale.domain(this.axisMinMaxWithMargin(minToSet, maxToSet,
+    this.yAutoscaleMargin));
+  var axis = d3.svg.axis().scale(this.yScale).orient('left');
+  if (this.yaxisTick) {
+    axis = axis.ticks(this.yaxisTick);
   }
   this.svg.select('.y.axis').call(axis);
 };
 
 ROSLIB.RWTPlot.prototype.setYAxisScaleAuto = function () {
-  this.y_scale.domain(this.axisMinMaxWithMargin(this.y_min_value, this.y_max_value,
-    this.y_autoscale_margin));
-  var axis = d3.svg.axis().scale(this.y_scale).orient('left');
-  if (this.yaxis_tick) {
-    axis = axis.ticks(this.yaxis_tick);
+  this.yScale.domain(this.axisMinMaxWithMargin(this.yMinValue, this.yMaxValue,
+    this.yAutoscaleMargin));
+  var axis = d3.svg.axis().scale(this.yScale).orient('left');
+  if (this.yaxisTick) {
+    axis = axis.ticks(this.yaxisTick);
   }
   this.svg.select('.y.axis').call(axis);
 };
@@ -253,8 +253,8 @@ ROSLIB.RWTPlot.prototype.setXAxisScale = function (sec) {
     return;
   }
 
-  if (this.use_timestamp) {
-    this.max_data = sec;
+  if (this.useTimestamp) {
+    this.maxData = sec;
 
     var newestStamp;
     $.each(this.seriesMap, function (fieldPath, dataList) {
@@ -275,25 +275,25 @@ ROSLIB.RWTPlot.prototype.setXAxisScale = function (sec) {
   }
 };
 
-ROSLIB.RWTPlot.prototype.refreshXAxisDomain = function (x_end_time) {
-  if (this.use_timestamp) {
-    var st = this.start_ts;
-    var ticks = this.max_data + 1;
+ROSLIB.RWTPlot.prototype.refreshXAxisDomain = function (xEndTime) {
+  if (this.useTimestamp) {
+    var st = this.startTs;
+    var ticks = this.maxData + 1;
 
-    if (!x_end_time) {
-      x_end_time = ROSLIB.Time.now();
+    if (!xEndTime) {
+      xEndTime = ROSLIB.Time.now();
     }
-    var x_begin_time = x_end_time.substract(ROSLIB.Time.fromSec(this.max_data));
+    var xBeginTime = xEndTime.substract(ROSLIB.Time.fromSec(this.maxData));
 
-    this.x_scale.domain([x_begin_time.toDate(), x_end_time.toDate()]);
-    this.x.scale(this.x_scale)
-      .ticks(this.max_data + 1)
+    this.xScale.domain([xBeginTime.toDate(), xEndTime.toDate()]);
+    this.x.scale(this.xScale)
+      .ticks(this.maxData + 1)
       .tickFormat(function (d, i) {
         var tmp = Math.ceil((ticks - 1) / 10.0);
         if (i % tmp === 0) {
           return Math.floor((d.getTime() - st) / 1000.0); // sec
         } else {
-          return "";
+          return '';
         }
       });
     this.svg.select('.x.axis')
@@ -304,10 +304,10 @@ ROSLIB.RWTPlot.prototype.refreshXAxisDomain = function (x_end_time) {
 };
 
 ROSLIB.RWTPlot.prototype.getYAxisMinMax = function () {
-  var domain = this.y_scale.domain();
+  var domain = this.yScale.domain();
   var min = domain[0];
   var max = domain[1];
-  var margin = this.y_autoscale_margin;
+  var margin = this.yAutoscaleMargin;
 
   var middle = (min + max) / 2.0;
   min = (min - middle) / (1.0 + margin) + middle;
@@ -320,52 +320,51 @@ ROSLIB.RWTPlot.prototype.getYAxisMinMax = function () {
 };
 
 ROSLIB.RWTPlot.prototype.getXAxisSec = function () {
-  return this.max_data;
+  return this.maxData;
 };
 
 ROSLIB.RWTPlot.prototype.addRawData = function (data) {
   // check the dimension
-  var data_dimension = _.isArray(data) ? data.length : 0;
-  if (data_dimension === 0) {
+  var dataDimension = _.isArray(data) ? data.length : 0;
+  if (dataDimension === 0) {
     data = [data];          // force to encapsulate into array
   }
   this.checkYAxisMinMax(data);
 
   var now = ROSLIB.Time.now();
   this.data.push(data);
-  var arr_data = this.data.toArray();
-  var decomposed_arr = _.zip(arr_data);
+  var arrData = this.data.toArray();
+  var decomposedArr = _.zip(arrData);
   if (this.paths.length < data.length) {
     for (var pathIndex = this.paths.length; pathIndex < data.length; pathIndex++) {
       this.paths.push(this.allocatePath(String(pathIndex), pathIndex % 7));
     }
   }
-  if (this.is_paused) {
+  if (this.isPaused) {
     return;
   }
 
-  for (var i = 0; i < decomposed_arr.length; i++) {
-    var target_arr = decomposed_arr[i];
-    if (this.need_to_animate) {
+  for (var i = 0; i < decomposedArr.length; i++) {
+    var targetArr = decomposedArr[i];
+    if (this.needToAnimate) {
       this.paths[i]
-        .datum(target_arr)
+        .datum(targetArr)
         .attr('d', this.line)
         .attr('transform', null)
         .transition()
         //.duration(0)
         .ease('linear')
-        .attr('transform', 'translate(' + this.x_scale(-1) + ',0)');
+        .attr('transform', 'translate(' + this.xScale(-1) + ',0)');
     }
     else {
-      this.paths[i].datum(target_arr)
+      this.paths[i].datum(targetArr)
         .attr('d', this.line)
         .attr('transform', null)
         .transition();
     }
   }
-  // this.last_time = now;
-  if (this.data.length() === this.max_data) {
-    this.need_to_animate = true;
+  if (this.data.length() === this.maxData) {
+    this.needToAnimate = true;
   }
 };
 
@@ -384,19 +383,19 @@ ROSLIB.RWTPlot.prototype.chopTimestampedData = function (stamp) {
   $.each(this.seriesMap, function (fieldPath, dataArr) {
     if (_.isArray(dataArr) && dataArr.length > 0) {
       // chop here
-      var chop_num = 0;
+      var chopNum = 0;
       for (var i = 0; i < dataArr.length; i++) {
         var diff = stamp.substract(dataArr[i].stamp).toSec();
-        if (diff > this.max_data) {
-          chop_num = chop_num + 1;
+        if (diff > this.maxData) {
+          chopNum = chopNum + 1;
         }
         else {
           break;
         }
       }
-      dataArr = dataArr.slice(chop_num);
+      dataArr = dataArr.slice(chopNum);
       that.seriesMap[fieldPath] = dataArr;
-      isChopped |= chop_num > 0;
+      isChopped |= chopNum > 0;
     }
   });
   return isChopped;
@@ -405,24 +404,24 @@ ROSLIB.RWTPlot.prototype.chopTimestampedData = function (stamp) {
 // unused
 ROSLIB.RWTPlot.prototype.getDisplayData = function (stamp, dataArr) {
   if (dataArr.length > 0) {
-    var chop_num = 0;
+    var chopNum = 0;
     for (var i = 0; i < dataArr.length; i++) {
       var diff = stamp.substract(dataArr[i].stamp).toSec();
-      if (diff > this.max_data) {
-        chop_num = chop_num + 1;
+      if (diff > this.maxData) {
+        chopNum = chopNum + 1;
       } else {
         break;
       }
     }
-    return { animate: (chop_num > 0), data: dataArr.slice(chop_num) };
+    return { animate: (chopNum > 0), data: dataArr.slice(chopNum) };
   } else {
     return { animate: false, data: dataArr };
   }
 };
 
 ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dataItem) {
-  var data_dimension = _.isArray(dataItem) ? dataItem.length : 0;
-  if (data_dimension === 0) {
+  var dataDimension = _.isArray(dataItem) ? dataItem.length : 0;
+  if (dataDimension === 0) {
     dataItem = [dataItem];          // force to encapsulate into array
   }
   this.checkYAxisMinMax(dataItem);
@@ -434,12 +433,12 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
     dataArr = [];
   }
 
-  var before_chop_oldest_time = null;
+  var beforeChopOldestStamp = null;
   if (dataArr.length > 0) {
-    before_chop_oldest_time = dataArr[0].stamp;
+    beforeChopOldestStamp = dataArr[0].stamp;
   }
 
-  var need_to_animate = this.chopTimestampedData(stamp);
+  var needToAnimate = this.chopTimestampedData(stamp);
 
   dataItem.stamp = stamp;
   dataArr.push(dataItem);
@@ -448,7 +447,7 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
   if (dataArr.length < 1) {
     return;
   }
-  if (this.is_paused) {
+  if (this.isPaused) {
     return;
   }
 
@@ -456,28 +455,28 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
 
   // var dispDataTmp = this.getDisplayData(stamp, dataArr);
   // var dispData = dispDataTmp.data;
-  // need_to_animate = dispDataTmp.animate;
+  // needToAnimate = dispDataTmp.animate;
 
-  var oldest_stamp = dataArr[0].stamp;
+  var afterChopOldestStamp = dataArr[0].stamp;
   for (var i = 0; i < dataItem.length; i++) { // x_i := i
     var pathWithIndex = this.getFieldPathWithIndex(msgFieldPath, i);
 
-    var plot_data = [];
+    var plotData = [];
     for (var j = 0; j < dataArr.length; j++) {
       var value = dataArr[j][i];
       // scale x(i) here
-      // oldest_stamp = 0, stamp = this.max_data
-      if (!stamp.equal(oldest_stamp)) {
-        var new_data = [dataArr[j].stamp, value]; // [x1, y1] or [x1, z1]
-        plot_data.push(new_data);
+      // afterChopOldestStamp = 0, stamp = this.maxData
+      if (!stamp.equal(afterChopOldestStamp)) {
+        var newData = [dataArr[j].stamp, value]; // [x1, y1] or [x1, z1]
+        plotData.push(newData);
       }
     }
 
-    if (need_to_animate) {
-      var translation = oldest_stamp.substract(before_chop_oldest_time).toSec();
+    if (needToAnimate) {
+      var translation = afterChopOldestStamp.substract(beforeChopOldestStamp).toSec();
 
       this.paths[pathWithIndex]
-        .datum(plot_data)
+        .datum(plotData)
         .attr('d', this.line)
         .attr('transform', null)
         .transition()
@@ -485,7 +484,7 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
         .ease('linear')
         .attr('transform', 'translate(' + (-translation) + ',0)');
     } else {
-      this.paths[pathWithIndex].datum(plot_data)
+      this.paths[pathWithIndex].datum(plotData)
         .attr('d', this.line)
         .attr('transform', null)
         .transition();
@@ -494,7 +493,7 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
 };
 
 ROSLIB.RWTPlot.prototype.addData = function (msgFieldPath, data, data2) {
-  if (this.use_timestamp) {
+  if (this.useTimestamp) {
     this.addTimestampedData(msgFieldPath, data, data2);
   }
   else {
@@ -519,7 +518,7 @@ ROSLIB.RWTPlot.prototype.removeTimestampedSeries = function (msgFieldPath) {
 };
 
 ROSLIB.RWTPlot.prototype.removeSeries = function (msgFieldPath) {
-  if (this.use_timestamp) {
+  if (this.useTimestamp) {
     this.removeTimestampedSeries(msgFieldPath);
   }
   else {
