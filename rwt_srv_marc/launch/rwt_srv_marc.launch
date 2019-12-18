@@ -2,4 +2,6 @@
   <arg name="launch_roswww" default="true" />
   <include file="$(find rwt_srv_marc)/launch/webserver.launch"
            if="$(arg launch_roswww)" />
+
+  <node pkg="rwt_srv_marc" type="srv_list.py" name="srv_list"></node>
 </launch>
