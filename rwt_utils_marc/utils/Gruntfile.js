@@ -41,7 +41,7 @@ module.exports = function (grunt) {
       files: [
         'Gruntfile.js',
         '../src/*.js',
-        '../www/js/rwt_utils_marc_main.js'
+        '../www/js/*.js'
       ]
     },
     watch: {
