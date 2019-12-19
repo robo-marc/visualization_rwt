@@ -2,12 +2,20 @@ cmake_minimum_required(VERSION 2.8.3)
 project(rwt_action_marc)
 
 find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
-  rosbridge_server
+  roscpp
   rospy
-  rwt_utils_3rdparty
   std_msgs
-  roswww
+  message_generation
+)
+
+add_service_files(
+   FILES
+   ActionList.srv
+)
+ 
+generate_messages(
+  DEPENDENCIES
+  std_msgs
 )
 
 catkin_package(

@@ -2,4 +2,6 @@
   <arg name="launch_roswww" default="true" />
   <include file="$(find rwt_action_marc)/launch/webserver.launch"
            if="$(arg launch_roswww)" />
+           
+  <node pkg="rwt_action_marc" type="action_list.py" name="action_list"></node>       
 </launch>
