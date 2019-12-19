@@ -189,7 +189,7 @@ ROSLIB.RWTPlot.prototype.drawLegend = function () {
   var that = this;
   var legendVals = [];
   var legendColors = {};
-  $.each(Object.keys(this.paths), function (index, pathId) {
+  _.each(Object.keys(this.paths), function (pathId, index) {
     var name = that.pathSettings[pathId].name;
     legendVals.push(name);
     legendColors[name] = that.pathSettings[pathId].color;
@@ -363,7 +363,7 @@ ROSLIB.RWTPlot.prototype.setXAxisScale = function (sec) {
     this.maxData = sec;
 
     var newestStamp;
-    $.each(this.seriesMap, function (fieldPath, dataList) {
+    _.each(this.seriesMap, function (dataList, fieldPath) {
       if (_.isArray(dataList) && dataList.length > 0) {
         var stamp = dataList[dataList.length - 1].stamp;
         if (newestStamp === undefined
@@ -486,7 +486,7 @@ ROSLIB.RWTPlot.prototype.chopTimestampedData = function (stamp) {
   var that = this;
   var isChopped = false;
   // check the oldest message
-  $.each(this.seriesMap, function (fieldPath, dataArr) {
+  _.each(this.seriesMap, function (dataArr, fieldPath) {
     if (_.isArray(dataArr) && dataArr.length > 0) {
       // chop here
       var chopNum = 0;
