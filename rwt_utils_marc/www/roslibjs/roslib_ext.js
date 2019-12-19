@@ -11,3 +11,18 @@ Ros.prototype.getSrvList = function (callback, failedCallback) {
     failedCallback(msg);
   });
 };
+
+Ros.prototype.getActionList = function (callback, failedCallback) {
+  var rwt_action = new Service({
+    ros: this,
+    name: '/action_list',
+    serviceType: 'rwt_action_marc/ActionList'
+  });
+  var request = new ServiceRequest();
+  rwt_action.callService(request, function (result) {
+    callback(result);
+  }, function (msg) {
+    failedCallback(msg);
+  });
+
+};
