@@ -5,13 +5,14 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   rosbridge_server
   rospy
-  rwt_utils_3rdparty
   std_msgs
+  rwt_utils_3rdparty
+  rwt_utils_marc
   roswww
 )
 
 catkin_package(
-  CATKIN_DEPENDS geometry_msgs rosbridge_server rospy std_msgs rwt_utils_3rdparty roswww
+  CATKIN_DEPENDS geometry_msgs rosbridge_server rospy std_msgs rwt_utils_3rdparty rwt_utils_marc roswww
 )
 include_directories(
   ${catkin_INCLUDE_DIRS}

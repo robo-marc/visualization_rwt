@@ -143,10 +143,17 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
       .y(function (d, i) { return that.yScale(d); });
   }
   this.color = d3.scale.category10();
+  this.colorIndex = 0;
 
-  // Key: msgFieldPath with array index number
+  // Key: path id(msgFieldPath with array index number)
   // Value: d3-path object
   this.paths = {};
+
+  // Key: path id(msgFieldPath with array index number)
+  // Value: object(name, color)
+  this.pathSettings = {};
+
+  this.drawLegend();
 };
 
 // TODO: deprecated
@@ -158,32 +165,131 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
 //   }
 // };
 
-ROSLIB.RWTPlot.prototype.getFieldPathWithIndex = function (msgFieldPath, index) {
+ROSLIB.RWTPlot.prototype.getNextColor = function () {
+  var color = this.color(this.colorIndex);
+  this.colorIndex++;
+  return color;
+};
+
+ROSLIB.RWTPlot.prototype.getFieldPathId = function (msgFieldPath, index) {
   var s = msgFieldPath + '/' + String(index); // like '/array_sin_cos/data/0'
   s = s.replace(/\//g, '__'); // like '__array_sin_cos__data__0'
   return s;
 };
 
-ROSLIB.RWTPlot.prototype.allocatePath = function (id, num) {
+ROSLIB.RWTPlot.prototype.getFieldPathName = function (msgFieldPath, index) {
+  var s = msgFieldPath; // like '/array_sin_cos/data'
+  if (index !== undefined) {
+    s += '[' + String(index) + ']'; // like '/array_sin_cos/data[0]'
+  }
+  return s;
+};
+
+ROSLIB.RWTPlot.prototype.drawLegend = function () {
   var that = this;
-  this.color.domain(_.range(num)); // update the domain of the color
+  var legendVals = [];
+  var legendColors = {};
+  _.each(Object.keys(this.paths), function (pathId, index) {
+    var name = that.pathSettings[pathId].name;
+    legendVals.push(name);
+    legendColors[name] = that.pathSettings[pathId].color;
+  });
+
+  $('#legend-div').empty();
+
+  var areaPadding = 16;
+  var legend = d3.select('#legend-div')
+    .append('svg')
+    .style('width', '90%')
+    // .style('border', '1px solid gray')
+    .style('margin', '16px')
+    .style('padding', String(areaPadding) + 'px')
+    .selectAll('g')
+    .data(legendVals)
+    .enter()
+    .append('g')
+    .attr('class', 'legends')
+    ;
+
+  legend.append('rect') // 凡例の色付け四角
+    .attr('x', 0)
+    .attr('y', 15)
+    .attr('width', 30)
+    .attr('height', 2)
+    .style('fill', function (d, i) {
+      return legendColors[d];
+    }) // 色付け
+    ;
+  legend.append('text')  // 凡例の文言
+    .attr('x', 35)
+    .attr('y', 20)
+    .text(function (d, i) { return d; })
+    .attr('class', 'textselected')
+    .style('text-anchor', 'start')
+    // .style('font-size', 12)
+    ;
+
+  var padding = 20;
+  // var legendAreaWidth = legend[0].parentNode.clientWidth - (areaPadding * 2);
+  legend.attr('transform', function (d, i) {
+    {
+      // 凡例をひとまず１行あたり３個固定で描画してみる
+      var itemCountPerRow = 3;
+      var rowIndex = Math.floor(i / itemCountPerRow); // 凡例の行のインデックス番号
+      var begin = rowIndex * itemCountPerRow;
+      var end = begin + itemCountPerRow - 1;
+      // console.log('legend[' + i + ']: begin:' + begin + ', end:' + end);
+      return 'translate('
+        + (
+          d3.sum(legendVals, function (e, j) {
+            // console.log('sum[i, j]: [' + i + '][' + j + ']');
+            // if (j < i) {
+            if (begin <= j && j <= end && j < i) {
+              // console.log('  width: [' + legend[0][j].getBBox().width + ']');
+              return legend[0][j].getBBox().width;   // 各凡例の横幅サイズ取得
+            } else {
+              // console.log('  width: [' + 0 + ']');
+              return 0;
+            }
+          }) + padding * (i % itemCountPerRow))
+        + ','
+        + (legend[0][0].getBBox().height + padding) * rowIndex // 凡例の各行の高さを計算
+        + ')';
+    }
+  });
+};
+
+ROSLIB.RWTPlot.prototype.allocatePath = function (id, color) {
+  var that = this;
+  // this.color.domain(_.range(num)); // update the domain of the color
   return this.svg.append('g')
     .attr('id', id)
     .attr('clip-path', 'url(#clip)')
     .append('path')
     .datum([])
-    .attr('class', 'line line' + num)
-    .style('stroke', function (d) { return that.specifiedColor || that.color(num - 1); })
+    .attr('class', 'line')
+    .style('stroke', function (d) {
+      return color;
+    })
     .attr('d', this.line);
 };
 
 ROSLIB.RWTPlot.prototype.allocatePathForArr = function (msgFieldPath, dataItem) {
-  var colorIndex = _.size(this.paths);
   for (var i = 0; i < dataItem.length; i++) {
-    var pathWithIndex = this.getFieldPathWithIndex(msgFieldPath, i);
-    if (!(pathWithIndex in this.paths)) { // 'A in B' means 'B contains key A'
-      colorIndex++;
-      this.paths[pathWithIndex] = this.allocatePath(pathWithIndex, colorIndex % 7);
+    var fieldPathId = this.getFieldPathId(msgFieldPath, i);
+    if (!(fieldPathId in this.paths)) { // 'A in B' means 'B contains key A'
+      var color = this.getNextColor();
+
+      this.paths[fieldPathId] = this.allocatePath(fieldPathId, color);
+
+      var indexForName = (dataItem.length === 1 ? undefined : i);
+      var pathName = this.getFieldPathName(msgFieldPath, indexForName);
+
+      this.pathSettings[fieldPathId] = {
+        name: pathName,
+        color: color,
+      };
+      this.drawLegend();
     }
   }
 };
@@ -257,7 +363,7 @@ ROSLIB.RWTPlot.prototype.setXAxisScale = function (sec) {
     this.maxData = sec;
 
     var newestStamp;
-    $.each(this.seriesMap, function (fieldPath, dataList) {
+    _.each(this.seriesMap, function (dataList, fieldPath) {
       if (_.isArray(dataList) && dataList.length > 0) {
         var stamp = dataList[dataList.length - 1].stamp;
         if (newestStamp === undefined
@@ -380,7 +486,7 @@ ROSLIB.RWTPlot.prototype.chopTimestampedData = function (stamp) {
   var that = this;
   var isChopped = false;
   // check the oldest message
-  $.each(this.seriesMap, function (fieldPath, dataArr) {
+  _.each(this.seriesMap, function (dataArr, fieldPath) {
     if (_.isArray(dataArr) && dataArr.length > 0) {
       // chop here
       var chopNum = 0;
@@ -459,7 +565,7 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
 
   var afterChopOldestStamp = dataArr[0].stamp;
   for (var i = 0; i < dataItem.length; i++) { // x_i := i
-    var pathWithIndex = this.getFieldPathWithIndex(msgFieldPath, i);
+    var fieldPathId = this.getFieldPathId(msgFieldPath, i);
 
     var plotData = [];
     for (var j = 0; j < dataArr.length; j++) {
@@ -475,7 +581,7 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
     if (needToAnimate) {
       var translation = afterChopOldestStamp.substract(beforeChopOldestStamp).toSec();
 
-      this.paths[pathWithIndex]
+      this.paths[fieldPathId]
         .datum(plotData)
         .attr('d', this.line)
         .attr('transform', null)
@@ -484,7 +590,7 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
         .ease('linear')
         .attr('transform', 'translate(' + (-translation) + ',0)');
     } else {
-      this.paths[pathWithIndex].datum(plotData)
+      this.paths[fieldPathId].datum(plotData)
         .attr('d', this.line)
         .attr('transform', null)
         .transition();
@@ -507,13 +613,15 @@ ROSLIB.RWTPlot.prototype.removeTimestampedSeries = function (msgFieldPath) {
     if (dataArr && dataArr.length > 0) {
       var tmpData = dataArr[0];
       for (var i = 0; i < tmpData.length; i++) {
-        var pathWithIndex = this.getFieldPathWithIndex(msgFieldPath, i);
-        this.svg.select('#' + pathWithIndex)
+        var fieldPathId = this.getFieldPathId(msgFieldPath, i);
+        this.svg.select('#' + fieldPathId)
           .remove();
-        delete this.paths[pathWithIndex];
+        delete this.paths[fieldPathId];
+        delete this.pathSettings[fieldPathId];
       }
     }
     delete this.seriesMap[msgFieldPath];
+    this.drawLegend();
   }
 };
 
