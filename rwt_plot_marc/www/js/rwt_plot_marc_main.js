@@ -29,7 +29,7 @@ $(function () {
   // initialize screen
   function initScreen() {
 
-    plot.initializePlot($('#plot-area'), initPlotSpec);
+    plot.initializePlot('plot-area', 'position-area', 'legend-area', initPlotSpec);
 
     // TODO: deprecated
     ros.install_config_button('config-button');

@@ -35,8 +35,8 @@ ROSLIB.RWTPlot.prototype.clearData = function () {
   }
   this.needToAnimate = false;
   if (this.spec) {
-    $('#' + this.content.attr('id')).find('svg').remove();
-    this.initializePlot(this.content, this.spec);
+    $('#' + this.contentId).find('svg').remove();
+    this.initializePlot(this.contentId, this.posisionId, this.legendId, this.spec);
   }
 };
 
@@ -48,9 +48,12 @@ ROSLIB.RWTPlot.prototype.start = function () {
   this.isPaused = false;
 };
 
-ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
+ROSLIB.RWTPlot.prototype.initializePlot = function (contentId, posisionId, legendId, spec) {
   this.spec = spec || {};
-  this.content = $content;
+  this.contentId = contentId;
+  this.legendId = legendId;
+  this.posisionId = posisionId;
+  var $content = $('#' + contentId);
   var width = $content.width();
   var height = $content.height();
   var margin = spec.margin || { top: 20, right: 20, bottom: 20, left: 40 };
@@ -67,6 +70,8 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
   this.yAutoscaleMargin = yaxisSpec.autoScaleMargin || 0.2;
   this.yaxisTick = yaxisTick;
   this.specifiedColor = color;
+
+  this.margin = margin;
 
   if (this.useTimestamp) {
     //this.xScale = d3.scale.linear().domain([0, this.maxData]).range([0, width - margin.left - margin.right]);
@@ -90,7 +95,7 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
       .range([height - margin.top - margin.bottom, 0]);
   }
 
-  this.svg = d3.select('#' + $content.attr('id')).append('svg')
+  this.svg = d3.select('#' + this.contentId).append('svg')
     .attr('class', 'rwt-plot')
     .attr('width', width)
     .attr('height', height)
@@ -142,6 +147,7 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
       .x(function (d, i) { return that.xScale(i); })
       .y(function (d, i) { return that.yScale(d); });
   }
+
   this.color = d3.scale.category10();
   this.colorIndex = 0;
 
@@ -153,7 +159,43 @@ ROSLIB.RWTPlot.prototype.initializePlot = function ($content, spec) {
   // Value: object(name, color)
   this.pathSettings = {};
 
-  this.drawLegend();
+  this.preparePositionPainter();
+  this.paintLegend();
+};
+
+ROSLIB.RWTPlot.prototype.preparePositionPainter = function () {
+  var that = this;
+
+  var $positionLabel = $('#' + this.posisionId);
+
+  d3.select('#' + this.contentId + ' svg')
+    .on('mousemove', function () {
+      that.paintPosition(this, that, $positionLabel);
+    })
+    .on('click', function () {
+      that.paintPosition(this, that, $positionLabel);
+    });
+
+  // $('#' + this.contentId + ' svg').on('mouseout', function () {
+  //   $positionLabel.empty();
+  // });
+};
+
+ROSLIB.RWTPlot.prototype.paintPosition = function (e, plot, positionLabel) {
+  // マウスの物理座標を取得
+  var m = d3.mouse(e);
+
+  // 物理座標からグラフ上の座標に変換
+  var x = plot.xScale.invert(m[0] - plot.margin.left);
+  x = plot.round10((x.getTime() - plot.startTs) / 1000.0);
+
+  var y = plot.round10(plot.yScale.invert(m[1] - plot.margin.top));
+
+  positionLabel.text('X = ' + x + '　Y = ' + y);
+};
+
+ROSLIB.RWTPlot.prototype.round10 = function (value) {
+  return Math.round(value * 10) / 10;
 };
 
 // TODO: deprecated
@@ -185,7 +227,7 @@ ROSLIB.RWTPlot.prototype.getFieldPathName = function (msgFieldPath, index) {
   return s;
 };
 
-ROSLIB.RWTPlot.prototype.drawLegend = function () {
+ROSLIB.RWTPlot.prototype.paintLegend = function () {
   var that = this;
   var legendVals = [];
   var legendColors = {};
@@ -195,10 +237,10 @@ ROSLIB.RWTPlot.prototype.drawLegend = function () {
     legendColors[name] = that.pathSettings[pathId].color;
   });
 
-  $('#legend-div').empty();
+  $('#' + this.legendId).empty();
 
   var areaPadding = 16;
-  var legend = d3.select('#legend-div')
+  var legend = d3.select('#' + this.legendId)
     .append('svg')
     .style('width', '90%')
     // .style('border', '1px solid gray')
@@ -289,7 +331,7 @@ ROSLIB.RWTPlot.prototype.allocatePathForArr = function (msgFieldPath, dataItem) 
         name: pathName,
         color: color,
       };
-      this.drawLegend();
+      this.paintLegend();
     }
   }
 };
@@ -621,7 +663,7 @@ ROSLIB.RWTPlot.prototype.removeTimestampedSeries = function (msgFieldPath) {
       }
     }
     delete this.seriesMap[msgFieldPath];
-    this.drawLegend();
+    this.paintLegend();
   }
 };
 
