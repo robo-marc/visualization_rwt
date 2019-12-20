@@ -3,16 +3,46 @@
 
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="shortcut icon" type="image/ico" href="favicon.ico" />
   <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="css/rwt_console_marc.css">
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" type="text/css" />
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css"
+    type="text/css" />
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/examples/examples.css" type="text/css" />
   </link>
   <title>rwt_console_marc</title>
+
+  <style>
+    .cell-title {
+      font-weight: bold;
+    }
+
+    .cell-effort-driven {
+      text-align: center;
+    }
+
+    .toggle {
+      height: 9px;
+      width: 9px;
+      display: inline-block;
+    }
+
+    .toggle.expand {
+      background: url(../images/expand.gif) no-repeat center center;
+    }
+
+    .toggle.collapse {
+      background: url(../images/collapse.gif) no-repeat center center;
+    }
+  </style>
 </head>
 
 <body>
   <div class="container">
     <div class="page-header">
-      <h1><span class="glyphicon glyphicon-star"></span>rwt_console_marc <small>robotwebtools consol</small> <span
+      <h1><span class="glyphicon glyphicon-star"></span>rwt_console_marc <small>robotwebtools console</small> <span
           id="config-button"></span></h1>
     </div>
     <div id="topic-area">
@@ -27,10 +57,54 @@
           <input type="name" class="form-control" name="field-accessor" id="field-accessor"
             placeholder="specify field like data" />
         </div>
-        <button type="submit" class="btn btn-primary">sample</button>
+        <button type="button" class="btn btn-primary">sample</button>
       </form>
     </div>
   </div>
+  <button id="clearButton" type="button">clear</button>
+  <a id="downloadCSV" href="#" download="test.csv">download</a>
+  <table width="100%">
+    <tr>
+      <td valign="top" width="50%">
+        <div style="border:1px solid gray;background:wheat;padding:6px;">
+          <label>Show tasks with % at least: </label>
+
+          <div style="padding:4px;">
+            <div style="width:100px;" id="pcSlider"></div>
+          </div>
+          <br />
+          <label>And title including:</label>
+          <input type=text id="txtSearch">
+        </div>
+        <br />
+
+        <div id="myGrid" style="width:1200px;height:500px;"></div>
+      </td>
+      <td valign="top">
+        <h2>Demonstrates:</h2>
+        <ul>
+          <li>implementing expand/collapse as a filter for DataView</li>
+        </ul>
+
+        <h2>View Source:</h2>
+        <ul>
+          <li><A href="https://github.com/6pac/SlickGrid/blob/master/examples/example5-collapsing.html"
+              target="_sourcewindow"> View the source for this example on Github</a></li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/firebugx.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.12.4.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery.event.drag-2.3.0.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.core.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.formatters.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.editors.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.grid.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.dataview.js"></script>
+
   <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
