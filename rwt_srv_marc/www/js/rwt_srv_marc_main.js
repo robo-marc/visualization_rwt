@@ -57,11 +57,23 @@ $(function () {
   // ★グリッドアイテム取得/////////////////////////////////////////
   var grid;
   var columns = [
-    { id: "tree", name: "Tree", field: "tree", width: 200, minWidth: 20, maxWidth: 300 },
-    { id: "type", name: "Type", field: "type", width: 260, minWidth: 20, maxWidth: 900 },
-    { id: "path", name: "Path", field: "path", width: 260, minWidth: 20, maxWidth: 300 },
-    { id: "remove", name: "Remove", field: "remove", width: 100, minWidth: 20, maxWidth: 200 }
+    { id: "tree", name: "Tree", field: "tree", width: 200, minWidth: 20, maxWidth: 300, editor: Slick.Editors.Text },
+    { id: "type", name: "Type", field: "type", width: 260, minWidth: 20, maxWidth: 900, editor: Slick.Editors.Text },
+    { id: "path", name: "Path", field: "path", width: 260, minWidth: 20, maxWidth: 300, editor: Slick.Editors.Text },
+    //削除ボタンを表示するためのカラムを定義
+    {
+      id: "remove", name: "Remove", field: "remove", width: 100, minWidth: 20, maxWidth: 200, formatter: function () {
+        return '<button class="delete-button"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>';
+      }
+    }
   ];
+  // SlickGrid動作オプション
+  var options = {
+    // (3) 編集可能にする。
+    editable: true
+  };
+
+
   var data = [];
 
   // for (var i = 0; i < 30; i++) {
@@ -73,7 +85,7 @@ $(function () {
   //   };
   // }
 
-  grid = new Slick.Grid("#myGrid", data, columns);
+  grid = new Slick.Grid("#myGrid", data, columns, options);
 
   // serviceのリストを表示するリストボックス
   function selectService(objList) {
@@ -116,26 +128,33 @@ $(function () {
   $('#add-service-button').on('click', function () {
     var serviceName = $('#service-select').val();
     var messageName = $('#message-select').val();
-    RequestData = []
-    for (var i = 0; i < 1; i++) {
-      RequestData[i] = {
-        tree: "Request",
-        type: serviceName + "/" + messageName,
-        path: serviceName + "/" + messageName,
-        remove: "",
-      };
-    }
 
-    data.push(RequestData)
+    data[data.length] = {
+      tree: "Request",
+      type: serviceName + "/" + messageName,
+      path: serviceName + "/" + messageName,
+      remove: "",
+    };
 
-    for (var n = 0; n < data.length; n++) {
-      var recordObj = data[n];
-      grid = new Slick.Grid("#myGrid", recordObj, columns);
-    }
-
-    // grid = new Slick.Grid("#myGrid", data, columns);
+    data[data.length] = {
+      tree: "Response",
+      type: serviceName + "/" + messageName,
+      path: serviceName + "/" + messageName,
+      remove: "",
+    };
+    grid = new Slick.Grid("#myGrid", data, columns, options);
+    // 削除クリックイベントハンドラ
+    grid.onClick.subscribe(function (e, args) {
+      if ($(e.target).hasClass('delete-button')) {
+        data.splice(args.row, 1);
+        grid.invalidate();
+      }
+    });
   });
-});
 
+
+
+
+});
 
 
