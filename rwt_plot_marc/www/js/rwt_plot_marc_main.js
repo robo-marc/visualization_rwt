@@ -29,7 +29,7 @@ $(function () {
   // initialize screen
   function initScreen() {
 
-    plot.initializePlot($('#plot-area'), initPlotSpec);
+    plot.initializePlot('plot-area', 'position-area', 'legend-area', initPlotSpec);
 
     // TODO: deprecated
     ros.install_config_button('config-button');
@@ -92,16 +92,16 @@ $(function () {
   function getFieldList(typeInfo) {
     var typeList = [];
 
-    $.each(typeInfo, function (fieldName, fieldType) {
+    _.each(typeInfo, function (fieldType, fieldName) {
       if (_.isArray(fieldType)) {
         // console.log('[name, type]: [' + fieldName + ', ' + fieldType + '] is array');
         typeList.push(fieldName);
 
         // // Parse object array. Is this necessary?
-        // $.each(fieldType, function (index, childType) {
+        // _.each(fieldType, function (childType, index) {
         //   if (typeof childType === 'object') {
         //     var grandChildren = getMemberList(childType);
-        //     $.each(grandChildren, function (index, grandChild) {
+        //     _.each(grandChildren, function (grandChild, index) {
         //       var s = fieldName + '/' + grandChild;
         //       typeList.push(s);
         //     });
@@ -112,7 +112,7 @@ $(function () {
         // console.log('[name, type]: [' + fieldName + ', ' + fieldType + '] is object');
         // typeList.push(fieldName); // For set all member, but not implemented.
         var children = getFieldList(fieldType);
-        $.each(children, function (index, child) {
+        _.each(children, function (child, index) {
           var s = fieldName + '/' + child;
           typeList.push(s);
         });
@@ -212,7 +212,7 @@ $(function () {
 
         var typeList = getFieldList(decoded);
         $('#type-select').empty();
-        $.each(typeList, function (index, value) {
+        _.each(typeList, function (value, index) {
           $('<option>', {
             value: value,
             text: value,
