@@ -10,7 +10,7 @@
  * @class RWTRobotMonitor
  * @param spec
  */
-ROSLIB.RWTRobotMonitor = function(spec) {
+ROSLIB.RWTRobotMonitor = function (spec) {
   // spec, ros
   var diagnostics_agg_topic = spec.diagnostics_agg_topic || '/diagnostics_agg';
   var ros = spec.ros;
@@ -24,37 +24,41 @@ ROSLIB.RWTRobotMonitor = function(spec) {
     messageType: 'diagnostic_msgs/DiagnosticArray'
   });
   var that = this;
-  this.diagnostics_agg_subscriber.subscribe(function(msg) {
+  this.diagnostics_agg_subscriber.subscribe(function (msg) {
     that.diagnosticsCallback(msg);
   });
   // timer to update last_time_id
-  
-  setTimeout(function() {
+
+  setTimeout(function () {
     that.updateLastTimeString();
   }, 1000);
+  $('#pause-button').show();
+  $('#start-button').hide();
 };
 
 /**
  * callback function for /diagnostics_agg.
  * @param msg - message of /diagnostics_agg.
  */
-ROSLIB.RWTRobotMonitor.prototype.diagnosticsCallback = function(msg) {
+ROSLIB.RWTRobotMonitor.prototype.diagnosticsCallback = function (msg) {
   this.last_diagnostics_update = ROSLIB.Time.now();
   var diagnostics_statuses
     = ROSLIB.DiagnosticsStatus.createFromArray(msg);
   var that = this;
-  _.forEach(diagnostics_statuses, function(status) {
+  _.forEach(diagnostics_statuses, function (status) {
     that.history.registerStatus(status);
   });
-
+  if (ROSLIB.RWTRobotMonitor.prototype.is_paused) {
+    return;
+  }
   this.updateView();
-  
+
 };
 
 /**
  * callback function to update string to show the last message received
  */
-ROSLIB.RWTRobotMonitor.prototype.updateLastTimeString = function() {
+ROSLIB.RWTRobotMonitor.prototype.updateLastTimeString = function () {
   var that = this;
   if (that.last_diagnostics_update) {
     var now = ROSLIB.Time.now();
@@ -64,7 +68,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateLastTimeString = function() {
   else {
     $(that.last_time_id).html(-1);
   }
-  setTimeout(function() {
+  setTimeout(function () {
     that.updateLastTimeString();
   }, 1000);
 };
@@ -72,17 +76,17 @@ ROSLIB.RWTRobotMonitor.prototype.updateLastTimeString = function() {
 /**
  * update html view
  */
-ROSLIB.RWTRobotMonitor.prototype.updateView = function() {
+ROSLIB.RWTRobotMonitor.prototype.updateView = function () {
   this.updateErrorList();
   this.updateWarnList();
   this.updateAllList();
   this.registerBrowserCallback();
 };
 
-ROSLIB.RWTRobotMonitor.prototype.updateList = function(list_id, level, icon) {
+ROSLIB.RWTRobotMonitor.prototype.updateList = function (list_id, level, icon) {
   $('#' + list_id + ' li').remove();
   var directories = this.history.root.getDirectories(level);
-  directories.sort(function(a, b) {
+  directories.sort(function (a, b) {
     var apath = a.fullName();
     var bpath = b.fullName();
     if (apath > bpath) {
@@ -96,33 +100,33 @@ ROSLIB.RWTRobotMonitor.prototype.updateList = function(list_id, level, icon) {
     }
   });
 
-  _.forEach(directories, function(dir) {
+  _.forEach(directories, function (dir) {
     var html_pre = '<li class="list-group-item" data-name="'
       + dir.fullName() + '"><span class="glyphicon ' + icon + '"></span>';
     var html_suf = '</li>';
     $('#' + list_id).append(html_pre
-                            + dir.fullName() + ':' + dir.status.message
-                            + html_suf);
+      + dir.fullName() + ':' + dir.status.message
+      + html_suf);
   });
 };
 
 /**
  * update all list view
  */
-ROSLIB.RWTRobotMonitor.prototype.updateAllList = function() {
+ROSLIB.RWTRobotMonitor.prototype.updateAllList = function () {
   // check opened list first
   var open_ids = [];
-  $('#all-list .in, #all-list .collapsing').each(function() {
+  $('#all-list .in, #all-list .collapsing').each(function () {
     open_ids.push($(this).attr('id'));
   });
   $('#all-list li').remove();
   // return jquery object
-  var rec = function(directory) {
+  var rec = function (directory) {
     var $html = $('<li class="list-group-item inner" data-name="' + directory.fullName() + '">'
-                  + '<a data-toggle="collapse" data-parent="#all-list" href="#' + directory.uniqID() + '">'
-                  + directory.getCollapseIconHTML()
-                  + directory.getIconHTML() + directory.name + '</a>'
-                  +'</li>');
+      + '<a data-toggle="collapse" data-parent="#all-list" href="#' + directory.uniqID() + '">'
+      + directory.getCollapseIconHTML()
+      + directory.getIconHTML() + directory.name + '</a>'
+      + '</li>');
     if (directory.children.length === 0) {
       return $html;
     }
@@ -155,23 +159,23 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllList = function() {
 /**
  * update warn list view
  */
-ROSLIB.RWTRobotMonitor.prototype.updateWarnList = function() {
+ROSLIB.RWTRobotMonitor.prototype.updateWarnList = function () {
   this.updateList('warn-list', ROSLIB.DiagnosticsStatus.LEVEL.WARN, 'glyphicon-exclamation-sign');
 };
 
 /**
  * update error list view
  */
-ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function() {
+ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
   this.updateList('error-list', ROSLIB.DiagnosticsStatus.LEVEL.ERROR, 'glyphicon-minus-sign');
 };
 
 /**
  * registering callbacks for clicking the view lists
  */
-ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function() {
+ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
   var root = this.history.root;
-  $('.list-group-item').dblclick(function() {
+  $('.list-group-item').dblclick(function () {
     if ($(this).find('.in').length !== 0) {
       return;                   // skip
     }
@@ -189,7 +193,7 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function() {
       + '</div>'
       + '</div><!-- /.modal-content -->'
       + '</div><!-- /.modal-dialog -->'
-      +' </div><!-- /.modal -->';
+      + ' </div><!-- /.modal -->';
     var the_directory = root.findByName($(this).attr('data-name'));
     var $html = $(html);
     var $first_body_html = $('<dl></dl>');
@@ -209,10 +213,10 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function() {
       $second_body_html.append('<dt>' + second_key + ':</dt>' + '<dd>' + the_directory.status.values[second_key] + '</dd>');
     }
     $html.find('.modal-title').html(the_directory.fullName());
-    
+
     $html.find('.modal-body').append($second_body_html);
-    $html.find('.dismiss-button').click(function() {
-      $html.on('hidden.bs.modal', function() {
+    $html.find('.dismiss-button').click(function () {
+      $html.on('hidden.bs.modal', function () {
         $('#modal').remove();
       });
       $html.modal('hide');
@@ -220,6 +224,18 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function() {
     //$html.find('.modal-title').html()
     $('.container').append($html);
     $('#modal').modal();
-    
+
   });
 };
+
+$('#pause-button').on('click', function () {
+  ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
+  $('#pause-button').hide();
+  $('#start-button').show();
+});
+
+$('#start-button').on('click', function () {
+  ROSLIB.RWTRobotMonitor.prototype.is_paused = false;
+  $('#pause-button').show();
+  $('#start-button').hide();
+});

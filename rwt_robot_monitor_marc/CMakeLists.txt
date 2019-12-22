@@ -7,10 +7,11 @@ find_package(catkin REQUIRED COMPONENTS
   roswww
   rwt_plot
   rwt_utils_3rdparty
+  rwt_utils_marc
 )
 
 catkin_package(
-  CATKIN_DEPENDS diagnostic_msgs rosbridge_server roswww rwt_plot rwt_utils_3rdparty
+  CATKIN_DEPENDS diagnostic_msgs rosbridge_server roswww rwt_plot rwt_utils_3rdparty rwt_utils_marc
 )
 
 include_directories(

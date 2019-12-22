@@ -18,12 +18,14 @@
   <build_depend>roslibjs_experimental</build_depend>
   <build_depend>rwt_plot</build_depend>
   <build_depend>rwt_utils_3rdparty</build_depend>
+  <build_depend>rwt_utils_marc</build_depend>
   <build_depend>roswww</build_depend>
   <run_depend>diagnostic_msgs</run_depend>
   <run_depend>rosbridge_server</run_depend>
   <run_depend>roslibjs_experimental</run_depend>
   <run_depend>rwt_plot</run_depend>
   <run_depend>rwt_utils_3rdparty</run_depend>
+  <run_depend>rwt_utils_marc</run_depend>
   <run_depend>roswww</run_depend>
 
   <export>

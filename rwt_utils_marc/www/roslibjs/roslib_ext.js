@@ -26,6 +26,20 @@ ROSLIB.Ros.prototype.getActionList = function (callback, failedCallback) {
   });
 };
 
+ROSLIB.Ros.prototype.dumpParams = function (callback) {
+  var rwt_rosparam = new ROSLIB.Service({
+    ros: this,
+    name: '/dump_params',
+    serviceType: 'rwt_rosparam_marc/DumpParams'
+  });
+
+  var request = new ROSLIB.ServiceRequest();
+  rwt_rosparam.callService(request, function (value) {
+    // var value = JSON.parse(result.value);
+    callback(value);
+  });
+};
+
 /**
  * Represents a time whith seconds and nanoseconds
  * @class Time

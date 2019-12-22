@@ -2,4 +2,5 @@
   <arg name="launch_roswww" default="true" />
   <include file="$(find rwt_rosparam_marc)/launch/webserver.launch"
            if="$(arg launch_roswww)" />
+  <node pkg="rwt_rosparam_marc" type="dump_params.py" name="dump_params"></node>             
 </launch>
