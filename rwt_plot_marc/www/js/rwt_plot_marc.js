@@ -534,7 +534,7 @@ ROSLIB.RWTPlot.prototype.chopTimestampedData = function (stamp) {
       var chopNum = 0;
       for (var i = 0; i < dataArr.length; i++) {
         var diff = stamp.substract(dataArr[i].stamp).toSec();
-        if (diff > this.maxData) {
+        if (diff > that.maxData) {
           chopNum = chopNum + 1;
         }
         else {
@@ -587,6 +587,11 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
   }
 
   var needToAnimate = this.chopTimestampedData(stamp);
+
+  dataArr = this.seriesMap[msgFieldPath]; // get chopped data array again
+  if (!dataArr) {
+    dataArr = [];
+  }
 
   dataItem.stamp = stamp;
   dataArr.push(dataItem);
