@@ -1,55 +1,31 @@
 function requiredFieldValidator(value) {
-  if (value == null || value == undefined || !value.length) {
+  if (value === null || value === undefined || !value.length) {
     return { valid: false, msg: "This is a required field" };
   } else {
     return { valid: true, msg: null };
   }
 }
 
-
-var TaskNameFormatter = function (row, cell, value, columnDef, dataContext) {
-  if (value == null || value == undefined || dataContext === undefined) { return ""; }
-
-  value = value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
-  var idx = dataView.getIdxById(dataContext.id);
-  if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
-    if (dataContext._collapsed) {
-      return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
-    } else {
-      return spacer + " <span class='toggle collapse'></span>&nbsp;" + value;
-    }
-  } else {
-    return spacer + " <span class='toggle'></span>&nbsp;" + value;
-  }
-};
-
 var dataView;
 var grid;
 var data = [];
 var columns = [
-  { id: "#", name: "#", field: "#", minWidth: 60, editor: Slick.Editors.Text },
-  { id: "Message", name: "Message", field: "Message", width: 220, editor: Slick.Editors.Text },
-  { id: "Severity", name: "Severity", field: "Severity", editor: Slick.Editors.Text },
-  { id: "Node", name: "Node", field: "Node", width: 80, editor: Slick.Editors.Text },
-  { id: "Stamp", name: "Stamp", field: "Stamp", minWidth: 60, editor: Slick.Editors.Text },
-  { id: "Topics", name: "Topics", field: "Topics", minWidth: 60, editor: Slick.Editors.Text },
-  { id: "Location", name: "Location", width: 80, minWidth: 20, maxWidth: 80, field: "Location", editor: Slick.Editors.Text }
+  { id: "#", name: "#", field: "#", sortable: true },
+  { id: "Message", name: "Message", width: 240, field: "Message", sortable: true },
+  { id: "Severity", name: "Severity", field: "Severity", sortable: true },
+  { id: "Node", name: "Node", field: "Node", sortable: true },
+  { id: "Stamp", name: "Stamp", field: "Stamp", width: 240, sortable: true },
+  { id: "Topics", name: "Topics", field: "Topics", width: 240, sortable: true },
+  { id: "Location", name: "Location", field: "Location", width: 240, sortable: true },
+  { id: "Number", name: "Number", field: "Number", width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
 ];
 
 var options = {
   editable: true,
-  enableAddRow: true,
+  enableAddRow: false,
   enableCellNavigation: true,
   asyncEditorLoading: false
 };
-
-var clear = function () {
-  data = [];
-  dataView.setItems(data);
-  dataView.setFilter(myFilter);
-  dataView.endUpdate();
-}
 
 function myFilter(item) {
   var percentCompleteThreshold = 0;
@@ -58,22 +34,20 @@ function myFilter(item) {
     return false;
   }
 
-  if (searchString != "" && item["title"].indexOf(searchString) == -1) {
+  if (searchString !== "" && item["title"].indexOf(searchString) === -1) {
     return false;
   }
 
-  if (item.parent != null) {
+  if (item.parent !== null) {
     var parent = data[item.parent];
 
     while (parent) {
-      if (parent._collapsed || (parent["percentComplete"] < percentCompleteThreshold) || (searchString != "" && parent["title"].indexOf(searchString) == -1)) {
+      if (parent._collapsed || (parent["percentComplete"] < percentCompleteThreshold) || (searchString !== "" && parent["title"].indexOf(searchString) === -1)) {
         return false;
       }
-
       parent = data[parent.parent];
     }
   }
-
   return true;
 }
 
@@ -81,17 +55,21 @@ function percentCompleteSort(a, b) {
   return a["percentComplete"] - b["percentComplete"];
 }
 
-
+dataView = new Slick.Data.DataView({ inlineFilters: true });
+grid = new Slick.Grid("#myGrid", dataView, columns, options);
+var list = [];
+var isSubscribe = 1;
+var count = 1;
+var isAsc = false;
 $(function () {
-
   // subscribe topic
   var ros = new ROSLIB.Ros();
   ros.install_config_button("config-button");
 
-  var list = [];
-  var i = 1;
+  $('#pauseButton').show();
+  $('#startButton').hide();
 
-  function test() {
+  function startDrawing() {
     var sub = null;
     sub = new ROSLIB.Topic({
       ros: ros,
@@ -99,202 +77,214 @@ $(function () {
       messageType: 'rosgraph_msgs/Log'
     });
     sub.subscribe(function (msg) {
-      var intTime = msg.header.stamp.secs;
-      var d = new Date(intTime * 1000);
-      var year = d.getFullYear();
-      var month = d.getMonth() + 1;
-      var day = d.getDate();
-      var hour = ('0' + d.getHours()).slice(-2);
-      var min = ('0' + d.getMinutes()).slice(-2);
-      var sec = ('0' + d.getSeconds()).slice(-2);
+      if (isSubscribe === 1) {
+        var intTime = msg.header.stamp.secs;
+        var d = new Date(intTime * 1000);
+        var year = d.getFullYear();
+        var month = d.getMonth() + 1;
+        var day = d.getDate();
+        var hour = ('0' + d.getHours()).slice(-2);
+        var min = ('0' + d.getMinutes()).slice(-2);
+        var sec = ('0' + d.getSeconds()).slice(-2);
 
-      var time = hour + ":" + min + ":" + sec + "." + msg.header.stamp.nsecs + "(" + year + "-" + month + "-" + day + ")";
-      var mes = msg.msg;
-      var severilty = msg.level;
-      var node = msg.name;
-      var stamp = time;
-      var topics = msg.topics.join(',');
-      var location = msg.file + ":" + msg.function + ":" + msg.line;
-      var levelName = null;
+        var regular = ('0000000000' + msg.header.stamp.nsecs).slice(-9);
+        var time = hour + ":" + min + ":" + sec + "." + regular + "(" + year + "-" + month + "-" + day + ")";
+        var mes = msg.msg;
+        var severiltyNumber = msg.level;
+        var severilty = null;
+        var node = msg.name;
+        var stamp = time;
+        var topics = msg.topics.join(',');
+        var location = msg.file + ":" + msg.function + ":" + msg.line;
 
-      if (severilty == '1') {
-        levelName = 'DEBUG';
-      } else if (severilty == '2') {
-        levelName = 'INFO';
-      } else if (severilty == '4') {
-        levelName = 'WARN';
-      } else if (severilty == '8') {
-        levelName = 'ERROR';
-      } else if (severilty == '16') {
-        levelName = 'FATAL';
+        if (msg.level === 1) {
+          severilty = 'DEBUG';
+        } else if (msg.level === 2) {
+          severilty = 'INFO';
+        } else if (msg.level === 4) {
+          severilty = 'WARN';
+        } else if (msg.level === 8) {
+          severilty = 'ERROR';
+        } else if (msg.level === 16) {
+          severilty = 'FATAL';
+        }
+
+        var associationItem = {
+          id: count,
+          indent: 0,
+          '#': '#' + count,
+          Message: mes,
+          SeveriltyNumber: severiltyNumber,
+          Severity: severilty,
+          Node: node,
+          Stamp: stamp,
+          RawTime: msg.header.stamp.secs + '.' + regular,
+          Topics: topics,
+          Location: location,
+          Number: count
+        };
+
+        if (count >= 20001) {
+          dataView.deleteItem(count - 20000);
+        }
+
+        list.push(associationItem);
+
+        if (isAsc === false) {
+          dataView.insertItem(0, associationItem);
+          grid.invalidate();
+        }
+
+        if (isAsc === true) {
+          dataView.insertItem(count, associationItem);
+          grid.invalidate();
+        }
+
+        count++;
+
+        var txt = list.length + ' messages';
+        document.getElementById("NumberOfMessage").innerHTML = txt;
       }
-
-      var associationList = { '#': '#' + i, Message: mes, Severity: levelName, Node: node, Stamp: stamp, Topics: topics, Location: location };
-      // console.log(associationList);
-      list.push(associationList);
-      sample();
-      i++;
     });
-  };
+  }
 
-  document.getElementById('clearButton').onclick = function () {
-    list = [];
-    clear();
-    i = 1;
-    sample();
-  };
+  //グラフをクリアする
+  $('#clearButton').click(function () {
+    list.length = 0;
+    data.length = 0;
+    count = 1;
+    dataView.setItems(data);
+    dataView.setFilter(myFilter);
+    grid.invalidate();
+    document.getElementById("NumberOfMessage").innerHTML = '0 messages';
+  });
 
-  document.getElementById('downloadCSV').onclick = function (e) {
-    // e.preventDefault();
-    var arr = []
-    _.each(list, function (value, index) {
+  //CSVをダウンロード
+  $('#downloadCSV').click(function () {
+    var arr = [];
+    var itemList = _.cloneDeep(list);
+    _.each(itemList, function (value, index) {
+      delete value.id;
+      delete value['#'];
+      delete value.Stamp;
+      delete value.indent;
+      delete value.Severity;
       arr.push(Object.keys(value).map(function (key) {
-        return value[key]
+        return value[key];
       })
       );
     });
-    var csvData;
+    var csvData = '';
     _.each(arr, function (value, index) {
-      let row = value.join('  ');
-      csvData += row + '\n';
+      var row = value.join(';');
+      csvData = row + '\n' + csvData;
     });
-    var blob = new Blob([csvData], { "type": "text/plain" });
+    var csvText = 'message;severity;node;stamp;topics;location\n' + csvData;
+    var blob = new Blob([csvText], { "type": "text/plain" });
     if (window.navigator.msSaveBlob) {
       window.navigator.msSaveBlob(blob, "test.csv");
       window.navigator.msSaveOrOpenBlob(blob, "test.csv");
     } else {
       document.getElementById("downloadCSV").href = window.URL.createObjectURL(blob);
     }
-    // var encodedUri = encodeURI(csvData);
-    // var link = document.getElementById("downloadCSV");
-    // link.setAttribute("href", encodedUri);
-    // link.setAttribute("download", "csvdata.csv");
-  };
-
-  var sample = function () {
-    var indent = 0;
-    var parents = [];
-    // prepare the data
-    _.each(list, function (msg, index) {
-      var d = (data[index] = {});
-      var parent;
-
-      if (Math.random() > 0.8 && index > 0) {
-        indent++;
-        parents.push(index - 1);
-      } else if (Math.random() < 0.3 && indent > 0) {
-        indent--;
-        parents.pop();
-      }
-
-      if (parents.length > 0) {
-        parent = parents[parents.length - 1];
-      } else {
-        parent = null;
-      }
-      d["id"] = "id_" + index;
-      d["indent"] = indent;
-      d["parent"] = parent;
-      d["#"] = msg['#'];
-      d["Message"] = msg.Message;
-      d["Severity"] = msg.Severity;
-      d["Node"] = msg.Node;
-      d["Stamp"] = msg.Stamp;
-      d["Topics"] = msg.Topics;
-      d["Location"] = msg.Location;
-    });
+  });
 
 
-    // initialize the model
-    dataView = new Slick.Data.DataView({ inlineFilters: true });
-    dataView.beginUpdate();
-    dataView.setItems(data);
-    dataView.setFilter(myFilter);
-    dataView.endUpdate();
+  //一時停止
+  $('#pauseButton').click(function () {
+    isSubscribe = 0;
+    $('#pauseButton').hide();
+    $('#startButton').show();
+  });
 
+  //再開ボタン
+  $('#startButton').click(function () {
+    isSubscribe = 1;
+    $('#pauseButton').show();
+    $('#startButton').hide();
+  });
 
-    // initialize the grid
-    grid = new Slick.Grid("#myGrid", dataView, columns, options);
+  //並び替え
+  var sortcol;
+  grid.onSort.subscribe(function (e, args) {
+    sortcol = args.sortCol.field;
 
-    grid.onCellChange.subscribe(function (e, args) {
-      dataView.updateItem(args.item.id, args.item);
-    });
-
-    // grid.onAddNewRow.subscribe(function (e, args) {
-    //   var item = {
-    //     "id": "new_" + (Math.round(Math.random() * 10000)),
-    //     "indent": 0,
-    //     "title": "New task",
-    //     "duration": "1 day",
-    //     "percentComplete": 0,
-    //     "start": "01/01/2009",
-    //     "finish": "01/01/2009",
-    //     "effortDriven": false
-    //   };
-    //   $.extend(item, args.item);
-    //   dataView.addItem(item);
-    // });
-
-    // grid.onClick.subscribe(function (e, args) {
-    //   if ($(e.target).hasClass("toggle")) {
-    //     var item = dataView.getItem(args.row);
-    //     if (item) {
-    //       if (!item._collapsed) {
-    //         item._collapsed = true;
-    //       } else {
-    //         item._collapsed = false;
-    //       }
-
-    //       dataView.updateItem(item.id, item);
-    //     }
-    //     e.stopImmediatePropagation();
-    //   }
-    // });
-
-
-    // wire up model events to drive the grid
-    dataView.onRowCountChanged.subscribe(function (e, args) {
-      grid.updateRowCount();
+    if (sortcol === "#") {
+      sortcol = "Number";
+    }
+    if (sortcol === "Number" || sortcol === "Stamp") {
+      isAsc = args.sortAsc;
+      dataView.sort(comparer, isAsc);
+      grid.invalidateAllRows();
       grid.render();
-    });
+    }
+  });
 
-    dataView.onRowsChanged.subscribe(function (e, args) {
-      grid.invalidateRows(args.rows);
-      grid.render();
-    });
-
-
-    var h_runfilters = null;
-
-    // wire up the slider to apply the filter to the model
-    // $("#pcSlider").slider({
-    //   "range": "min",
-    //   "slide": function (event, ui) {
-    //     Slick.GlobalEditorLock.cancelCurrentEdit();
-
-    //     if (percentCompleteThreshold != ui.value) {
-    //       window.clearTimeout(h_runfilters);
-    //       h_runfilters = window.setTimeout(dataView.refresh, 10);
-    //       percentCompleteThreshold = ui.value;
-    //     }
-    //   }
-    // });
+  function comparer(a, b) {
+    var x = a[sortcol], y = b[sortcol];
+    return (x === y ? 0 : (x > y ? 1 : -1));
+  }
 
 
-    // wire up the search textbox to apply the filter to the model
-    $("#txtSearch").keyup(function (e) {
-      Slick.GlobalEditorLock.cancelCurrentEdit();
+  startDrawing();
 
-      // clear on Esc
-      if (e.which == 27) {
-        this.value = "";
-      }
-
-      searchString = this.value;
-      dataView.refresh();
-    })
-  };
-
-  sample();
-  test();
 });
+
+// var sample = function () {
+//   var indent = 0;
+//   var parents = [];
+//   var rowCount = 1;
+//   // prepare the data
+//   _.each(list, function (msg, index) {
+
+//     var d = (data[index] = {});
+//     var parent;
+
+//     if (parents.length > 0) {
+//       parent = parents[parents.length - 1];
+//     } else {
+//       parent = null;
+//     }
+//     d["id"] = "id_" + index;
+//     d["indent"] = indent;
+//     d["parent"] = parent;
+//     d["#"] = '#' + rowCount;
+//     d["Message"] = msg.Message;
+//     d["Severity"] = severilty;
+//     d["Node"] = msg.Node;
+//     d["Stamp"] = msg.Stamp;
+//     d["Topics"] = msg.Topics;
+//     d["Location"] = msg.Location;
+
+//     rowCount++;
+//   });
+
+
+//   // initialize the model
+//   dataView.beginUpdate();
+//   var sortData = data.slice().reverse();
+//   dataView.setItems(sortData);
+//   dataView.setFilter(myFilter);
+//   dataView.endUpdate();
+
+
+//   // initialize the grid
+//   grid = new Slick.Grid("#myGrid", dataView, columns, options);
+
+//   grid.onCellChange.subscribe(function (e, args) {
+//     dataView.updateItem(args.item.id, args.item);
+//   });
+
+//   // wire up the search textbox to apply the filter to the model
+//   $("#txtSearch").keyup(function (e) {
+//     Slick.GlobalEditorLock.cancelCurrentEdit();
+
+//     // clear on Esc
+//     if (e.which === 27) {
+//       this.value = "";
+//     }
+
+//     searchString = this.value;
+//     dataView.refresh();
+//   });
+// };
