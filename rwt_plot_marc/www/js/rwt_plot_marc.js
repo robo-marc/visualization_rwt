@@ -50,6 +50,7 @@ ROSLIB.RWTPlot.prototype.start = function () {
 
 ROSLIB.RWTPlot.prototype.initializePlot = function (contentId, posisionId, legendId, spec) {
   this.spec = spec || {};
+
   this.contentId = contentId;
   this.legendId = legendId;
   this.posisionId = posisionId;
@@ -59,34 +60,35 @@ ROSLIB.RWTPlot.prototype.initializePlot = function (contentId, posisionId, legen
   var margin = spec.margin || { top: 20, right: 20, bottom: 20, left: 40 };
   var that = this;
   var color = spec.color || false;
+
+  var xaxisSpec = spec.xaxis || {};
+  var xDomainWidth = xaxisSpec.domainWidth || 2;
+  this.xDomainWidth = xDomainWidth;
+
   var yaxisSpec = spec.yaxis || {};
   var yaxisMin = yaxisSpec.min || 0.0;
   var yaxisMax = yaxisSpec.max || 1.0;
   var yaxisTick = yaxisSpec.tick || false;
-
   this.yAutoscale = yaxisSpec.autoScale || false;
-  this.yMinValue = yaxisMin;
-  this.yMaxValue = yaxisMax;
+  // this.yMinValue = yaxisMin;
+  // this.yMaxValue = yaxisMax;
   this.yAutoscaleMargin = yaxisSpec.autoScaleMargin || 0.2;
   this.yaxisTick = yaxisTick;
-  this.specifiedColor = color;
 
+  this.specifiedColor = color;
   this.margin = margin;
 
   if (this.useTimestamp) {
-    //this.xScale = d3.scale.linear().domain([0, this.maxData]).range([0, width - margin.left - margin.right]);
     this.xScale = d3.time.scale().range([0, width - margin.left - margin.right]);
-    //this.xScale.ticks(d3.time.second, 1);
-    //.domain([0, this.maxData])
   }
   else {
     this.xScale = d3.scale.linear()
-      .domain([0, this.maxData - 1])
+      .domain([0, this.xRange - 1])
       .range([0, width - margin.left - margin.right]);
   }
   if (this.yAutoscale) {
     this.yScale = d3.scale.linear()
-      .domain(this.axisMinMaxWithMargin(this.yMinValue, this.yMaxValue, this.yAutoscaleMargin))
+      .domain(this.axisMinMaxWithMargin(yaxisMin, yaxisMax, this.yAutoscaleMargin))
       .range([height - margin.top - margin.bottom, 0]);
   }
   else {
@@ -110,7 +112,7 @@ ROSLIB.RWTPlot.prototype.initializePlot = function (contentId, posisionId, legen
 
   // draw x axis
   var st = this.startTs;
-  var ticks = this.maxData + 1;
+  var ticks = this.xDomainWidth + 1;
   this.x = d3.svg.axis()
     .scale(this.xScale)
     .orient('bottom')
@@ -336,6 +338,27 @@ ROSLIB.RWTPlot.prototype.allocatePathForArr = function (msgFieldPath, dataItem) 
   }
 };
 
+ROSLIB.RWTPlot.prototype.setMaxData = function (max) {
+  if (!max) {
+    return;
+  }
+
+  var shouldClear = false;
+  if (!this.useTimestamp && this.maxData !== max) {
+    shouldClear = true;
+  }
+
+  this.maxData = max;
+
+  if (shouldClear) {
+    this.clearData(); // re-build RingBuffer
+  }
+};
+
+ROSLIB.RWTPlot.prototype.getMaxData = function () {
+  return this.maxData;
+};
+
 ROSLIB.RWTPlot.prototype.axisMinMaxWithMargin = function (min, max, margin) {
   var yMiddle = (max + min) / 2.0;
   var yMin = (min - yMiddle) * (1.0 + margin) + yMiddle;
@@ -347,11 +370,11 @@ ROSLIB.RWTPlot.prototype.checkYAxisMinMax = function (data) {
   var needToUpdate = false;
   for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
     var val = data[dataIndex];
-    if (val < this.yMinValue) {
+    if (val < this.yMinValue || this.yMinValue === undefined) {
       this.yMinValue = val;
       needToUpdate = true;
     }
-    if (val > this.yMaxValue) {
+    if (val > this.yMaxValue || this.yMaxValue === undefined) {
       this.yMaxValue = val;
       needToUpdate = true;
     }
@@ -402,7 +425,10 @@ ROSLIB.RWTPlot.prototype.setXAxisScale = function (sec) {
   }
 
   if (this.useTimestamp) {
-    this.maxData = sec;
+    if (sec > this.maxData) {
+      sec = this.maxData;
+    }
+    this.xDomainWidth = sec;
 
     var newestStamp;
     _.each(this.seriesMap, function (dataList, fieldPath) {
@@ -426,16 +452,16 @@ ROSLIB.RWTPlot.prototype.setXAxisScale = function (sec) {
 ROSLIB.RWTPlot.prototype.refreshXAxisDomain = function (xEndTime) {
   if (this.useTimestamp) {
     var st = this.startTs;
-    var ticks = this.maxData + 1;
+    var ticks = this.xDomainWidth + 1;
 
     if (!xEndTime) {
       xEndTime = ROSLIB.Time.now();
     }
-    var xBeginTime = xEndTime.substract(ROSLIB.Time.fromSec(this.maxData));
+    var xBeginTime = xEndTime.substract(ROSLIB.Time.fromSec(this.xDomainWidth));
 
     this.xScale.domain([xBeginTime.toDate(), xEndTime.toDate()]);
     this.x.scale(this.xScale)
-      .ticks(this.maxData + 1)
+      .ticks(ticks)
       .tickFormat(function (d, i) {
         var tmp = Math.ceil((ticks - 1) / 10.0);
         if (i % tmp === 0) {
@@ -468,7 +494,7 @@ ROSLIB.RWTPlot.prototype.getYAxisMinMax = function () {
 };
 
 ROSLIB.RWTPlot.prototype.getXAxisSec = function () {
-  return this.maxData;
+  return this.xDomainWidth;
 };
 
 ROSLIB.RWTPlot.prototype.addRawData = function (data) {
@@ -555,7 +581,7 @@ ROSLIB.RWTPlot.prototype.getDisplayData = function (stamp, dataArr) {
     var chopNum = 0;
     for (var i = 0; i < dataArr.length; i++) {
       var diff = stamp.substract(dataArr[i].stamp).toSec();
-      if (diff > this.maxData) {
+      if (diff > this.xDomainWidth) {
         chopNum = chopNum + 1;
       } else {
         break;
@@ -618,7 +644,6 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
     for (var j = 0; j < dataArr.length; j++) {
       var value = dataArr[j][i];
       // scale x(i) here
-      // afterChopOldestStamp = 0, stamp = this.maxData
       if (!stamp.equal(afterChopOldestStamp)) {
         var newData = [dataArr[j].stamp, value]; // [x1, y1] or [x1, z1]
         plotData.push(newData);

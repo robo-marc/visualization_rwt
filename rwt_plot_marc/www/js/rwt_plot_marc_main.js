@@ -4,14 +4,15 @@ $(function () {
   ////////////////////////////////////////
   // variables
 
-  var plot = new ROSLIB.RWTPlot({
-    maxData: 2,          // when using timestamp, it is regarded as seconds
+  var plotSpec = {
+    maxData: 120,          // when using timestamp, it is regarded as seconds
     timestamp: true
-  });
-
-  var ros = new ROSLIB.Ros();
+  };
 
   var initPlotSpec = {
+    xaxis: {
+      domainWidth: 2,          // when using timestamp, it is regarded as seconds
+    },
     yaxis: {
       autoScale: true,
       autoScaleMargin: 0.2,
@@ -22,6 +23,10 @@ $(function () {
   // Key: msgFieldPath(topicName + '/' + accessor)
   // Value: ROSLIB.Topic object
   var subscribingMap = {};
+
+  var plot = new ROSLIB.RWTPlot(plotSpec);
+
+  var ros = new ROSLIB.Ros();
 
   ////////////////////////////////////////
   // functions
@@ -38,13 +43,19 @@ $(function () {
     $('#pause-button').show();
     $('#start-button').hide();
 
+    printPlotSpec();
     printXAxisSec();
     printYAxisDomain();
   }
 
+  function printPlotSpec() {
+    var max = plot.getMaxData();
+    $('#max-data').val(max);
+  }
+
   function printXAxisSec() {
     var xSec = plot.getXAxisSec();
-    $('#x-sec').val(Math.round(xSec));
+    $('#x-range').val(Math.round(xSec));
   }
 
   function printYAxisDomain() {
@@ -238,8 +249,12 @@ $(function () {
       return;
     }
 
+    //set plot spec
+    var max = toInt($('#max-data').val());
+    plot.setMaxData(max);
+
     //set X-axis
-    var xSec = toInt($('#x-sec').val());
+    var xSec = toInt($('#x-range').val());
     plot.setXAxisScale(xSec);
 
     // set Y-axis
@@ -253,6 +268,7 @@ $(function () {
       plot.setYAxisMinMaxMnually(yMin, yMax);
     }
 
+    printPlotSpec();
     printXAxisSec();
     printYAxisDomain();
   });
@@ -275,6 +291,10 @@ $(function () {
     }
 
     plot.clearData();
+
+    printPlotSpec();
+    printXAxisSec();
+    printYAxisDomain();
   });
 
   ////////////////////////////////////////
