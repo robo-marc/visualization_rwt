@@ -33,6 +33,8 @@ ROSLIB.RWTPlot.prototype.clearData = function () {
   else {
     this.data = new ROSLIB.RingBuffer({ bufferCount: this.maxData });
   }
+  this.yMinValue = undefined;
+  this.yMaxValue = undefined;
   this.needToAnimate = false;
   if (this.spec) {
     $('#' + this.contentId).find('svg').remove();
@@ -70,8 +72,6 @@ ROSLIB.RWTPlot.prototype.initializePlot = function (contentId, posisionId, legen
   var yaxisMax = yaxisSpec.max || 1.0;
   var yaxisTick = yaxisSpec.tick || false;
   this.yAutoscale = yaxisSpec.autoScale || false;
-  // this.yMinValue = yaxisMin;
-  // this.yMaxValue = yaxisMax;
   this.yAutoscaleMargin = yaxisSpec.autoScaleMargin || 0.2;
   this.yaxisTick = yaxisTick;
 
