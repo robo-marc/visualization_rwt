@@ -1,8 +1,15 @@
+var dataView;
+dataView = new Slick.Data.DataView({ inlineFilters: true });
+
 var data = [];
 var searchString = '';
 
+var resParentId;
+var reqParentId;
 
 $(function () {
+
+  var grid;
 
   // subscribe topic
   var ros = new ROSLIB.Ros();
@@ -13,14 +20,13 @@ $(function () {
   function requestService() {
     ros.getSrvList(
       function (result) {
-        var objList = [];;
+        var objList = [];
         _.each(result.message,
           function (msg, index) {
             var replace = msg.split('\'').join('\"');
             var obj = JSON.parse(replace);
             objList.push(obj);
           });
-        console.log(objList);
         listDataAcquisition(objList);
       },
       function (mes) {
@@ -32,7 +38,7 @@ $(function () {
   requestService();
 
   // ツリー用追加ロジック/////////////////////////////////////////////
-  var TaskNameFormatter = function (row, cell, value, columnDef, dataContext) {
+  var treeFormatter = function (row, cell, value, columnDef, dataContext) {
     if (value === null || value === undefined || dataContext === undefined) { return ''; }
 
     value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -49,34 +55,36 @@ $(function () {
     }
   };
   ///////////////////////////////////////////////////////////////////
+  //削除ボタンを表示するためのカラムを定義
+  var removeButtonFormatter = function (row, cell, value, columnDef, dataContext) {
+    if (value === null || value === undefined || dataContext === undefined) { return ''; }
+    var parentId = dataContext.parent;
+    if (parentId === null) {
+      return '<button class="delete-button"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>';
+    }
+    return '';
+  };
 
   // ★グリッドアイテム取得/////////////////////////////////////////
-  var dataView;
-  var grid;
   var columns = [
-    { id: 'tree', name: 'Tree', field: 'tree', width: 200, minWidth: 20, maxWidth: 300, formatter: TaskNameFormatter },
+    { id: 'tree', name: 'Tree', field: 'tree', width: 200, minWidth: 20, maxWidth: 300, formatter: treeFormatter },
     { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, },
     { id: 'path', name: 'Path', field: 'path', width: 260, minWidth: 20, maxWidth: 300, },
-    //削除ボタンを表示するためのカラムを定義
-    {
-      id: 'remove', name: 'Remove', field: 'remove', width: 100, minWidth: 20, maxWidth: 200, formatter: function () {
-        return '<button class="delete-button"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>';
-      }
-    }
+    { id: 'remove', name: 'Remove', field: 'remove', width: 100, minWidth: 20, maxWidth: 200, formatter: removeButtonFormatter }
   ];
 
   // ツリー用追加ロジック/////////////////////////////////
 
   function myFilter(item) {
     if (item.parent !== null) {
-      var parent = data[item.parent];
+      var parent = dataView.getItemById(item.parent);
 
       while (parent) {
-        if (parent._collapsed || (searchString !== '')) {
+        if (parent._collapsed) {
           return false;
         }
 
-        parent = data[parent.parent];
+        parent = dataView.getItemById(parent.parent);
       }
     }
 
@@ -125,11 +133,9 @@ $(function () {
     }
   });
 
-
-
+  var resId = 0;
+  var reqId = 1;
   $('#add-service-button').on('click', function () {
-    var indent = 0;
-    var parents = [];
     var serviceName = $('#service-select').val();
     var messageName = $('#message-select').val();
     var typeName = serviceName + '/' + messageName;
@@ -138,13 +144,12 @@ $(function () {
     var responseDefer = $.Deferred();
     var promises = [requestDefer.promise(), responseDefer.promise()];
 
+    var reqData = [];
     ros.getServiceRequestDetails(typeName,
       function (types) {
-        console.log('got request detail: ' + types);
 
-        var parent;
-        var reqData = [];
-        reqData.push({
+        var reqDataRetention = ({
+          id: reqId,
           indent: 0,
           parent: null,
           tree: 'Request',
@@ -152,7 +157,9 @@ $(function () {
           path: typeName,
           remove: '',
         });
-
+        reqParentId = reqId;
+        reqId = reqId + 2;
+        var reqChildren = [];
         // TODO: push
         var typedefsData = types['typedefs'];
         var childReqData = typedefsData[0];
@@ -160,14 +167,19 @@ $(function () {
         var fieldtypes = childReqData['fieldtypes'];
         for (var i = 0; i < fieldnames.length; i++) {
           reqData.push({
+            id: reqId,
             indent: 1,
-            parent: 0,
+            parent: reqParentId,
             tree: fieldnames[i],
             type: fieldtypes[i],
             path: typeName + '/' + fieldnames[i],
             remove: '',
           });
+          reqChildren.push(reqId);
+          reqId = reqId + 2;
         }
+        reqDataRetention.children = reqChildren;
+        reqData.push(reqDataRetention);
         requestDefer.resolve({ key: 'request', value: reqData });
       },
       function (message) {
@@ -175,21 +187,22 @@ $(function () {
         requestDefer.resolve();
       }
     );
-
+    var resData = [];
     ros.getServiceResponseDetails(typeName,
       function (types) {
-        console.log('got response detail: ' + types);
-
-        var resData = [];
-        resData.push({
+        var resDataRetention = ({
+          id: resId,
           indent: 0,
-          parent: 1,
+          parent: null,
           tree: 'Response',
           type: typeName,
           path: typeName,
           remove: '',
         });
 
+        resParentId = resId;
+        resId = resId + 2;
+        var resChildren = [];
         // TODO: push★
         var typedefsData = types['typedefs'];
         var childReqData = typedefsData[0];
@@ -197,14 +210,20 @@ $(function () {
         var fieldtypes = childReqData['fieldtypes'];
         for (var i = 0; i < fieldnames.length; i++) {
           resData.push({
+            id: resId,
             indent: 1,
-            parent: 0,
+            parent: resParentId,
             tree: fieldnames[i],
             type: fieldtypes[i],
             path: typeName + '/' + fieldnames[i],
             remove: '',
           });
+          resChildren.push(resId);
+          resId = resId + 2;
         }
+        resDataRetention.children = resChildren;
+        resData.push(resDataRetention);
+
         responseDefer.resolve({ key: 'response', value: resData });
       },
       function (message) {
@@ -226,7 +245,6 @@ $(function () {
       for (var i = 0; i < arguments.length; i++) {
         var key = arguments[i].key;
         var value = arguments[i].value;
-        console.log(key);
 
         if (key === 'request') {
           reqData = value;
@@ -235,23 +253,25 @@ $(function () {
         }
       }
 
+      reqData.sort(function (a, b) {
+        return (a.id - b.id);
+      });
+
+      resData.sort(function (a, b) {
+        return (a.id - b.id);
+      });
       var mergedData = reqData.concat(resData);
 
-      var itemCount = dataView.getLength();
-      var lastItem = dataView.getItem(itemCount - 1) || { id: 0 };
-      var nextId = lastItem['id'] + 1;
       dataView.beginUpdate();
       _.each(mergedData, function (item, index) {
-        item['id'] = nextId + index;
         dataView.addItem(item);
       });
       dataView.endUpdate();
-
     });
   });
 
   //★ initialize the model
-  dataView = new Slick.Data.DataView({ inlineFilters: true });
+  // dataView = new Slick.Data.DataView({ inlineFilters: true });
   dataView.setItems(data);
   dataView.setFilter(myFilter);
 
@@ -283,7 +303,13 @@ $(function () {
       || $target.hasClass('delete-button')) {
       var items = dataView.getItem(args.row);
       if (items) {
+        var parentItem = dataView.getItemById(items.id);
+        var childrenId = parentItem.children;
         dataView.beginUpdate();
+        _.each(childrenId,
+          function (id, index) {
+            dataView.deleteItem(id);
+          });
         dataView.deleteItem(items.id);
         dataView.endUpdate();
       }
