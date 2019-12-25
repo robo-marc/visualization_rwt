@@ -1,0 +1,5 @@
+string name
+string type
+---
+float32 hz
+float32 bw

@@ -2,4 +2,5 @@
   <arg name="launch_roswww" default="true" />
   <include file="$(find rwt_topic_marc)/launch/webserver.launch"
            if="$(arg launch_roswww)" />
+ <node pkg="rwt_topic_marc" type="topic_hz_bw.py" name="topic_hz_bw"></node>                        
 </launch>
