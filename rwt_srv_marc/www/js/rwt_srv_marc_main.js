@@ -13,7 +13,7 @@ $(function () {
   function requestService() {
     ros.getSrvList(
       function (result) {
-        var objList = [];
+        var objList = [];;
         _.each(result.message,
           function (msg, index) {
             var replace = msg.split('\'').join('\"');
@@ -21,7 +21,7 @@ $(function () {
             objList.push(obj);
           });
         console.log(objList);
-        selectService(objList);
+        listDataAcquisition(objList);
       },
       function (mes) {
         console.log(mes);
@@ -86,8 +86,9 @@ $(function () {
   ///////////////////////////////////////////////////////////
 
   // serviceのリストを表示するリストボックス
-  function selectService(objList) {
+  function listDataAcquisition(objList) {
     var firstAddServiceStr = '';
+    objList.sort();
     for (var i = 0; i < objList.length; i++) {
       var recordData = objList[i];
       for (var j = 0; j < recordData.length; j++) {
@@ -189,7 +190,25 @@ $(function () {
           remove: '',
         });
 
-        // TODO: push
+        // TODO: push★
+        var typedefsData = types['typedefs'];
+        var childReqData = typedefsData[0];
+        var fieldnames = childReqData['fieldnames'];
+        var fieldtypes = childReqData['fieldtypes'];
+        for (var i = 0; i < fieldnames.length; i++) {
+          resData.push({
+            indent: 1,
+            parent: 0,
+            tree: fieldnames[i],
+            type: fieldtypes[i],
+            path: typeName + '/' + fieldnames[i],
+            remove: '',
+          });
+        }
+        responseDefer.resolve({ key: 'response', value: resData });
+      },
+      function (message) {
+        console.log('getParams failed: %s', message);
 
         responseDefer.resolve({ key: 'response', value: resData });
       },
@@ -204,7 +223,7 @@ $(function () {
 
       var reqData;
       var resData;
-      for (var i = 0; i < arguments.length; i++) { // arguments は forEach() 使えない
+      for (var i = 0; i < arguments.length; i++) {
         var key = arguments[i].key;
         var value = arguments[i].value;
         console.log(key);
@@ -227,7 +246,7 @@ $(function () {
         dataView.addItem(item);
       });
       dataView.endUpdate();
-      // grid = new Slick.Grid("#myGrid", mergedData, columns);
+
     });
   });
 
@@ -252,8 +271,9 @@ $(function () {
         } else {
           item._collapsed = false;
         }
-
+        dataView.beginUpdate();
         dataView.updateItem(item.id, item);
+        dataView.endUpdate();
       }
       e.stopImmediatePropagation();
     }
@@ -267,8 +287,6 @@ $(function () {
         dataView.deleteItem(items.id);
         dataView.endUpdate();
       }
-      // data.splice(args.row, 1);
-      // grid.invalidate();
     }
   });
 
