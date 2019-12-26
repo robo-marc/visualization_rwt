@@ -120,3 +120,14 @@ ROSLIB.Time.prototype.toDate = function () {
   d.setTime(this.secs * 1000 + this.nsecs / 1000000);
   return d;
 };
+
+/**
+ * Converts Date object into ROSLIB.Time
+ */
+ROSLIB.Time.fromDate = function (date) {
+  var msec = date.getTime();
+  return new ROSLIB.Time({
+    secs: Math.floor(msec / 1000),
+    nsecs: (msec % 1000) * 1000000
+  });
+};
