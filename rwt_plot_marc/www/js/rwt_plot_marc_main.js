@@ -34,10 +34,9 @@ $(function () {
   // initialize screen
   function initScreen() {
 
-    plot.initializePlot('plot-area', 'position-area', 'legend-area', initPlotSpec);
+    ros.autoConnect();
 
-    // TODO: deprecated
-    ros.install_config_button('config-button');
+    plot.initializePlot('plot-area', 'position-area', 'legend-area', initPlotSpec);
 
     $('#y-auto-check').click();
     $('#pause-button').show();
