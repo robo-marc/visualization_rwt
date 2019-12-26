@@ -135,6 +135,7 @@ $(function () {
 
   var resId = 0;
   var reqId = 1;
+
   $('#add-service-button').on('click', function () {
     var serviceName = $('#service-select').val();
     var messageName = $('#message-select').val();
@@ -156,6 +157,7 @@ $(function () {
           type: typeName,
           path: typeName,
           remove: '',
+          _collapsed: true,
         });
         reqParentId = reqId;
         reqId = reqId + 2;
@@ -163,15 +165,18 @@ $(function () {
         // TODO: push
         var typedefsData = types['typedefs'];
         var childReqData = typedefsData[0];
+        var fieldarraylen = childReqData['fieldarraylen'];
         var fieldnames = childReqData['fieldnames'];
         var fieldtypes = childReqData['fieldtypes'];
         for (var i = 0; i < fieldnames.length; i++) {
+          var len = fieldarraylen[i];
           reqData.push({
             id: reqId,
             indent: 1,
+            fieldarraylen: fieldarraylen[i],
             parent: reqParentId,
             tree: fieldnames[i],
-            type: fieldtypes[i],
+            type: fieldtypes[i] + (len !== -1 ? '[]' : ''),
             path: typeName + '/' + fieldnames[i],
             remove: '',
           });
@@ -198,6 +203,7 @@ $(function () {
           type: typeName,
           path: typeName,
           remove: '',
+          _collapsed: true,
         });
 
         resParentId = resId;
@@ -206,15 +212,18 @@ $(function () {
         // TODO: push★
         var typedefsData = types['typedefs'];
         var childReqData = typedefsData[0];
+        var fieldarraylen = childReqData['fieldarraylen'];
         var fieldnames = childReqData['fieldnames'];
         var fieldtypes = childReqData['fieldtypes'];
         for (var i = 0; i < fieldnames.length; i++) {
+          var len = fieldarraylen[i];
           resData.push({
             id: resId,
             indent: 1,
+            fieldarraylen: fieldarraylen[i],
             parent: resParentId,
             tree: fieldnames[i],
-            type: fieldtypes[i],
+            type: fieldtypes[i] + (len !== -1 ? '[]' : ''),
             path: typeName + '/' + fieldnames[i],
             remove: '',
           });
@@ -260,8 +269,8 @@ $(function () {
       resData.sort(function (a, b) {
         return (a.id - b.id);
       });
-      var mergedData = reqData.concat(resData);
 
+      var mergedData = reqData.concat(resData);
       dataView.beginUpdate();
       _.each(mergedData, function (item, index) {
         dataView.addItem(item);
