@@ -1,43 +1,97 @@
+/**
+ * 
+ */
 ROSLIB.Ros.prototype.getSrvList = function (callback, failedCallback) {
-  var rwt_srv = new ROSLIB.Service({
+  var client = new ROSLIB.Service({
     ros: this,
     name: '/srv_list',
     serviceType: 'rwt_srv_marc/SrvList'
   });
+
   var request = new ROSLIB.ServiceRequest();
-  rwt_srv.callService(request, function (result) {
-    callback(result);
-  }, function (msg) {
-    failedCallback(msg);
-  });
+  client.callService(request,
+    function (result) {
+      callback(result);
+    },
+    function (message) {
+      failedCallback(message);
+    }
+  );
 };
 
+/**
+ *
+ */
 ROSLIB.Ros.prototype.getActionList = function (callback, failedCallback) {
-  var rwt_action = new ROSLIB.Service({
+  var client = new ROSLIB.Service({
     ros: this,
     name: '/action_list',
     serviceType: 'rwt_action_marc/ActionList'
   });
+
   var request = new ROSLIB.ServiceRequest();
-  rwt_action.callService(request, function (result) {
-    callback(result);
-  }, function (msg) {
-    failedCallback(msg);
-  });
+  client.callService(request,
+    function (result) {
+      callback(result);
+    },
+    function (message) {
+      failedCallback(message);
+    }
+  );
 };
 
-ROSLIB.Ros.prototype.dumpParams = function (callback) {
-  var rwt_rosparam = new ROSLIB.Service({
+/**
+ *
+ */
+ROSLIB.Ros.prototype.dumpParams = function (callback, failedCallback) {
+  var client = new ROSLIB.Service({
     ros: this,
     name: '/dump_params',
     serviceType: 'rwt_rosparam_marc/DumpParams'
   });
 
   var request = new ROSLIB.ServiceRequest();
-  rwt_rosparam.callService(request, function (value) {
-    // var value = JSON.parse(result.value);
-    callback(value);
+  client.callService(request,
+    function (result) {
+      callback(result);
+    },
+    function (message) {
+      failedCallback(message);
+    }
+  );
+};
+
+/**
+ * Retrieves Hz Bandwidth in ROS from Topic
+ * @class Ros
+ * @param topicName topic name to find:
+ * @param topicType topic type to find:
+ */
+ROSLIB.Ros.prototype.getTopicInfo = function (topicName, topicType, callback, failedCallback) {
+  var client = new ROSLIB.Service({
+    ros: this,
+    name: '/topic_hz_bw',
+    serviceType: 'rwt_rostopic_marc/TopicHzBw'
   });
+
+  var request = new ROSLIB.ServiceRequest({
+    name: topicName,
+    type: topicType
+  });
+  if (typeof failedCallback === 'function') {
+    client.callService(request,
+      function (result) {
+        callback(result);
+      },
+      function (message) {
+        failedCallback(message);
+      }
+    );
+  } else {
+    client.callService(request, function (result) {
+      callback(result);
+    });
+  }
 };
 
 /**
@@ -119,4 +173,15 @@ ROSLIB.Time.prototype.toDate = function () {
   var d = new Date();
   d.setTime(this.secs * 1000 + this.nsecs / 1000000);
   return d;
+};
+
+/**
+ * Converts Date object into ROSLIB.Time
+ */
+ROSLIB.Time.fromDate = function (date) {
+  var msec = date.getTime();
+  return new ROSLIB.Time({
+    secs: Math.floor(msec / 1000),
+    nsecs: (msec % 1000) * 1000000
+  });
 };

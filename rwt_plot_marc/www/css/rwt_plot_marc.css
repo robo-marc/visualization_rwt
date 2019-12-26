@@ -11,3 +11,14 @@ svg.rwt-plot .axis line {
   stroke: #000;
   shape-rendering: crispEdges;
 }
+
+#plot-area {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.scroll {
+  cursor: grabbing;
+}
