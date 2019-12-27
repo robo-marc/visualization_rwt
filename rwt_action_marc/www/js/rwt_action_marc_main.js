@@ -1,13 +1,13 @@
 var data = [];
 var searchString = '';
-var dataView;
-dataView = new Slick.Data.DataView({ inlineFilters: true });
+var dataView = new Slick.Data.DataView({ inlineFilters: true });
 
 $(function () {
 
   // subscribe topic
   var ros = new ROSLIB.Ros();
-  ros.install_config_button('config-button');
+  ros.autoConnect();
+
   var serviceMap = new Map();
 
   //getSrvList request
@@ -29,8 +29,6 @@ $(function () {
       }
     );
   }
-
-  requestService();
 
   // ツリー用追加ロジック/////////////////////////////////////////////
   var TaskNameFormatter = function (row, cell, value, columnDef, dataContext) {
@@ -184,7 +182,7 @@ $(function () {
 
                   actionId++;
                   // console.log(actionData);
-                };
+                }
                 ExcludItem.push(data.typeName);
               }
             });
@@ -227,7 +225,7 @@ $(function () {
             actionData[k - 1] = tmp;
           }
         }
-      };
+      }
 
       console.log(actionData);
       dataView.beginUpdate();
@@ -305,6 +303,8 @@ $(function () {
     grid.invalidateRows(args.rows);
     grid.render();
   });
+
+  requestService();
 });
 
 

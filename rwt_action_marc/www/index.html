@@ -7,8 +7,7 @@
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" type="text/css" />
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css"
     type="text/css" />
-  <link rel="stylesheet" type="text/css" href="css/rwt_action_marc.css">
-  </link>
+  <link rel="stylesheet" type="text/css" href="css/rwt_action_marc.css" />
   <style>
     .toggle {
       height: 9px;
@@ -33,52 +32,30 @@
       <h1><span class="glyphicon glyphicon-star"></span>rwt_action_marc <small>robotwebtools action</small> <span
           id="config-button"></span></h1>
     </div>
-    <div id="topic-area">
-      <form id="topic-form" role="form" class="form-inline">
+
+    <div id="service-area">
+      <form id="service-form" role="form" class="form-inline">
         <div class="form-group">
-          <label class="sr-only" for="topic-select">topic</label>
-          <select id="topic-select" class="form-control">
+          <select id="service-select" class="form-control">
           </select>
         </div>
+
         <div class="form-group">
-          <label class="sr-only" for="field-accessor">field-accessor</label>
-          <input type="name" class="form-control" name="field-accessor" id="field-accessor"
-            placeholder="specify field like data" />
+          <select id="message-select" class="form-control">
+          </select>
         </div>
-        <button type="submit" class="btn btn-primary">sample</button>
+
+        <div class="form-group">
+          <button type="button" id="add-service-button" class="btn btn-success"><span
+              class="glyphicon glyphicon-plus"></span></button>
+        </div>
       </form>
     </div>
+
+    <div id="result-area">
+      <div id="myGrid" style="width:100%; height:500px;"></div>
+    </div>
   </div>
-
-  <div id="service-area">
-    <form id="service-form" role="form" class="form-inline">
-      <div class="form-group">
-        <select id="service-select" class="form-control">
-        </select>
-      </div>
-  </div>
-
-
-  <div id="message-area">
-    <form id="message-form" role="form" class="form-inline">
-      <div class="form-group">
-        <select id="message-select" class="form-control">
-        </select>
-      </div>
-
-      <div class="form-group">
-        <button type="button" id="add-service-button" class="btn btn-success"><span
-            class="glyphicon glyphicon-plus"></span></button>
-      </div>
-
-      <table width="100%">
-        <tr>
-          <div id="myGrid" style="width:800px;height:500px;"></div>
-          </select>
-        </tr>
-      </table>
-  </div>
-
 
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.11.2.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui-1.11.3.min.js"></script>
@@ -92,10 +69,12 @@
   <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
 
   <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
+
   <script type="text/javascript" src="js/rwt_action_marc_main.js"></script>
 </body>
 

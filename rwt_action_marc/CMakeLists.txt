@@ -20,8 +20,9 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS geometry_msgs rosbridge_server rospy std_msgs rwt_utils_3rdparty roswww rwt_utils_marc
+  CATKIN_DEPENDS rosbridge_server rospy std_msgs rwt_utils_3rdparty roswww rwt_utils_marc
 )
+
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )

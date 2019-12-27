@@ -3,6 +3,7 @@
     "module": true,
     "EventEmitter2": true,
     "ROSLIB": true,
+    "Slick": true,
     "_": true,
     "$": true
   },
@@ -20,6 +21,7 @@
   "devel": true,
   "strict": false,
   "trailing": true,
+  "quotmark": "single",
   "proto": true,
   "laxbreak": true
 }
