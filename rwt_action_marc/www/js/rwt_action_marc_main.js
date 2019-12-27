@@ -8,12 +8,12 @@ $(function () {
 
   var ros = new ROSLIB.Ros();
 
-  var serviceMap = new Map();
+  var serviceMap = {};
 
   var columns = [
     { id: 'tree', name: 'Tree', field: 'tree', width: 200, minWidth: 20, maxWidth: 300, formatter: treeFormatter },
     { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, },
-    { id: 'path', name: 'Path', field: 'path', width: 260, minWidth: 20, maxWidth: 300, },
+    { id: 'path', name: 'Path', field: 'path', width: 400, minWidth: 20, maxWidth: 900, },
     { id: 'remove', name: 'Remove', field: 'remove', width: 100, minWidth: 20, maxWidth: 200, formatter: removeButtonFormatter }
   ];
   var data = [];
@@ -68,25 +68,45 @@ $(function () {
         var serviceStr = serviceElement.substring(0, serviceElement.indexOf('/'));
         var messageStr = serviceElement.substring(serviceElement.indexOf('/') + 1);
 
-        if (serviceMap.has(serviceStr)) {
-          serviceMap.get(serviceStr).push(messageStr);
+        if (serviceStr in serviceMap) {
+          serviceMap[serviceStr].push(messageStr)
         } else {
           var mapValue = [messageStr];
-          serviceMap.set(serviceStr, mapValue);
-          $('#package-select').append('<option value="' + serviceStr + '">' + serviceStr + '</option>');
+          serviceMap[serviceStr] = mapValue;
         }
       }
     }
-    $('#package-select').change();
+    buildPackageSelect(Object.keys(serviceMap));
+  }
+
+  function buildPackageSelect(packageList) {
+    var optionsHtml = "";
+
+    packageList.sort();
+    for (var i = 0; i < packageList.length; i++) {
+      optionsHtml += '<option value="' + packageList[i] + '">' + packageList[i] + '</option>';
+    }
+
+    var $select = $('#package-select');
+    $select.empty();
+    $select.append(optionsHtml);
+    $select.change();
   }
 
   $('#package-select').on('change', function () {
     var selectedValue = $('#package-select').val();
-    $('#message-select').empty();
-    var messageList = serviceMap.get(selectedValue);
+    var messageList = serviceMap[selectedValue];
+    var optionsHtml = "";
+
+    messageList.sort();
     for (var i = 0; i < messageList.length; i++) {
-      $('#message-select').append('<option value="' + messageList[i] + '">' + messageList[i] + '</option>');
+      optionsHtml += '<option value="' + messageList[i] + '">' + messageList[i] + '</option>';
     }
+
+    var $select = $('#message-select');
+    $select.empty();
+    $select.append(optionsHtml);
+    $select.change();
   });
 
 
@@ -165,6 +185,7 @@ $(function () {
           typeName: typeName,
           parentId: actionId,
           indent: 0,
+          path: typeName,
           parentPath: actionId
         });
         actionId++;
@@ -184,16 +205,13 @@ $(function () {
                 var indent = parenfInfo.indent + 1;
                 var path = parenfInfo.parentPath;
                 for (var i4 = 0; i4 < rosType.fieldnames.length; i4++) {
-                  if (rosType.fieldarraylen[i4] !== -1) {
-                    console.log('array!!!');
-                  }
                   dataList.push({
                     id: actionId,
                     indent: indent,
                     parent: parenfInfo.parentId,
                     tree: rosType.fieldnames[i4],
                     type: rosType.fieldtypes[i4] + (rosType.fieldarraylen[i4] !== -1 ? '[]' : ''),
-                    path: rosType.fieldtypes[i4],
+                    path: parenfInfo.path + '/' + rosType.fieldnames[i4],
                     remove: '',
                     parentPath: path + '.' + actionId,
                     _collapsed: true,
@@ -202,6 +220,7 @@ $(function () {
                     typeName: rosType.fieldtypes[i4],
                     parentId: actionId,
                     indent: indent,
+                    path: parenfInfo.path + '/' + rosType.fieldnames[i4],
                     parentPath: path + '.' + actionId
                   });
                   actionId++;
