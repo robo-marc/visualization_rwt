@@ -20,14 +20,13 @@ $(function () {
   var grid = new Slick.Grid('#myGrid', dataView, columns);
 
   var actionId = 1;
-  var deleteItem = [];
 
   ////////////////////////////////////////
   // common
 
   // initialize screen
   function initScreen() {
-
+    // common
     ros.autoConnect();
 
     // for grid
@@ -48,24 +47,20 @@ $(function () {
     ros.getActionList(
       function (result) {
         var objList = [];
-        _.each(result.message,
-          function (msg, index) {
-            var replace = msg.split('\'').join('\"');
-            var obj = JSON.parse(replace);
-            objList.push(obj);
-          });
-        // console.log(objList);
-        getActionDetail(objList);
+        _.each(result.message, function (msg, index) {
+          var replace = msg.split('\'').join('\"');
+          var obj = JSON.parse(replace);
+          objList.push(obj);
+        });
+        parseObjList(objList);
       },
-      function (mes) {
-        console.log(mes);
+      function (message) {
+        console.log('getActionList failed: %s', message);
       }
     );
   }
 
-  // actionのリストを表示するリストボックス
-  function getActionDetail(objList) {
-    var firstAddServiceStr = '';
+  function parseObjList(objList) {
     for (var i = 0; i < objList.length; i++) {
       var recordData = objList[i];
       for (var j = 0; j < recordData.length; j++) {
@@ -76,9 +71,6 @@ $(function () {
         if (serviceMap.has(serviceStr)) {
           serviceMap.get(serviceStr).push(messageStr);
         } else {
-          if (0 === serviceMap.size) {
-            firstAddServiceStr = serviceStr;
-          }
           var mapValue = [messageStr];
           serviceMap.set(serviceStr, mapValue);
           $('#package-select').append('<option value="' + serviceStr + '">' + serviceStr + '</option>');
@@ -86,19 +78,14 @@ $(function () {
       }
     }
     $('#package-select').change();
-    // ////// 不要？
-    // var messageList = serviceMap.get(firstAddServiceStr);
-    // for (var k = 0; k < messageList.length; k++) {
-    //   $('#message-select').append('<option value="' + messageList[k] + '">' + messageList[k] + '</option>');
-    // }
   }
 
   $('#package-select').on('change', function () {
     var selectedValue = $('#package-select').val();
     $('#message-select').empty();
     var messageList = serviceMap.get(selectedValue);
-    for (var k = 0; k < messageList.length; k++) {
-      $('#message-select').append('<option value="' + messageList[k] + '">' + messageList[k] + '</option>');
+    for (var i = 0; i < messageList.length; i++) {
+      $('#message-select').append('<option value="' + messageList[i] + '">' + messageList[i] + '</option>');
     }
   });
 
@@ -124,12 +111,12 @@ $(function () {
   }
 
   function removeButtonFormatter(row, cell, value, columnDef, dataContext) {
-    // if (value === null || value === undefined || dataContext === undefined) { return ''; }
-    // var parentId = dataContext.parent;
-    // if (parentId === null) {
-    return '<button class="delete-button"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>';
-    // }
-    // return '';
+    if (value === null || value === undefined || dataContext === undefined) { return ''; }
+    var parentId = dataContext.parent;
+    if (parentId === null) {
+      return '<button class="delete-button"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>';
+    }
+    return '';
   }
 
   function myFilter(item) {
@@ -148,22 +135,22 @@ $(function () {
   }
 
   $('#add-button').on('click', function () {
-    var parents = [];
-    var serviceName = $('#package-select').val();
+    var packageName = $('#package-select').val();
     var messageName = $('#message-select').val();
-    var typeName = serviceName + '/' + messageName;
+    var typeName = packageName + '/' + messageName;
 
     var requestDefer = $.Deferred();
     var promises = [requestDefer.promise()];
 
     ros.getMessageDetails(typeName,
-      function (types) {
-
-        var actionData = [];
-        var ExcludItem = [];
-        var parentData = [];
+      function (rosTypeList) { // callback when getMessageDetails() succeeds 
+        var dataList = [];
+        var excludeTypeList = [];
+        var parentInfoList = [];
         var keepParentData = [];
-        actionData.push({
+
+        // push root item
+        dataList.push({
           id: actionId,
           indent: 0,
           parent: null,
@@ -171,51 +158,69 @@ $(function () {
           type: typeName,
           path: typeName,
           remove: '',
+          parentPath: String(actionId),
+          _collapsed: true,
+        });
+        parentInfoList.push({
+          typeName: typeName,
+          parentId: actionId,
+          indent: 0,
           parentPath: actionId
         });
-
-        parentData.push({ typeName: typeName, parentId: actionId, indent: 0, parentPath: actionId });
         actionId++;
 
-        for (var i = 0; i < types.length; i++) {
-          _.each(parentData, function (data, index) {
-            _.each(types, function (item, index) {
-              // console.log(data);
-              if (data.typeName === item.type && ExcludItem.indexOf(item.type) === -1) {
-                var indent = data.indent + 1;
-                var path = data.parentPath;
-                for (var j = 0; j < item.fieldnames.length; j++) {
-                  actionData.push({
+        // push child item
+        for (var i = 0; i < rosTypeList.length; i++) {
+
+          for (var i2 = 0; i2 < parentInfoList.length; i2++) {
+            var parenfInfo = parentInfoList[i2];
+
+            for (var i3 = 0; i3 < rosTypeList.length; i3++) {
+              var rosType = rosTypeList[i3];
+
+              if (parenfInfo.typeName === rosType.type
+                && excludeTypeList.indexOf(rosType.type) === -1) {
+
+                var indent = parenfInfo.indent + 1;
+                var path = parenfInfo.parentPath;
+                for (var i4 = 0; i4 < rosType.fieldnames.length; i4++) {
+                  if (rosType.fieldarraylen[i4] !== -1) {
+                    console.log('array!!!');
+                  }
+                  dataList.push({
                     id: actionId,
                     indent: indent,
-                    parent: data.parentId,
-                    tree: item.fieldnames[j],
-                    type: item.fieldtypes[j] + (item.fieldarraylen[j] !== -1 ? '[]' : ''),
-                    path: item.fieldtypes[j],
+                    parent: parenfInfo.parentId,
+                    tree: rosType.fieldnames[i4],
+                    type: rosType.fieldtypes[i4] + (rosType.fieldarraylen[i4] !== -1 ? '[]' : ''),
+                    path: rosType.fieldtypes[i4],
                     remove: '',
                     parentPath: path + '.' + actionId,
+                    _collapsed: true,
                   });
-                  keepParentData.push({ typeName: item.fieldtypes[j], parentId: actionId, indent: indent, parentPath: path + '.' + actionId });
-
-                  //TODO: 孫の代までのデータ追加
-                  deleteItem.push({ parentId: data.parentId, childId: actionId });
-
-
+                  keepParentData.push({
+                    typeName: rosType.fieldtypes[i4],
+                    parentId: actionId,
+                    indent: indent,
+                    parentPath: path + '.' + actionId
+                  });
                   actionId++;
-                  // console.log(actionData);
-                }
-                ExcludItem.push(data.typeName);
+                } // loop end of i4
+                excludeTypeList.push(parenfInfo.typeName);
               }
-            });
-            ExcludItem.length = 0;
-          });
-          parentData = _.cloneDeep(keepParentData);
-          keepParentData.length = 0;
 
-        }
-        requestDefer.resolve({ key: 'ActionRoot', value: actionData });
+            } // loop end of i3
+            excludeTypeList.length = 0; // clear array
+
+          } // loop end of i2
+          parentInfoList = _.cloneDeep(keepParentData);
+          keepParentData.length = 0; // clear array
+
+        } // loop end of i
+
+        requestDefer.resolve({ key: 'ActionRoot', value: dataList });
       },
-      function (message) {
+      function (message) {  // callback when getMessageDetails() fails 
         console.log('getMessageDetails failed: %s', message);
         requestDefer.resolve();
       }
@@ -225,30 +230,27 @@ $(function () {
       // 非同期処理が全部終わったときの処理
 
       var actionData;
-      var resData;
       for (var i = 0; i < arguments.length; i++) { // arguments は forEach() 使えない
         var key = arguments[i].key;
         var value = arguments[i].value;
-        console.log(value);
 
         if (key === 'ActionRoot') {
-          actionData = value;
+          actionData = value; // dataList
         } else {
           actionData = '';
         }
       }
 
-      for (var j = 0; j < actionData.length - 1; j++) {
-        for (var k = actionData.length - 1; k > j; k--) {
-          if (actionData[k].parentPath < actionData[k - 1].parentPath) {
-            var tmp = actionData[k];
-            actionData[k] = actionData[k - 1];
-            actionData[k - 1] = tmp;
-          }
+      actionData.sort(function (a, b) {
+        if (a.parentPath < b.parentPath) {
+          return -1;
+        } else if (a.parentPath > b.parentPath) {
+          return 1;
+        } else {
+          return 0;
         }
-      }
+      });
 
-      console.log(actionData);
       dataView.beginUpdate();
       _.each(actionData, function (item, index) {
         dataView.addItem(item);
@@ -257,51 +259,60 @@ $(function () {
     });
   });
 
+  function toggleTree(e, args) {
+    var item = dataView.getItem(args.row);
+    if (item) {
+      if (!item._collapsed) {
+        item._collapsed = true;
+      } else {
+        item._collapsed = false;
+      }
+
+      dataView.updateItem(item.id, item);
+    }
+    e.stopImmediatePropagation();
+  }
+
+  function deleteItems(args) {
+    var row = args.row;
+    var triggerItem = grid.getDataItem(row);
+
+    if (triggerItem) {
+      var triggerItemId = triggerItem.parentPath;
+      var deleteTargetIdList = [];
+      var allItems = dataView.getItems();
+
+      // search items to delete
+      for (var i = allItems.length - 1; i >= 0; i--) {
+        var item = allItems[i];
+        var rootId = item.parentPath.substring(0, item.parentPath.indexOf('.'));
+        if (triggerItemId === rootId) {
+          deleteTargetIdList.push(item.id);
+        }
+      }
+      deleteTargetIdList.push(triggerItem.id);
+
+      // delete items
+      dataView.beginUpdate();
+      for (var j = 0; j < deleteTargetIdList.length; j++) {
+        dataView.deleteItem(deleteTargetIdList[j]);
+      }
+      dataView.endUpdate();
+    }
+  }
+
   grid.onClick.subscribe(function gridClickhandler(e, args) {
     var $target = $(e.target);
 
-    // ツリー　開く/閉じる　クリックイベントハンドラ
+    // event handler: toggle tree button
     if ($target.hasClass('toggle')) {
-      var item = dataView.getItem(args.row);
-      if (item) {
-        if (!item._collapsed) {
-          item._collapsed = true;
-        } else {
-          item._collapsed = false;
-        }
-
-        dataView.updateItem(item.id, item);
-      }
-      e.stopImmediatePropagation();
+      toggleTree(e, args);
     }
 
-    // 削除クリックイベントハンドラ
-    //TODO: 削除処理のアップデート
+    // event handler: click remove buttom
     else if ($target.parent().hasClass('delete-button')
       || $target.hasClass('delete-button')) {
-      var row = args.row;
-      var items = grid.getDataItem(row);
-
-      // var parentItem = dataView.getItemById(items.id);
-      // var parent = parentItem.parentPath;
-      // console.log(parent);
-      // var childrenId = parent.split('.');
-      console.log(deleteItem);
-      // console.log(item.childId);
-      if (items) {
-        // dataView.beginUpdate();
-        _.each(deleteItem, function (item, index) {
-          if (item.parentId === items.id) {
-            dataView.deleteItem(item.childId);
-          }
-        });
-        dataView.deleteItem(items.id);
-        grid.invalidateAllRows();
-        grid.render();
-        // dataView.endUpdate();
-      }
-      // data.splice(args.row, 1);
-      // grid.invalidate();
+      deleteItems(args);
     }
   });
 
