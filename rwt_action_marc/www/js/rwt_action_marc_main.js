@@ -1,17 +1,50 @@
-var data = [];
-var searchString = '';
+
 var dataView = new Slick.Data.DataView({ inlineFilters: true });
 
 $(function () {
 
-  // subscribe topic
+  ////////////////////////////////////////
+  // variables
+
   var ros = new ROSLIB.Ros();
-  ros.autoConnect();
 
   var serviceMap = new Map();
 
-  //getSrvList request
-  function requestService() {
+  var columns = [
+    { id: 'tree', name: 'Tree', field: 'tree', width: 200, minWidth: 20, maxWidth: 300, formatter: treeFormatter },
+    { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, },
+    { id: 'path', name: 'Path', field: 'path', width: 260, minWidth: 20, maxWidth: 300, },
+    { id: 'remove', name: 'Remove', field: 'remove', width: 100, minWidth: 20, maxWidth: 200, formatter: removeButtonFormatter }
+  ];
+  var data = [];
+  var grid = new Slick.Grid('#myGrid', dataView, columns);
+
+  var actionId = 1;
+  var deleteItem = [];
+
+  ////////////////////////////////////////
+  // common
+
+  // initialize screen
+  function initScreen() {
+
+    ros.autoConnect();
+
+    // for grid
+    dataView.beginUpdate();
+    dataView.setItems(data);
+    dataView.setFilter(myFilter);
+    dataView.endUpdate();
+
+    // for dropdown
+    getActionList();
+  }
+
+
+  ////////////////////////////////////////
+  // dropdown
+
+  function getActionList() {
     ros.getActionList(
       function (result) {
         var objList = [];
@@ -30,61 +63,7 @@ $(function () {
     );
   }
 
-  // ツリー用追加ロジック/////////////////////////////////////////////
-  var TaskNameFormatter = function (row, cell, value, columnDef, dataContext) {
-    if (value === null || value === undefined || dataContext === undefined) { return ''; }
-
-    value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    var spacer = '<span style="display:inline-block;height:1px;width:' + (15 * dataContext['indent']) + 'px"></span>';
-    var idx = dataView.getIdxById(dataContext.id);
-    if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
-      if (dataContext._collapsed) {
-        return spacer + '<span class="toggle expand"></span>&nbsp;' + value;
-      } else {
-        return spacer + '<span class="toggle collapse"></span>&nbsp;' + value;
-      }
-    } else {
-      return spacer + '<span class="toggle"></span>&nbsp;' + value;
-    }
-  };
-  ///////////////////////////////////////////////////////////////////
-
-  // ★グリッドアイテム取得/////////////////////////////////////////
-
-  var grid;
-  var columns = [
-    { id: 'tree', name: 'Tree', field: 'tree', width: 200, minWidth: 20, maxWidth: 300, formatter: TaskNameFormatter },
-    { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, },
-    { id: 'path', name: 'Path', field: 'path', width: 260, minWidth: 20, maxWidth: 300, },
-    //削除ボタンを表示するためのカラムを定義
-    {
-      id: 'remove', name: 'Remove', field: 'remove', width: 100, minWidth: 20, maxWidth: 200, formatter: function () {
-        return '<button class="delete-button"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>';
-      }
-    }
-  ];
-
-  // ツリー用追加ロジック/////////////////////////////////
-
-  function myFilter(item) {
-    if (item.parent !== null) {
-      var parent = dataView.getItemById(item.parent);
-
-      while (parent) {
-        if (parent._collapsed) {
-          return false;
-        }
-
-        parent = dataView.getItemById(parent.parent);
-      }
-    }
-
-    return true;
-
-  }
-  ///////////////////////////////////////////////////////////
-
-  // serviceのリストを表示するリストボックス
+  // actionのリストを表示するリストボックス
   function getActionDetail(objList) {
     var firstAddServiceStr = '';
     for (var i = 0; i < objList.length; i++) {
@@ -102,20 +81,20 @@ $(function () {
           }
           var mapValue = [messageStr];
           serviceMap.set(serviceStr, mapValue);
-          $('#service-select').append('<option value="' + serviceStr + '">' + serviceStr + '</option>');
+          $('#package-select').append('<option value="' + serviceStr + '">' + serviceStr + '</option>');
         }
       }
     }
-    ////// 不要？
-    var messageList = serviceMap.get(firstAddServiceStr);
-    for (var k = 0; k < messageList.length; k++) {
-      $('#message-select').append('<option value="' + messageList[k] + '">' + messageList[k] + '</option>');
-    }
+    $('#package-select').change();
+    // ////// 不要？
+    // var messageList = serviceMap.get(firstAddServiceStr);
+    // for (var k = 0; k < messageList.length; k++) {
+    //   $('#message-select').append('<option value="' + messageList[k] + '">' + messageList[k] + '</option>');
+    // }
   }
-  ///////
 
-  $('#service-select').on('change', function () {
-    var selectedValue = $('#service-select').val();
+  $('#package-select').on('change', function () {
+    var selectedValue = $('#package-select').val();
     $('#message-select').empty();
     var messageList = serviceMap.get(selectedValue);
     for (var k = 0; k < messageList.length; k++) {
@@ -123,11 +102,54 @@ $(function () {
     }
   });
 
-  var actionId = 1;
-  var deleteItem = [];
-  $('#add-service-button').on('click', function () {
+
+  ////////////////////////////////////////
+  // grid
+
+  function treeFormatter(row, cell, value, columnDef, dataContext) {
+    if (value === null || value === undefined || dataContext === undefined) { return ''; }
+
+    value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    var spacer = '<span style="display:inline-block;height:1px;width:' + (15 * dataContext['indent']) + 'px"></span>';
+    var idx = dataView.getIdxById(dataContext.id);
+    if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
+      if (dataContext._collapsed) {
+        return spacer + '<span class="toggle expand"></span>&nbsp;' + value;
+      } else {
+        return spacer + '<span class="toggle collapse"></span>&nbsp;' + value;
+      }
+    } else {
+      return spacer + '<span class="toggle"></span>&nbsp;' + value;
+    }
+  }
+
+  function removeButtonFormatter(row, cell, value, columnDef, dataContext) {
+    // if (value === null || value === undefined || dataContext === undefined) { return ''; }
+    // var parentId = dataContext.parent;
+    // if (parentId === null) {
+    return '<button class="delete-button"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>';
+    // }
+    // return '';
+  }
+
+  function myFilter(item) {
+    if (item.parent !== null) {
+      var parent = dataView.getItemById(item.parent);
+
+      while (parent) {
+        if (parent._collapsed) {
+          return false;
+        }
+
+        parent = dataView.getItemById(parent.parent);
+      }
+    }
+    return true;
+  }
+
+  $('#add-button').on('click', function () {
     var parents = [];
-    var serviceName = $('#service-select').val();
+    var serviceName = $('#package-select').val();
     var messageName = $('#message-select').val();
     var typeName = serviceName + '/' + messageName;
 
@@ -151,7 +173,6 @@ $(function () {
           remove: '',
           parentPath: actionId
         });
-
 
         parentData.push({ typeName: typeName, parentId: actionId, indent: 0, parentPath: actionId });
         actionId++;
@@ -195,7 +216,7 @@ $(function () {
         requestDefer.resolve({ key: 'ActionRoot', value: actionData });
       },
       function (message) {
-        console.log('getParams failed: %s', message);
+        console.log('getMessageDetails failed: %s', message);
         requestDefer.resolve();
       }
     );
@@ -233,19 +254,10 @@ $(function () {
         dataView.addItem(item);
       });
       dataView.endUpdate();
-      // grid = new Slick.Grid("#myGrid", mergedData, columns);
     });
   });
 
-  //★ initialize the model
-  dataView.setItems(data);
-  dataView.setFilter(myFilter);
-
-  //★ initialize the grid
-  grid = new Slick.Grid('#myGrid', dataView, columns);
-
-  //★
-  grid.onClick.subscribe(function (e, args) {
+  grid.onClick.subscribe(function gridClickhandler(e, args) {
     var $target = $(e.target);
 
     // ツリー　開く/閉じる　クリックイベントハンドラ
@@ -293,7 +305,6 @@ $(function () {
     }
   });
 
-  //★ wire up model events to drive the grid
   dataView.onRowCountChanged.subscribe(function (e, args) {
     grid.updateRowCount();
     grid.render();
@@ -304,7 +315,8 @@ $(function () {
     grid.render();
   });
 
-  requestService();
+
+  ////////////////////////////////////////
+  // start screen
+  initScreen();
 });
-
-
