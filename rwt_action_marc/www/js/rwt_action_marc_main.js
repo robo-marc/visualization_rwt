@@ -69,7 +69,7 @@ $(function () {
         var messageStr = serviceElement.substring(serviceElement.indexOf('/') + 1);
 
         if (serviceStr in serviceMap) {
-          serviceMap[serviceStr].push(messageStr)
+          serviceMap[serviceStr].push(messageStr);
         } else {
           var mapValue = [messageStr];
           serviceMap[serviceStr] = mapValue;
@@ -80,7 +80,7 @@ $(function () {
   }
 
   function buildPackageSelect(packageList) {
-    var optionsHtml = "";
+    var optionsHtml = '';
 
     packageList.sort();
     for (var i = 0; i < packageList.length; i++) {
@@ -96,7 +96,7 @@ $(function () {
   $('#package-select').on('change', function () {
     var selectedValue = $('#package-select').val();
     var messageList = serviceMap[selectedValue];
-    var optionsHtml = "";
+    var optionsHtml = '';
 
     messageList.sort();
     for (var i = 0; i < messageList.length; i++) {
