@@ -13,8 +13,9 @@ $(function () {
 
   // subscribe topic
   var ros = new ROSLIB.Ros();
-  ros.install_config_button('config-button');
-  var serviceMap = new Map();
+  ros.autoConnect();
+
+  var serviceMap = {};
 
   //getSrvList request
   function requestService() {
@@ -69,7 +70,7 @@ $(function () {
   var columns = [
     { id: 'tree', name: 'Tree', field: 'tree', width: 200, minWidth: 20, maxWidth: 300, formatter: treeFormatter },
     { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, },
-    { id: 'path', name: 'Path', field: 'path', width: 260, minWidth: 20, maxWidth: 300, },
+    { id: 'path', name: 'Path', field: 'path', width: 260, minWidth: 20, maxWidth: 900, },
     { id: 'remove', name: 'Remove', field: 'remove', width: 100, minWidth: 20, maxWidth: 200, formatter: removeButtonFormatter }
   ];
 
@@ -95,7 +96,6 @@ $(function () {
 
   // serviceのリストを表示するリストボックス
   function listDataAcquisition(objList) {
-    var firstAddServiceStr = '';
     objList.sort();
     for (var i = 0; i < objList.length; i++) {
       var recordData = objList[i];
@@ -104,39 +104,51 @@ $(function () {
         var serviceStr = serviceElement.substring(0, serviceElement.indexOf('/'));
         var messageStr = serviceElement.substring(serviceElement.indexOf('/') + 1);
 
-        if (serviceMap.has(serviceStr)) {
-          serviceMap.get(serviceStr).push(messageStr);
+        if (serviceStr in serviceMap) {
+          serviceMap[serviceStr].push(messageStr);
         } else {
-          if (0 === serviceMap.size) {
-            firstAddServiceStr = serviceStr;
-          }
           var mapValue = [messageStr];
-          serviceMap.set(serviceStr, mapValue);
-          $('#service-select').append('<option value="' + serviceStr + '">' + serviceStr + '</option>');
+          serviceMap[serviceStr] = mapValue;
         }
       }
     }
-    ////// 不要？
-    var messageList = serviceMap.get(firstAddServiceStr);
-    for (var k = 0; k < messageList.length; k++) {
-      $('#message-select').append('<option value="' + messageList[k] + '">' + messageList[k] + '</option>');
-    }
+    buildServiceSelect(Object.keys(serviceMap));
   }
-  ///////
+
+  function buildServiceSelect(packageList) {
+    var optionsHtml = '';
+
+    // packageList.sort();
+    for (var i = 0; i < packageList.length; i++) {
+      optionsHtml += '<option value="' + packageList[i] + '">' + packageList[i] + '</option>';
+    }
+
+    var $select = $('#service-select');
+    $select.empty();
+    $select.append(optionsHtml);
+    $select.change();
+  }
 
   $('#service-select').on('change', function () {
     var selectedValue = $('#service-select').val();
-    $('#message-select').empty();
-    var messageList = serviceMap.get(selectedValue);
-    for (var k = 0; k < messageList.length; k++) {
-      $('#message-select').append('<option value="' + messageList[k] + '">' + messageList[k] + '</option>');
+    var messageList = serviceMap[selectedValue];
+    var optionsHtml = '';
+
+    // messageList.sort();
+    for (var i = 0; i < messageList.length; i++) {
+      optionsHtml += '<option value="' + messageList[i] + '">' + messageList[i] + '</option>';
     }
+
+    var $select = $('#message-select');
+    $select.empty();
+    $select.append(optionsHtml);
+    $select.change();
   });
 
   var resId = 0;
   var reqId = 1;
 
-  $('#add-service-button').on('click', function () {
+  $('#add-button').on('click', function () {
     var serviceName = $('#service-select').val();
     var messageName = $('#message-select').val();
     var typeName = serviceName + '/' + messageName;
