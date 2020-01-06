@@ -14,7 +14,7 @@ $(function () {
     { id: 'tree', name: 'Tree', field: 'tree', width: 170, minWidth: 20, maxWidth: 400, formatter: treeFormatter },
     { id: 'type', name: 'Type', field: 'type', width: 170, minWidth: 20, maxWidth: 400, },
     { id: 'path', name: 'Path', field: 'path', width: 380, minWidth: 20, },
-    { id: 'remove', name: '', field: 'remove', width: 70, minWidth: 20, maxWidth: 70, formatter: removeButtonFormatter }
+    { id: 'remove', name: '', field: 'remove', width: 30, minWidth: 30, maxWidth: 30, formatter: removeButtonFormatter }
   ];
   var data = [];
   var grid = new Slick.Grid('#myGrid', dataView, columns);
@@ -338,6 +338,8 @@ $(function () {
   dataView.onRowCountChanged.subscribe(function (e, args) {
     grid.updateRowCount();
     grid.render();
+    grid.resizeCanvas();
+    grid.autosizeColumns();
   });
 
   dataView.onRowsChanged.subscribe(function (e, args) {
@@ -348,6 +350,9 @@ $(function () {
   $(window).on('load resize', function () {
     grid.resizeCanvas();
     grid.autosizeColumns();
+
+    // prevent the delete button from being hidden when switching screens vertically
+    grid.resizeCanvas();
   });
 
 

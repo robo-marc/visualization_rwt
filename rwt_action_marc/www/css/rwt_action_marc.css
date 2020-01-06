@@ -1,116 +1,69 @@
 /* css */
 
-.action .myGrid {
+/* grid - overall*/
+.ui-widget {
   margin: calc(0.75rem + 35px) 1.75rem 2.5rem;
+  padding: 2px;
 
-  border: 1px solid #ccc;
+  border: 0;
   box-sizing: border-box;
   height: 300px;
   position: relative;
 
   font-family: "Noto Sans JP", "メイリオ", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.6875rem;
+  color: #474747;
 }
-  .action .slick-cell l3 r3 a.icon{
-    position: absolute;
-    right: 10px;
-    font-size: 0;
-    color: #E85454; 
-  }
 
-  /* width: 100%;
-  overflow-x: scroll;
-  border-collapse: collapse;
-  border-spacing: 0;
-  position: absolute;
-  top: -35px;
-  table-layout: fixed; */
-
-/* TODO test */
-/* .cell-effort-driven {
-  text-align: center;
+.ui-widget .slick-pane,
+.ui-widget .slick-pane div {
+  border: 0;
 }
-.cell-selection {
-  border-right-color: silver;
-  border-right-style: solid;
-  background: #f5f5f5;
-  color: gray;
-  text-align: right;
-  font-size: 10px;
-} */
 
+.ui-widget .slick-pane .grid-canvas {
+  border: 1px solid #ccc;
+}
+
+.slick-cell,
+.slick-headerrow-column,
+.slick-footerrow-column {
+  padding-top: 4px;
+}
+
+.even {
+  background: #F7F7F7;
+}
+
+/* grid - header */
+.slick-pane-header div {
+  background: none;
+  font-weight: bold;
+  font-size: 0.8125rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+/* grid - tree toggle button */
 .toggle {
   height: 9px;
   width: 9px;
   display: inline-block;
 }
 
-.icon .delete-button {
-  color: #E85454;
-}
-
-
- .toggle.expand{
-
-  /* content: "";
-  position: absolute;
-  display: block;
-  top: 0.4rem;
-  width: 4px;
-  height: 4px;
-  border: 4px solid transparent;
-  border-top: 4px solid #474747;
-  margin: auto;
-  vertical-align: middle;
-  box-sizing: border-box;  */
-
-  background: url(../../rwt_utils_3rdparty/SlickGrid//images/expand.gif) no-repeat center center;
+.toggle.expand {
+  background: url(../../rwt_utils_3rdparty/SlickGrid/images/expand.gif) no-repeat center center;
 }
 
 .toggle.collapse {
-
-  /* position: absolute;
-  display: block;
-  top: 0.25rem;
-  width: 4px;
-  height: 4px;
-  border: 4px solid transparent;
-  border-left: 4px solid #474747;
-  margin: auto;
-  vertical-align: middle;
-  box-sizing: border-box; */
-
   background: url(../../rwt_utils_3rdparty/SlickGrid/images/collapse.gif) no-repeat center center;
 }
 
-.odd {
-  background: #F7F7F7;
-    }
+/* grid - remove button */
+.ui-widget-content a.icon {
+  font-size: 0;
+  color: #E85454;
+}
 
-/* TODO test */
-.grid .grid-canvas .slick-cell {
-  padding: 5px 7.5834px;
-  font-size: 14px;
-}
-.grid .grid-canvas .slick-cell td {
-  font-size: 14px;
-}
-.grid .slick-header-columns .slick-header-column {
-  height: 33px;
-  line-height: 14px;
-  margin: 0;
-  border: 0;
-  /* like TH  */
-
-  background: transparent;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;  
-  font-weight: bold;
-  color: #333333;
-}
-.grid .slick-header-columns .slick-header-column.ui-state-default {
-  font-size: 14px;
-  line-height: 14px;
-}
-.grid .slick-header-columns .slick-header-column.ui-state-default td {
-  font-size: 14px;
+.ui-widget-content a.icon i {
+  font-size: 1rem;
 }
