@@ -1,0 +1,19 @@
+<launch>
+  <arg name="launch_roswww" default="true" />
+  <include file="$(find rwt_action_marc)/launch/webserver.launch"
+           if="$(arg launch_roswww)" />
+           
+  <node pkg="rwt_action_marc" type="action_list.py" name="action_list"></node>    
+
+  <node pkg="rwt_srv_marc" type="srv_list.py" name="srv_list"></node>
+
+  <node pkg="rwt_plot_marc" type="sin.py" name="$(anon sin)"></node>
+  <node pkg="rwt_plot_marc" type="cos.py" name="$(anon cos)"></node>
+  <node pkg="rwt_plot_marc" type="array.py" name="$(anon array)"></node>
+
+  <node pkg="rwt_rosparam_marc" type="dump_params.py" name="dump_params"></node>   
+  <node pkg="rwt_rosparam_marc" type="load_params.py" name="load_params"></node>               
+
+  <node pkg="rwt_topic_marc" type="topic_hz_bw.py" name="topic_hz_bw"></node> 
+
+</launch>

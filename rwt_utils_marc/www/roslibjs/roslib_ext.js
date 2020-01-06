@@ -41,7 +41,10 @@ ROSLIB.Ros.prototype.getActionList = function (callback, failedCallback) {
 };
 
 /**
- *
+ * Dump ROS parameter.
+ * 
+ * @param callback - function with params:
+ *   * details - Array of the parameters
  */
 ROSLIB.Ros.prototype.dumpParams = function (callback, failedCallback) {
   var client = new ROSLIB.Service({
@@ -49,16 +52,55 @@ ROSLIB.Ros.prototype.dumpParams = function (callback, failedCallback) {
     name: '/dump_params',
     serviceType: 'rwt_rosparam_marc/DumpParams'
   });
-
   var request = new ROSLIB.ServiceRequest();
-  client.callService(request,
-    function (result) {
+  if (typeof failedCallback === 'function') {
+    client.callService(request,
+      function (result) {
+        callback(result);
+      },
+      function (message) {
+        failedCallback(message);
+      }
+    );
+  } else {
+    client.callService(request, function (result) {
       callback(result);
-    },
-    function (message) {
-      failedCallback(message);
-    }
-  );
+    });
+  }
+};
+
+/**
+ * Load ROS parameter.
+ * 
+ * @param callback - function with params:
+ * @param params - String of parameters
+ */
+ROSLIB.Ros.prototype.loadParams = function (params, callback, failedCallback) {
+  var client = new ROSLIB.Service({
+    ros: this,
+    name: '/load_params',
+    serviceType: 'rwt_rosparam_marc/LoadParams'
+  });
+
+  var request = new ROSLIB.ServiceRequest({
+    name: this.name,
+    // params: JSON.stringify(params)
+    params: params
+  });
+  if (typeof failedCallback === 'function') {
+    client.callService(request,
+      function (result) {
+        callback(result);
+      },
+      function (message) {
+        failedCallback(message);
+      }
+    );
+  } else {
+    client.callService(request, function (result) {
+      callback(result);
+    });
+  }
 };
 
 /**

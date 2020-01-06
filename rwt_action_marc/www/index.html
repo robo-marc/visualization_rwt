@@ -1,59 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 
 <head>
-  <meta charset="utf-8" />
-  <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css" />
+  <meta charset="UTF-8">
+  <title>rwt_action_marc</title>
+  <meta name="author" content="Prototype">
+  <!-- <meta name="viewport" content="width=1000"> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" type="text/css" />
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css"
     type="text/css" />
+  <link rel="stylesheet" href="common/iconfont/material-icons.css">
+  <link rel="stylesheet" href="common/css/common.css">
   <link rel="stylesheet" type="text/css" href="css/rwt_action_marc.css" />
-  <style>
-    .toggle {
-      height: 9px;
-      width: 9px;
-      display: inline-block;
-    }
-
-    .toggle.expand {
-      background: url(../rwt_utils_3rdparty/SlickGrid//images/expand.gif) no-repeat center center;
-    }
-
-    .toggle.collapse {
-      background: url(../rwt_utils_3rdparty/SlickGrid/images/collapse.gif) no-repeat center center;
-    }
-  </style>
-  <title>rwt_action_marc</title>
 </head>
 
 <body>
-  <div class="container">
-    <div class="page-header">
-      <h1><span class="glyphicon glyphicon-star"></span>rwt_action_marc <small>robotwebtools action</small> <span
-          id="config-button"></span></h1>
-    </div>
+  <div class="root">
+    <header>
+      <div class="column">
+        <h2>rwt_action_marc</h2>
+        <a href="http://wiki.ros.org/rqt_action" target="_blank" class="icon"><i
+            class="material-icons">help_outline</i></a>
+      </div>
+    </header>
 
-    <div id="operation-area">
-      <form id="operation-form" role="form" class="form-inline">
-        <div class="form-group">
-          <select id="package-select" class="form-control">
+
+    <div class="contents action">
+
+      <div class="contents_header parts-box">
+        <div class="column">
+          <label for="">Message</label>
+          <select type="select" id="package-select">
           </select>
-        </div>
-
-        <div class="form-group">
-          <select id="message-select" class="form-control">
+          <span class="label">/</span>
+          <select type="select" id="message-select">
           </select>
+          <button id="add-button">ADD</button>
         </div>
+      </div>
 
-        <div class="form-group">
-          <button type="button" id="add-button" class="btn btn-success"><span
-              class="glyphicon glyphicon-plus"></span></button>
+      <div class="contents_body">
+        <!-- TODO grid or css  -->
+        <!-- <div class="myGrid" id="myGrid" style="width:100%; height:500px;"></div> -->
+        <div class="myGrid" id="myGrid"></div>
+
+        <div class="tree-box">
+          <div class="tree-wrap">
+            <table class="tree-table">
+              <thead>
+                <tr>
+                  <th class="tree">Tree</th>
+                  <th class="type">Type</th>
+                  <th class="path">Path</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="expand">
+                  <th class="tree"><span>Action Root</span></th>
+                  <td class="type">actionlib/TestAction</td>
+                  <td class="path">actionlib/TestAction
+                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
+                  </td>
+                </tr>
+                <tr class="leaf leaf1 expand">
+                  <th class="tree"><span>action_goal</span></th>
+                  <td class="type">actionlib/TestActionGoal</td>
+                  <td class="path">actionlib/TestAction/action_goal</td>
+                </tr>
+                <tr class="leaf leaf2 expand">
+                  <th class="tree"><span>header</span></th>
+                  <td class="type">std_msgs/Header</td>
+                  <td class="path">actionlib/TestAction/action_goal/header</td>
+                </tr>
+                <tr class="leaf leaf3">
+                  <th class="tree"><span>seq</span></th>
+                  <td class="type">uint32</td>
+                  <td class="path">actionlib/TestAction/action_goal/header/seq</td>
+                </tr>
+                <tr class="leaf leaf3 collapse end">
+                  <th class="tree"><span>stamp</span></th>
+                  <td class="type">time</td>
+                  <td class="path">actionlib/TestAction/action_goal/header/stamp</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </form>
-    </div>
+      </div>
 
-    <div id="result-area">
-      <div id="myGrid" style="width:100%; height:500px;"></div>
     </div>
   </div>
 

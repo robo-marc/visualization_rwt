@@ -36,9 +36,9 @@ $(function () {
     );
   }
 
-  requestService();
 
-  // ツリー用追加ロジック/////////////////////////////////////////////
+
+  // Tree structure
   var treeFormatter = function (row, cell, value, columnDef, dataContext) {
     if (value === null || value === undefined || dataContext === undefined) { return ''; }
 
@@ -55,18 +55,19 @@ $(function () {
       return spacer + '<span class="toggle"></span>&nbsp;' + value;
     }
   };
-  ///////////////////////////////////////////////////////////////////
-  //削除ボタンを表示するためのカラムを定義
+
+  // remove column
   var removeButtonFormatter = function (row, cell, value, columnDef, dataContext) {
     if (value === null || value === undefined || dataContext === undefined) { return ''; }
     var parentId = dataContext.parent;
     if (parentId === null) {
+      return '<a class="icon delete-button"><i class="material-icons">remove_circle</i></a>';
       return '<button class="delete-button"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>';
     }
     return '';
   };
 
-  // ★グリッドアイテム取得/////////////////////////////////////////
+  // grid item definition
   var columns = [
     { id: 'tree', name: 'Tree', field: 'tree', width: 200, minWidth: 20, maxWidth: 300, formatter: treeFormatter },
     { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, },
@@ -74,8 +75,7 @@ $(function () {
     { id: 'remove', name: 'Remove', field: 'remove', width: 100, minWidth: 20, maxWidth: 200, formatter: removeButtonFormatter }
   ];
 
-  // ツリー用追加ロジック/////////////////////////////////
-
+  // Tree structure
   function myFilter(item) {
     if (item.parent !== null) {
       var parent = dataView.getItemById(item.parent);
@@ -84,17 +84,13 @@ $(function () {
         if (parent._collapsed) {
           return false;
         }
-
         parent = dataView.getItemById(parent.parent);
       }
     }
-
     return true;
-
   }
-  ///////////////////////////////////////////////////////////
 
-  // serviceのリストを表示するリストボックス
+  // service drop - down list
   function listDataAcquisition(objList) {
     objList.sort();
     for (var i = 0; i < objList.length; i++) {
@@ -258,8 +254,8 @@ $(function () {
       }
     );
 
+    // When the asynchronous processing is terminated 
     $.when.apply(null, promises).done(function () {
-      // 非同期処理が全部終わったときの処理
 
       var reqData;
       var resData;
@@ -291,19 +287,19 @@ $(function () {
     });
   });
 
-  //★ initialize the model
+  // initialize the model
   // dataView = new Slick.Data.DataView({ inlineFilters: true });
   dataView.setItems(data);
   dataView.setFilter(myFilter);
 
-  //★ initialize the grid
+  // initialize the grid
   grid = new Slick.Grid('#myGrid', dataView, columns);
 
-  //★
+  //
   grid.onClick.subscribe(function (e, args) {
     var $target = $(e.target);
 
-    // ツリー　開く/閉じる　クリックイベントハンドラ
+    // tree　open/close handler
     if ($target.hasClass('toggle')) {
       var item = dataView.getItem(args.row);
       if (item) {
@@ -319,7 +315,7 @@ $(function () {
       e.stopImmediatePropagation();
     }
 
-    // 削除クリックイベントハンドラ
+    // remove handler
     else if ($target.parent().hasClass('delete-button')
       || $target.hasClass('delete-button')) {
       var items = dataView.getItem(args.row);
@@ -347,6 +343,8 @@ $(function () {
     grid.invalidateRows(args.rows);
     grid.render();
   });
+
+  requestService();
 });
 
 

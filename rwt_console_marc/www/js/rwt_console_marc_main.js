@@ -1,290 +1,434 @@
 function requiredFieldValidator(value) {
   if (value === null || value === undefined || !value.length) {
-    return { valid: false, msg: "This is a required field" };
+    return { valid: false, msg: 'This is a required field' };
   } else {
     return { valid: true, msg: null };
   }
 }
 
-var dataView;
-var grid;
-var data = [];
-var columns = [
-  { id: "#", name: "#", field: "#", sortable: true },
-  { id: "Message", name: "Message", width: 240, field: "Message", sortable: true },
-  { id: "Severity", name: "Severity", field: "Severity", sortable: true },
-  { id: "Node", name: "Node", field: "Node", sortable: true },
-  { id: "Stamp", name: "Stamp", field: "Stamp", width: 240, sortable: true },
-  { id: "Topics", name: "Topics", field: "Topics", width: 240, sortable: true },
-  { id: "Location", name: "Location", field: "Location", width: 240, sortable: true },
-  { id: "Number", name: "Number", field: "Number", width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
-];
-
-var options = {
-  editable: true,
-  enableAddRow: false,
-  enableCellNavigation: true,
-  asyncEditorLoading: false
-};
-
-function myFilter(item) {
-  var percentCompleteThreshold = 0;
-  var searchString = "";
-  if (item["percentComplete"] < percentCompleteThreshold) {
-    return false;
-  }
-
-  if (searchString !== "" && item["title"].indexOf(searchString) === -1) {
-    return false;
-  }
-
-  if (item.parent !== null) {
-    var parent = data[item.parent];
-
-    while (parent) {
-      if (parent._collapsed || (parent["percentComplete"] < percentCompleteThreshold) || (searchString !== "" && parent["title"].indexOf(searchString) === -1)) {
-        return false;
-      }
-      parent = data[parent.parent];
-    }
-  }
-  return true;
-}
-
-function percentCompleteSort(a, b) {
-  return a["percentComplete"] - b["percentComplete"];
-}
-
-dataView = new Slick.Data.DataView({ inlineFilters: true });
-grid = new Slick.Grid("#myGrid", dataView, columns, options);
-var list = [];
-var isSubscribe = 1;
-var count = 1;
-var isAsc = false;
 $(function () {
-  // subscribe topic
-  var ros = new ROSLIB.Ros();
-  ros.install_config_button("config-button");
 
-  $('#pauseButton').show();
-  $('#startButton').hide();
 
-  function startDrawing() {
-    var sub = null;
-    sub = new ROSLIB.Topic({
-      ros: ros,
-      name: '/rosout_agg',
-      messageType: 'rosgraph_msgs/Log'
-    });
-    sub.subscribe(function (msg) {
-      if (isSubscribe === 1) {
-        var intTime = msg.header.stamp.secs;
-        var d = new Date(intTime * 1000);
-        var year = d.getFullYear();
-        var month = d.getMonth() + 1;
-        var day = d.getDate();
-        var hour = ('0' + d.getHours()).slice(-2);
-        var min = ('0' + d.getMinutes()).slice(-2);
-        var sec = ('0' + d.getSeconds()).slice(-2);
+  var dataView;
+  var grid;
+  var data = [];
+  var columns = [
+    { id: '#', name: '#', field: '#', sortable: true },
+    { id: 'Message', name: 'Message', width: 240, field: 'Message', sortable: true },
+    { id: 'Severity', name: 'Severity', field: 'Severity', sortable: true },
+    { id: 'Node', name: 'Node', field: 'Node', sortable: true },
+    { id: 'Stamp', name: 'Stamp', field: 'Stamp', width: 240, sortable: true },
+    { id: 'Topics', name: 'Topics', field: 'Topics', width: 240, sortable: true },
+    { id: 'Location', name: 'Location', field: 'Location', width: 240, sortable: true },
+    { id: 'Number', name: 'Number', field: 'Number', width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
+  ];
 
-        var regular = ('0000000000' + msg.header.stamp.nsecs).slice(-9);
-        var time = hour + ":" + min + ":" + sec + "." + regular + "(" + year + "-" + month + "-" + day + ")";
-        var mes = msg.msg;
-        var severiltyNumber = msg.level;
-        var severilty = null;
-        var node = msg.name;
-        var stamp = time;
-        var topics = msg.topics.join(',');
-        var location = msg.file + ":" + msg.function + ":" + msg.line;
+  var options = {
+    editable: true,
+    enableAddRow: false,
+    enableCellNavigation: true,
+    asyncEditorLoading: false
+  };
 
-        if (msg.level === 1) {
-          severilty = 'DEBUG';
-        } else if (msg.level === 2) {
-          severilty = 'INFO';
-        } else if (msg.level === 4) {
-          severilty = 'WARN';
-        } else if (msg.level === 8) {
-          severilty = 'ERROR';
-        } else if (msg.level === 16) {
-          severilty = 'FATAL';
+  function myFilter(item) {
+    var percentCompleteThreshold = 0;
+    var searchString = '';
+    if (item['percentComplete'] < percentCompleteThreshold) {
+      return false;
+    }
+
+    if (searchString !== '' && item['title'].indexOf(searchString) === -1) {
+      return false;
+    }
+
+    if (item.parent !== null) {
+      var parent = data[item.parent];
+
+      while (parent) {
+        if (parent._collapsed || (parent['percentComplete'] < percentCompleteThreshold) || (searchString !== '' && parent['title'].indexOf(searchString) === -1)) {
+          return false;
         }
-
-        var associationItem = {
-          id: count,
-          indent: 0,
-          '#': '#' + count,
-          Message: mes,
-          SeveriltyNumber: severiltyNumber,
-          Severity: severilty,
-          Node: node,
-          Stamp: stamp,
-          RawTime: msg.header.stamp.secs + '.' + regular,
-          Topics: topics,
-          Location: location,
-          Number: count
-        };
-
-        if (count >= 20001) {
-          dataView.deleteItem(count - 20000);
-        }
-
-        list.push(associationItem);
-
-        if (isAsc === false) {
-          dataView.insertItem(0, associationItem);
-          grid.invalidate();
-        }
-
-        if (isAsc === true) {
-          dataView.insertItem(count, associationItem);
-          grid.invalidate();
-        }
-
-        count++;
-
-        var txt = list.length + ' messages';
-        document.getElementById("NumberOfMessage").innerHTML = txt;
+        parent = data[parent.parent];
       }
-    });
+    }
+    return true;
   }
 
-  //グラフをクリアする
-  $('#clearButton').click(function () {
-    list.length = 0;
-    data.length = 0;
-    count = 1;
-    dataView.setItems(data);
-    dataView.setFilter(myFilter);
-    grid.invalidate();
-    document.getElementById("NumberOfMessage").innerHTML = '0 messages';
-  });
+  function percentCompleteSort(a, b) {
+    return a['percentComplete'] - b['percentComplete'];
+  }
 
-  //CSVをダウンロード
-  $('#downloadCSV').click(function () {
-    var arr = [];
-    var itemList = _.cloneDeep(list);
-    _.each(itemList, function (value, index) {
-      delete value.id;
-      delete value['#'];
-      delete value.Stamp;
-      delete value.indent;
-      delete value.Severity;
-      arr.push(Object.keys(value).map(function (key) {
-        return value[key];
-      })
-      );
-    });
-    var csvData = '';
-    _.each(arr, function (value, index) {
-      var row = value.join(';');
-      csvData = row + '\n' + csvData;
-    });
-    var csvText = 'message;severity;node;stamp;topics;location\n' + csvData;
-    var blob = new Blob([csvText], { "type": "text/plain" });
-    if (window.navigator.msSaveBlob) {
-      window.navigator.msSaveBlob(blob, "test.csv");
-      window.navigator.msSaveOrOpenBlob(blob, "test.csv");
-    } else {
-      document.getElementById("downloadCSV").href = window.URL.createObjectURL(blob);
-    }
-  });
+  dataView = new Slick.Data.DataView({ inlineFilters: true });
+  grid = new Slick.Grid('#myGrid', dataView, columns, options);
+  var list = [];
+  var isSubscribe = 1;
+  var count = 1;
+  var isAsc = false;
 
+  $(function () {
+    // subscribe topic
+    var ros = new ROSLIB.Ros();
+    ros.autoConnect();
 
-  //一時停止
-  $('#pauseButton').click(function () {
-    isSubscribe = 0;
-    $('#pauseButton').hide();
-    $('#startButton').show();
-  });
-
-  //再開ボタン
-  $('#startButton').click(function () {
-    isSubscribe = 1;
     $('#pauseButton').show();
     $('#startButton').hide();
+
+    // display start
+    function startDrawing() {
+      var sub = null;
+      sub = new ROSLIB.Topic({
+        ros: ros,
+        name: '/rosout_agg',
+        messageType: 'rosgraph_msgs/Log'
+      });
+      sub.subscribe(function (msg) {
+        if (isSubscribe === 1) {
+          var mes = msg.msg;
+          var severityNumber = msg.level;
+          var severity = getErrorLevel(msg.level);
+          var node = msg.name;
+          var time = getTimestamp(msg.header.stamp.secs, msg.header.stamp.nsecs);
+          var regular = ('0000000000' + msg.header.stamp.nsecs).slice(-9);
+          var stamp = time;
+          var topics = msg.topics.join(',');
+          var location = msg.file + ':' + msg.function + ':' + msg.line;
+
+          var associationItem = {
+            id: count,
+            indent: 0,
+            '#': '#' + count,
+            Message: mes,
+            SeverityNumber: severityNumber,
+            Severity: severity,
+            Node: node,
+            Stamp: stamp,
+            RawTime: msg.header.stamp.secs + '.' + regular,
+            Topics: topics,
+            Location: location,
+            Number: count
+          };
+
+          if (count >= 20001) {
+            dataView.deleteItem(count - 20000);
+          }
+
+          list.push(associationItem);
+
+          if (isAsc === false) {
+            dataView.insertItem(0, associationItem);
+            grid.invalidate();
+          }
+
+          if (isAsc === true) {
+            dataView.insertItem(count, associationItem);
+            grid.invalidate();
+          }
+
+          count++;
+
+          var txt = list.length + ' messages';
+          document.getElementById('NumberOfMessage').innerHTML = txt;
+        }
+      });
+    }
+
+    // get error level
+    function getErrorLevel(level) {
+      var severity;
+      switch (level) {
+        case 1:
+          severity = 'DEBUG';
+          break;
+        case 2:
+          severity = 'INFO';
+          break;
+        case 4:
+          severity = 'WARN';
+          break;
+        case 8:
+          severity = 'ERROR';
+          break;
+        case 16:
+          severity = 'FATAL';
+          break;
+      }
+      return severity;
+    }
+
+    // get timestamp
+    function getTimestamp(secs, nsecs) {
+      var intTime = secs;
+      var d = new Date(intTime * 1000);
+      var year = d.getFullYear();
+      var month = d.getMonth() + 1;
+      var day = d.getDate();
+      var hour = ('0' + d.getHours()).slice(-2);
+      var min = ('0' + d.getMinutes()).slice(-2);
+      var sec = ('0' + d.getSeconds()).slice(-2);
+      var regular = ('0000000000' + nsecs).slice(-9);
+      var timestamp = hour + ':' + min + ':' + sec + '.' + regular + '(' + year + '-' + month + '-' + day + ')';
+      return timestamp;
+    }
+
+    // clear list
+    function clearList() {
+      list.length = 0;
+      data.length = 0;
+      count = 1;
+      dataView.setItems(data);
+      dataView.setFilter(myFilter);
+      grid.invalidate();
+      document.getElementById('NumberOfMessage').innerHTML = '0 messages';
+    }
+
+    // clear list
+    $('#clearButton').click(function () {
+      clearList();
+    });
+
+    // CSV download
+    $('#download').click(function () {
+      var arr = [];
+      var itemList = _.cloneDeep(list);
+      _.each(itemList, function (value, index) {
+        delete value.id;
+        delete value['#'];
+        // delete value.Stamp;
+        delete value.RawTime;
+        delete value.indent;
+        // delete value.Severity;
+        delete value.SeverityNumber;
+        arr.push(Object.keys(value).map(function (key) {
+          return value[key];
+        })
+        );
+      });
+      var csvData = '';
+      _.each(arr, function (value, index) {
+        var row = value.join(';');
+        csvData = row + '\n' + csvData;
+      });
+      var csvText = 'message;severity;node;stamp;topics;location\n' + csvData;
+      var blob = new Blob([csvText], { 'type': 'text/plain' });
+      if (window.navigator.msSaveBlob) {
+        window.navigator.msSaveBlob(blob, 'test.csv');
+        window.navigator.msSaveOrOpenBlob(blob, 'test.csv');
+      } else {
+        document.getElementById('download').href = window.URL.createObjectURL(blob);
+        // $('#download').href = window.URL.createObjectURL(blob);
+      }
+    });
+
+    // CSV load
+    // file change
+    var fileObj = document.getElementById('load');
+    fileObj.addEventListener('change', function (evt) {
+      var file = evt.target.files[0];
+      console.log(file);
+
+      // TODO CSV file only
+      // if (!file.name.match('.csv$')) {
+      //   alert('.csv file only');
+      //   return;
+      // }
+
+      // read text
+      var reader = new FileReader();
+      reader.readAsText(file);
+
+      reader.onload = function () {
+        var cols = reader.result.split('\n');
+        var data = [];
+        for (var i = 0; i < cols.length; i++) {
+          data[i] = cols[i].split(';');
+        }
+        console.log('---- data ----');
+        console.log(data);
+        gridList(data);
+      };
+    });
+
+    // grid List
+    function gridList(dataList) {
+
+      // var data = [];
+
+      // for (var i = 1; i < dataList.length - 2; i++) {
+      //   if (dataList[i]) {
+      //     list[i] = {
+      //       // #: dataList,
+      //       // value: dataList[i].Message,
+      //       // id: count,
+      //       // indent: 0,
+
+      //       '#': '#' + dataList[i][6],
+      //       Message: dataList[i][0],
+      //       // SeverityNumber: dataList[i][4],
+      //       Severity: dataList[i][1],
+      //       Node: dataList[i][2],
+      //       Stamp: dataList[i][3],
+      //       // RawTime: msg.header.stamp.secs + '.' + regular,
+      //       Topics: dataList[i][4],
+      //       Location: dataList[i][5],
+      //       Number: dataList[i][6]
+      //     };
+      //   }
+      // }
+      for (var i = 1; i < dataList.length - 1; i++) {
+        if (dataList[i]) {
+          // var mes = msg.msg;
+          // var severityNumber = msg.level;
+          // var severity = getErrorLevel(msg.level);
+          // var node = msg.name;
+          // var time = getTimestamp(msg.header.stamp.secs, msg.header.stamp.nsecs);
+          // var regular = ('0000000000' + msg.header.stamp.nsecs).slice(-9);
+          // var stamp = time;
+          // var topics = msg.topics.join(',');
+          // var location = msg.file + ':' + msg.function + ':' + msg.line;
+
+          var associationItem = {
+            id: dataList[i][6],
+            indent: 0,
+            '#': '#' + dataList[i][6],
+            Message: dataList[i][0],
+            // SeverityNumber: severityNumber,
+            Severity: dataList[i][1],
+            Node: dataList[i][2],
+            Stamp: dataList[i][3],
+            // RawTime: msg.header.stamp.secs + '.' + regular,
+            Topics: dataList[i][4],
+            Location: dataList[i][5],
+            Number: dataList[i][6]
+          };
+          console.log(associationItem);
+
+          if (count >= 20001) {
+            dataView.deleteItem(count - 20000);
+          }
+
+          list.push(associationItem);
+
+          if (isAsc === false) {
+            dataView.insertItem(0, associationItem);
+            grid.invalidate();
+          }
+
+          if (isAsc === true) {
+            dataView.insertItem(count, associationItem);
+            grid.invalidate();
+          }
+        }
+      }
+      // count++;
+
+      var txt = list.length + ' messages';
+      document.getElementById('NumberOfMessage').innerHTML = txt;
+
+      // console.log(list);
+      // var grid = new Slick.Grid('#myGrid', list, columns, options);
+      // grid.onSort.subscribe(function (e, args) {
+      //   grid.invalidateAllRows();
+      //   grid.render();
+      // });
+
+    }
+
+    // pause
+    $('#pauseButton').click(function () {
+      isSubscribe = 0;
+      $('#pauseButton').hide();
+      $('#startButton').show();
+    });
+
+    // start
+    $('#startButton').click(function () {
+      isSubscribe = 1;
+      $('#pauseButton').show();
+      $('#startButton').hide();
+    });
+
+    // sort
+    var sortcol;
+    grid.onSort.subscribe(function (e, args) {
+      sortcol = args.sortCol.field;
+
+      if (sortcol === '#') {
+        sortcol = 'Number';
+      }
+      if (sortcol === 'Number' || sortcol === 'Stamp') {
+        isAsc = args.sortAsc;
+        dataView.sort(comparer, isAsc);
+        grid.invalidateAllRows();
+        grid.render();
+      }
+    });
+
+    function comparer(a, b) {
+      var x = a[sortcol], y = b[sortcol];
+      return (x === y ? 0 : (x > y ? 1 : -1));
+    }
+
+    startDrawing();
+
   });
 
-  //並び替え
-  var sortcol;
-  grid.onSort.subscribe(function (e, args) {
-    sortcol = args.sortCol.field;
+  // var sample = function () {
+  //   var indent = 0;
+  //   var parents = [];
+  //   var rowCount = 1;
+  //   // prepare the data
+  //   _.each(list, function (msg, index) {
 
-    if (sortcol === "#") {
-      sortcol = "Number";
-    }
-    if (sortcol === "Number" || sortcol === "Stamp") {
-      isAsc = args.sortAsc;
-      dataView.sort(comparer, isAsc);
-      grid.invalidateAllRows();
-      grid.render();
-    }
-  });
+  //     var d = (data[index] = {});
+  //     var parent;
 
-  function comparer(a, b) {
-    var x = a[sortcol], y = b[sortcol];
-    return (x === y ? 0 : (x > y ? 1 : -1));
-  }
+  //     if (parents.length > 0) {
+  //       parent = parents[parents.length - 1];
+  //     } else {
+  //       parent = null;
+  //     }
+  //     d['id'] = 'id_' + index;
+  //     d['indent'] = indent;
+  //     d['parent'] = parent;
+  //     d['#'] = '#' + rowCount;
+  //     d['Message'] = msg.Message;
+  //     d['Severity'] = severity;
+  //     d['Node'] = msg.Node;
+  //     d['Stamp'] = msg.Stamp;
+  //     d['Topics'] = msg.Topics;
+  //     d['Location'] = msg.Location;
+
+  //     rowCount++;
+  //   });
 
 
-  startDrawing();
+  //   // initialize the model
+  //   dataView.beginUpdate();
+  //   var sortData = data.slice().reverse();
+  //   dataView.setItems(sortData);
+  //   dataView.setFilter(myFilter);
+  //   dataView.endUpdate();
+
+
+  //   // initialize the grid
+  //   grid = new Slick.Grid('#myGrid', dataView, columns, options);
+
+  //   grid.onCellChange.subscribe(function (e, args) {
+  //     dataView.updateItem(args.item.id, args.item);
+  //   });
+
+  //   // wire up the search textbox to apply the filter to the model
+  //   $('#txtSearch').keyup(function (e) {
+  //     Slick.GlobalEditorLock.cancelCurrentEdit();
+
+  //     // clear on Esc
+  //     if (e.which === 27) {
+  //       this.value = '';
+  //     }
+
+  //     searchString = this.value;
+  //     dataView.refresh();
+  //   });
+  // };
 
 });
-
-// var sample = function () {
-//   var indent = 0;
-//   var parents = [];
-//   var rowCount = 1;
-//   // prepare the data
-//   _.each(list, function (msg, index) {
-
-//     var d = (data[index] = {});
-//     var parent;
-
-//     if (parents.length > 0) {
-//       parent = parents[parents.length - 1];
-//     } else {
-//       parent = null;
-//     }
-//     d["id"] = "id_" + index;
-//     d["indent"] = indent;
-//     d["parent"] = parent;
-//     d["#"] = '#' + rowCount;
-//     d["Message"] = msg.Message;
-//     d["Severity"] = severilty;
-//     d["Node"] = msg.Node;
-//     d["Stamp"] = msg.Stamp;
-//     d["Topics"] = msg.Topics;
-//     d["Location"] = msg.Location;
-
-//     rowCount++;
-//   });
-
-
-//   // initialize the model
-//   dataView.beginUpdate();
-//   var sortData = data.slice().reverse();
-//   dataView.setItems(sortData);
-//   dataView.setFilter(myFilter);
-//   dataView.endUpdate();
-
-
-//   // initialize the grid
-//   grid = new Slick.Grid("#myGrid", dataView, columns, options);
-
-//   grid.onCellChange.subscribe(function (e, args) {
-//     dataView.updateItem(args.item.id, args.item);
-//   });
-
-//   // wire up the search textbox to apply the filter to the model
-//   $("#txtSearch").keyup(function (e) {
-//     Slick.GlobalEditorLock.cancelCurrentEdit();
-
-//     // clear on Esc
-//     if (e.which === 27) {
-//       this.value = "";
-//     }
-
-//     searchString = this.value;
-//     dataView.refresh();
-//   });
-// };

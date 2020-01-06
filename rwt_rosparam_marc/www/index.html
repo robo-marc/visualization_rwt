@@ -3,46 +3,93 @@
 
 <head>
   <meta charset="utf-8" />
+  <title>rwt_rosparam_marc</title>
+  <meta name="author" content="Prototype">
+  <!-- <meta name="viewport" content="width=1000"> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" type="text/css" />
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css"
     type="text/css" />
+  <link rel="stylesheet" href="common/iconfont/material-icons.css">
+  <link rel="stylesheet" href="common/css/common.css">
   <link rel="stylesheet" type="text/css" href="css/rwt_rosparam_marc.css">
   </link>
-  <title>rwt_rosparam_marc</title>
+
 </head>
 
 <body>
-  <div class="container">
-    <div class="page-header">
-      <h1>rwt_rosparam_marc<span id="config-button"></span></h1>
-    </div>
-    <div id="rosparam-area">
-      <form id="rosparam-form" role="form" class="form-inline">
-        <div class="form-group">
-          <label class="sr-only" for="rosparam-select">rosparam</label>
-          <select id="rosparam-select" class="form-control">
-          </select>
+
+  <div class="root">
+
+    <div class="container">
+
+      <!-- <div class="page-header">
+      <h1>rwt_rosparam_marc</h1>
+    </div> -->
+
+      <header>
+        <div class="column">
+          <h2>rwt_rosparam_marc</h2>
+          <a href="http://wiki.ros.org/rosparam" target="_blank" class="icon"><i
+              class="material-icons">help_outline</i></a>
         </div>
-        <div class="form-group">
+      </header>
+
+      <div id="rosparam-area">
+        <form id="rosparam-form" role="form" class="form-inline">
+          <div class="form-group">
+            <label class="sr-only" for="rosparam-select">rosparam</label>
+            <select id="rosparam-select" class="form-control">
+            </select>
+          </div>
+          <!-- <div class="form-group">
           <label class="sr-only" for="rosparam-arg1">rosparam-arg1</label>
           <select id="rosparam-arg1" class="form-control">
           </select>
-        </div>
-        <div class="form-group">
-          <label class="sr-only" for="rosparam-arg2">rosparam-arg2</label>
-          <input type="name" class="form-control" name="rosparam-arg2" id="rosparam-arg2"
-            placeholder="specify field like data" />
-        </div>
-        <button type="button" id="execute-button" class="btn btn-primary">execute</button>
-      </form>
+        </div> -->
+          <div class="form-group">
+            <label class="sr-only" for="rosparam-arg1">rosparam-arg1</label>
+            <input type="text" class="form-control" name="rosparam-arg1" id="rosparam-arg1" list="rosparam-arg1-data">
+            <datalist id="rosparam-arg1-data"></datalist>
+          </div>
+
+          <div class="form-group">
+            <label class="sr-only" for="rosparam-arg2">rosparam-arg2</label>
+            <input type="name" class="form-control" name="rosparam-arg2" id="rosparam-arg2"
+              placeholder="specify a parameter" />
+          </div>
+          <button type="button" id="execute-button" class="btn btn-primary">execute</button>
+          <!-- TODO load test -->
+          <form id="fileform" name="fileform">
+            <input type="file" name="load" id="load" />
+          </form>
+          <!-- <a button type="button" id="execute-button" class="btn btn-primary" href="#"
+          download="rosparam.yaml">execute</button></a> -->
+        </form>
+      </div>
+
+      <br>
+      <div id="result-area">
+        <div id="myGrid" style="width:800px;height:400px;"></div>
+      </div>
+      <br>
+
+      <div class="message-group">
+        <p>
+          <textarea name="message" rows="3" cols="100" value="" disabled="disabled">System message might be shown here when necessary
+        </textarea>
+        </p>
+      </div>
     </div>
   </div>
+
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.11.2.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui-1.11.3.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery.event.drag-2.3.0.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.core.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.grid.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.dataview.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>

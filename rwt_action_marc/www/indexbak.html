@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" type="text/css" />
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css"
+    type="text/css" />
+  <link rel="stylesheet" type="text/css" href="css/rwt_action_marc.css" />
+  <style>
+    .toggle {
+      height: 9px;
+      width: 9px;
+      display: inline-block;
+    }
+
+    .toggle.expand {
+      background: url(../rwt_utils_3rdparty/SlickGrid//images/expand.gif) no-repeat center center;
+    }
+
+    .toggle.collapse {
+      background: url(../rwt_utils_3rdparty/SlickGrid/images/collapse.gif) no-repeat center center;
+    }
+  </style>
+  <title>rwt_action_marc</title>
+</head>
+
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1><span class="glyphicon glyphicon-star"></span>rwt_action_marc <small>robotwebtools action</small> <span
+          id="config-button"></span></h1>
+    </div>
+
+    <div id="operation-area">
+      <form id="operation-form" role="form" class="form-inline">
+        <div class="form-group">
+          <select id="package-select" class="form-control">
+          </select>
+        </div>
+
+        <div class="form-group">
+          <select id="message-select" class="form-control">
+          </select>
+        </div>
+
+        <div class="form-group">
+          <button type="button" id="add-button" class="btn btn-success"><span
+              class="glyphicon glyphicon-plus"></span></button>
+        </div>
+      </form>
+    </div>
+
+    <div id="result-area">
+      <div id="myGrid" style="width:100%; height:500px;"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.11.2.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui-1.11.3.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery.event.drag-2.3.0.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.core.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.formatters.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.grid.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.editors.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.dataview.js"></script>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
+
+  <script type="text/javascript" src="js/rwt_action_marc_main.js"></script>
+</body>
+
+</html>

@@ -11,10 +11,14 @@ $(function () {
   var serviceMap = {};
 
   var columns = [
-    { id: 'tree', name: 'Tree', field: 'tree', width: 200, minWidth: 20, maxWidth: 300, formatter: treeFormatter },
-    { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, },
-    { id: 'path', name: 'Path', field: 'path', width: 400, minWidth: 20, maxWidth: 900, },
-    { id: 'remove', name: 'Remove', field: 'remove', width: 100, minWidth: 20, maxWidth: 200, formatter: removeButtonFormatter }
+    // { id: 'tree', name: 'Tree', field: 'tree', width: 200, minWidth: 20, maxWidth: 300, formatter: treeFormatter },
+    // { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, },
+    // { id: 'path', name: 'Path', field: 'path', width: 400, minWidth: 20, maxWidth: 900, },
+    // { id: 'remove', name: 'Remove', field: 'remove', width: 100, minWidth: 20, maxWidth: 200, formatter: removeButtonFormatter }
+    { id: 'tree', name: 'Tree', field: 'tree', width: 170, minWidth: 20, maxWidth: 400, formatter: treeFormatter },
+    { id: 'type', name: 'Type', field: 'type', width: 170, minWidth: 20, maxWidth: 400, },
+    { id: 'path', name: 'Path', field: 'path', width: 380, minWidth: 20, maxWidth: 900, },
+    { id: 'remove', name: 'Remove', field: 'remove', width: 70, minWidth: 20, maxWidth: 70, formatter: removeButtonFormatter }
   ];
   var data = [];
   var grid = new Slick.Grid('#myGrid', dataView, columns);
@@ -134,6 +138,8 @@ $(function () {
     if (value === null || value === undefined || dataContext === undefined) { return ''; }
     var parentId = dataContext.parent;
     if (parentId === null) {
+      return '<a href class="icon"><i class="material-icons">remove_circle</i></a>';
+      return '<a class="icon delete-button"><i class="material-icons">remove_circle</i></a>';
       return '<button class="delete-button"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>';
     }
     return '';

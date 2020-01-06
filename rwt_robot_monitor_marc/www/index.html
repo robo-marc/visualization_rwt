@@ -5,6 +5,8 @@
   <meta charset="utf-8" />
   <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="css/rwt_robot_monitor.css">
+  <link rel="stylesheet" href="common/iconfont/material-icons.css">
+  <link rel="stylesheet" href="common/css/common.css">
   </link>
   <title>rwt_robot_monitor</title>
 </head>
@@ -13,8 +15,10 @@
   <div class="container">
 
     <div class="page-header">
-      <h1><span class="glyphicon glyphicon-star"></span>rwt_robot_monitor <small>robotwebtools robot monitor
-          <!-- <a href="/rwt_robot_monitor/plotter.html">plotter is here</a></small></h1> -->
+      <h1>rwt_robot_monitor_marc
+        <!-- <a href="/rwt_robot_monitor/plotter.html">plotter is here</a></small></h1> -->
+        <a href="http://wiki.ros.org/rqt_robot_monitor" target="_blank" class="icon"><i
+            class="material-icons">help_outline</i></a>
     </div>
     <button type="button" id="pause-button" class="btn btn-warning"><span
         class="glyphicon glyphicon glyphicon-pause"></span></button>
@@ -41,23 +45,55 @@
           <ul class="list-group" id="all-list">
           </ul>
         </div>
-      </div>
-      <div class="footer-stats">
-        <p>Last message received <span id="last-message-sec">0</span> secnods ago
+        <div class="history" id="history">
+          <a href="#" class="btn-circle-flat" id="btn0" name="btn0">0</a>
+          <a href="#" class="btn-circle-flat" id="btn1" name="btn1">1</a>
+          <a href="#" class="btn-circle-flat" id="btn2" name="btn2">2</a>
+          <a href="#" class="btn-circle-flat" id="btn3" name="btn3">3</a>
+          <a href="#" class="btn-circle-flat" id="btn4" name="btn4">4</a>
+          <a href="#" class="btn-circle-flat" id="btn5" name="btn5">5</a>
+          <a href="#" class="btn-circle-flat" id="btn6" name="btn6">6</a>
+          <a href="#" class="btn-circle-flat" id="btn7" name="btn7">7</a>
+          <a href="#" class="btn-circle-flat" id="btn8" name="btn8">8</a>
+          <a href="#" class="btn-circle-flat" id="btn9" name="btn9">9</a>
+          <a href="#" class="btn-circle-flat" id="btn10" name="btn10">10</a>
+          <a href="#" class="btn-circle-flat" id="btn11" name="btn11">11</a>
+          <a href="#" class="btn-circle-flat" id="btn12" name="btn12">12</a>
+          <a href="#" class="btn-circle-flat" id="btn13" name="btn13">13</a>
+          <a href="#" class="btn-circle-flat" id="btn14" name="btn14">14</a>
+          <a href="#" class="btn-circle-flat" id="btn15" name="btn15">15</a>
+          <a href="#" class="btn-circle-flat" id="btn16" name="btn16">16</a>
+          <a href="#" class="btn-circle-flat" id="btn17" name="btn17">17</a>
+          <a href="#" class="btn-circle-flat" id="btn18" name="btn18">18</a>
+          <a href="#" class="btn-circle-flat" id="btn19" name="btn19">19</a>
+          <a href="#" class="btn-circle-flat" id="btn20" name="btn20">20</a>
+          <a href="#" class="btn-circle-flat" id="btn21" name="btn21">21</a>
+          <a href="#" class="btn-circle-flat" id="btn22" name="btn22">22</a>
+          <a href="#" class="btn-circle-flat" id="btn23" name="btn23">23</a>
+          <a href="#" class="btn-circle-flat" id="btn24" name="btn24">24</a>
+          <a href="#" class="btn-circle-flat" id="btn25" name="btn25">25</a>
+          <a href="#" class="btn-circle-flat" id="btn26" name="btn26">26</a>
+          <a href="#" class="btn-circle-flat" id="btn27" name="btn27">27</a>
+          <a href="#" class="btn-circle-flat" id="btn28" name="btn28">28</a>
+          <a href="#" class="btn-circle-flat" id="btn29" name="btn29">29</a>
+          <!-- <a href="#" class="btn-circle-flat" id="btn30" name="btn30">30</a> -->
+        </div>
+        <div class="footer-stats">
+          <p>Last message received <span id="last-message-sec">0</span> secnods ago
+        </div>
       </div>
     </div>
-  </div>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/d3/d3.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
-  <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
-  <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
-  <script type="text/javascript" src="rwt_robot_monitor.js"></script>
-  <script type="text/javascript" src="rwt_robot_monitor_main.js"></script>
+    <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
+    <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
+    <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
+    <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../rwt_utils_3rdparty/d3/d3.min.js"></script>
+    <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
+    <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
+    <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
+    <script type="text/javascript" src="rwt_robot_monitor.js"></script>
+    <script type="text/javascript" src="rwt_robot_monitor_main.js"></script>
 </body>
 
 </html>

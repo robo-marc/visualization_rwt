@@ -95,3 +95,19 @@ svg.rwt-plot .axis line {
 .rwt-plot-info-container .windows-inner {
   margin-top: 10px;
 }
+.btn-circle-flat {
+  display: inline-block;
+  text-decoration: none;
+  background: #87befd;
+  color: #FFF;
+  width: 25px;
+  height: 25px;
+  line-height: 25px;
+  border-radius: 50%;
+  text-align: center;
+  overflow: hidden;
+  transition: .4s;
+}
+.btn-circle-flat:hover {
+  background: #668ad8;
+}

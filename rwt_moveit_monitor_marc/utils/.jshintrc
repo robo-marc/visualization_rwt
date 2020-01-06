@@ -20,6 +20,7 @@
   "devel": true,
   "strict": false,
   "trailing": true,
+  "quotmark": "single",
   "proto": true,
   "laxbreak": true
 }

@@ -16,6 +16,7 @@ from rospkg.rospack import RosPack
 import rosparam
 from optparse import OptionParser
 import yaml
+import time
 import rosgraph
 from rosgraph.names import script_resolve_name, ns_join, get_ros_namespace, make_caller_id, make_global_ns, GLOBALNS
 from rwt_topic_marc.srv import *
@@ -36,11 +37,8 @@ class TopicInfo(ROSTopicHz):
             self.message_class = roslib.message.get_message_class(topic_type)
         except Exception as e:
             self.message_class = None
-            # qWarning('TopicInfo.__init__(): %s' % (e))
-
         if self.message_class is None:
             self.error = 'can not get message class for type "%s"' % topic_type
-            # qWarning('TopicInfo.__init__(): topic "%s": %s' % (topic_name, self.error))
 
     def _reset_data(self):
         self.last_message = None
@@ -57,7 +55,7 @@ class TopicInfo(ROSTopicHz):
     def start_monitoring(self):
         if self.message_class is not None:
             self.monitoring = True
-            # FIXME: subscribing to class AnyMsg breaks other subscribers on same node
+            # FIXME: subscribing to class AnyMsg breaks other subscribers on same node            
             self._subscriber = rospy.Subscriber(self._topic_name, self.message_class, self.message_callback)
 
     def stop_monitoring(self):
@@ -82,13 +80,15 @@ class TopicInfo(ROSTopicHz):
                 self.timestamps.pop(0)
                 self.sizes.pop(0)
             assert(len(self.timestamps) == len(self.sizes))
-
             self.last_message = message
 
     def get_bw(self):
+        print(' ---- start get_bw ---- ')
+        # print(self.timestamps)
         if len(self.timestamps) < 2:
             return None, None, None, None
         current_time = rospy.get_time()
+        # print(current_time)
         if current_time <= self.timestamps[0]:
             return None, None, None, None
             
@@ -101,6 +101,8 @@ class TopicInfo(ROSTopicHz):
             return bytes_per_s, mean_size, min_size, max_size
 
     def get_hz(self):
+        print(' ---- start get_hz ---- ')
+        # print(self.times)
         if not self.times:
             return None, None, None, None
         with self.lock:
@@ -113,16 +115,60 @@ class TopicInfo(ROSTopicHz):
 
 def handle_rwt_rostopic_marc(req):
     topic = TopicInfo(req.name, req.type)
+    monitor = topic.toggle_monitoring()
+    time.sleep(1)
     rate, mean, min_delta, max_delta = topic.get_hz()
     bytes_per_s, mean_size, min_size, max_size = topic.get_bw()
-    print(rate)
-    print(bytes_per_s)
-    return TopicHzBwResponse(rate, bytes_per_s)
+    notmonitor = topic.stop_monitoring()
+
+    rate_text = '%1.2f' % rate if rate != None else 'unknown'
+
+    if bytes_per_s is None:
+        bandwidth_text = 'unknown'
+    elif bytes_per_s < 1000:
+        bandwidth_text = '%.2fB/s' % bytes_per_s
+    elif bytes_per_s < 1000000:
+        bandwidth_text = '%.2fKB/s' % (bytes_per_s / 1000.)
+    else:
+        bandwidth_text = '%.2fMB/s' % (bytes_per_s / 1000000.)    
+    
+    return TopicHzBwResponse(rate_text, bandwidth_text)
 
 def topic_hz_bw():
     rospy.init_node('topic_hz_bw')
     s = rospy.Service('topic_hz_bw', TopicHzBw, handle_rwt_rostopic_marc)
     print "Ready"
+
+    #TODO test 
+    # topic = TopicInfo('/sin', 'std_msgs/Float64')
+    # topic = TopicInfo('/cos', 'std_msgs/Float64')
+    # topic = TopicInfo('/rosout', 'rosgraph_msgs/Log')
+
+    # monitor = topic.toggle_monitoring() 
+    # time.sleep(1)
+    # rate, mean, min_delta, max_delta = topic.get_hz()
+    # bytes_per_s, mean_size, min_size, max_size = topic.get_bw()
+
+    # time.sleep(1)
+    # notmonitor = topic.stop_monitoring()
+
+    # print('--- hz ---')
+    # rate_text = '%1.2f' % rate if rate != None else 'unknown'
+    # print(rate)
+    # print(rate_text)
+    
+    # print('--- bw ---')
+    # if bytes_per_s is None:
+    #     bandwidth_text = 'unknown'
+    # elif bytes_per_s < 1000:
+    #     bandwidth_text = '%.2fB/s' % bytes_per_s
+    # elif bytes_per_s < 1000000:
+    #     bandwidth_text = '%.2fKB/s' % (bytes_per_s / 1000.)
+    # else:
+    #     bandwidth_text = '%.2fMB/s' % (bytes_per_s / 1000000.)    
+    # print(bytes_per_s)
+    # print(bandwidth_text)
+    
     rospy.spin()
 
 if __name__ == "__main__":
