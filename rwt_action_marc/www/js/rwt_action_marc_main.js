@@ -121,12 +121,12 @@ $(function () {
     var idx = dataView.getIdxById(dataContext.id);
     if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
       if (dataContext._collapsed) {
-        return spacer + '<span class="toggle expand"></span>&nbsp;' + value;
+        return spacer + '<span class="toggle expand"></span>' + value;
       } else {
-        return spacer + '<span class="toggle collapse"></span>&nbsp;' + value;
+        return spacer + '<span class="toggle collapse"></span>' + value;
       }
     } else {
-      return spacer + '<span class="toggle"></span>&nbsp;' + value;
+      return spacer + '<span class="toggle leaf"></span>' + value;
     }
   }
 

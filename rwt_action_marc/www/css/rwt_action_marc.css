@@ -1,5 +1,3 @@
-/* css */
-
 /* grid - overall*/
 .ui-widget {
   margin: calc(0.75rem + 35px) 1.75rem 2.5rem;
@@ -44,18 +42,33 @@
 }
 
 /* grid - tree toggle button */
+.slick-cell.r0 {
+  padding-left: 8px;
+}
+
 .toggle {
-  height: 9px;
-  width: 9px;
+  height: 4px;
+  width: 4px;
   display: inline-block;
+  box-sizing: border-box;
+  margin-right: 5px;
 }
 
 .toggle.expand {
-  background: url(../../rwt_utils_3rdparty/SlickGrid/images/expand.gif) no-repeat center center;
+  border: 4px solid transparent;
+  border-left: 4px solid #474747;
 }
 
 .toggle.collapse {
-  background: url(../../rwt_utils_3rdparty/SlickGrid/images/collapse.gif) no-repeat center center;
+  border: 4px solid transparent;
+  border-top: 4px solid #474747;
+}
+
+.toggle.leaf {
+  width: 6px;
+  height: 1px;
+  border-left: 6px solid #474747;
+  margin-bottom: 3px;
 }
 
 /* grid - remove button */
