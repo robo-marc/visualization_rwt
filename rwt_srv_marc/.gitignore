@@ -1,7 +1,3 @@
 node_modules
-doc
 package-lock.json
-index_bk.html
-rwt_srv_marc_main bk.js
-
-
+doc
