@@ -284,15 +284,6 @@ ROSLIB.RWTPlot.prototype.round10 = function (value) {
   return Math.round(value * 10) / 10;
 };
 
-// TODO: deprecated
-// ROSLIB.RWTPlot.prototype.setColor = function (color) {
-//   this.specifiedColor = color;
-//   var retFunc = function (_) { return color; };
-//   for (var i = 0; i < this.paths.length; i++) {
-//     this.paths[i].style('stroke', retFunc);
-//   }
-// };
-
 ROSLIB.RWTPlot.prototype.getNextColor = function () {
   var color = this.color(this.colorIndex);
   this.colorIndex++;
@@ -315,76 +306,18 @@ ROSLIB.RWTPlot.prototype.getFieldPathName = function (msgFieldPath, index) {
 
 ROSLIB.RWTPlot.prototype.paintLegend = function () {
   var that = this;
-  var legendVals = [];
-  var legendColors = {};
+
+  var html = '<ul>';
   _.each(Object.keys(this.paths), function (pathId, index) {
     var name = that.pathSettings[pathId].name;
-    legendVals.push(name);
-    legendColors[name] = that.pathSettings[pathId].color;
+    var color = that.pathSettings[pathId].color;
+    html += '<li><span style="background: ' + color + ';"></span>' + name + '</li>';
   });
+  html += '</ul>';
 
-  $('#' + this.legendId).empty();
-
-  var areaPadding = 16;
-  var legend = d3.select('#' + this.legendId)
-    .append('svg')
-    .style('width', '90%')
-    // .style('border', '1px solid gray')
-    .style('margin', '16px')
-    .style('padding', String(areaPadding) + 'px')
-    .selectAll('g')
-    .data(legendVals)
-    .enter()
-    .append('g')
-    .attr('class', 'legends')
-    ;
-
-  legend.append('rect') // 凡例の色付け四角
-    .attr('x', 0)
-    .attr('y', 15)
-    .attr('width', 30)
-    .attr('height', 2)
-    .style('fill', function (d, i) {
-      return legendColors[d];
-    }) // 色付け
-    ;
-  legend.append('text')  // 凡例の文言
-    .attr('x', 35)
-    .attr('y', 20)
-    .text(function (d, i) { return d; })
-    .attr('class', 'textselected')
-    .style('text-anchor', 'start')
-    // .style('font-size', 12)
-    ;
-
-  var padding = 20;
-  // var legendAreaWidth = legend[0].parentNode.clientWidth - (areaPadding * 2);
-  legend.attr('transform', function (d, i) {
-    {
-      // 凡例をひとまず１行あたり３個固定で描画してみる
-      var itemCountPerRow = 3;
-      var rowIndex = Math.floor(i / itemCountPerRow); // 凡例の行のインデックス番号
-      var begin = rowIndex * itemCountPerRow;
-      var end = begin + itemCountPerRow - 1;
-      // console.log('legend[' + i + ']: begin:' + begin + ', end:' + end);
-      return 'translate('
-        + (
-          d3.sum(legendVals, function (e, j) {
-            // console.log('sum[i, j]: [' + i + '][' + j + ']');
-            // if (j < i) {
-            if (begin <= j && j <= end && j < i) {
-              // console.log('  width: [' + legend[0][j].getBBox().width + ']');
-              return legend[0][j].getBBox().width;   // 各凡例の横幅サイズ取得
-            } else {
-              // console.log('  width: [' + 0 + ']');
-              return 0;
-            }
-          }) + padding * (i % itemCountPerRow))
-        + ','
-        + (legend[0][0].getBBox().height + padding) * rowIndex // 凡例の各行の高さを計算
-        + ')';
-    }
-  });
+  var $legendArea = $('#' + this.legendId);
+  $legendArea.empty();
+  $legendArea.html(html);
 };
 
 ROSLIB.RWTPlot.prototype.allocatePath = function (id, color) {

@@ -41,6 +41,7 @@ $(function () {
     $('#y-auto-check').click();
     $('#pause-button').show();
     $('#start-button').hide();
+    $('#open_sub_button').click();
 
     printPlotSpec();
     printXAxisSec();
@@ -301,14 +302,14 @@ $(function () {
 
   $('#open_sub_button').on('click', function (e) {
     e.preventDefault();
-    $('#contents_sub').show();
+    $('#contents_sub').slideDown('normal');
     $('#close_sub_button').show();
     $('#open_sub_button').hide();
   });
 
   $('#close_sub_button').on('click', function (e) {
     e.preventDefault();
-    $('#contents_sub').hide();
+    $('#contents_sub').slideUp('normal');
     $('#close_sub_button').hide();
     $('#open_sub_button').show();
   });

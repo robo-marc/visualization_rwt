@@ -1,4 +1,4 @@
-/*** plot area ***/
+/*** plot area / legend area ***/
 
 /* overall */
 #plot-area {
@@ -39,4 +39,16 @@ svg.rwt-plot .axis line {
 svg.rwt-plot .axis .tick text {
   font-size: 0.75rem;
   fill: #515151;
+}
+
+/* legend */
+.plot_body .graph-footer ul li span {
+  content: "";
+  display: inline-block;
+  width: 1.5rem;
+  height: 0.25rem;
+  background: #ccc;
+  position: absolute;
+  left: 0;
+  top: 0.75rem;
 }
