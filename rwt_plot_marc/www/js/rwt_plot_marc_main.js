@@ -218,9 +218,6 @@ $(function () {
       ros.getMessageDetails(topicType, function (details) {
         var decoded = ros.decodeTypeDefs(details);
 
-        // TODO: deprecated
-        $('#message-detail').find('pre').html(JSON.stringify(decoded, null, '  ')); // pretty print
-
         var typeList = getFieldList(decoded);
         $('#type-select').empty();
         _.each(typeList, function (value, index) {
