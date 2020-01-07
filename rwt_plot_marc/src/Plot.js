@@ -222,7 +222,7 @@ ROSLIB.RWTPlot.prototype.paintPosition = function (e, plot, positionLabel) {
 
   var y = plot.round10(plot.yScale.invert(m[1] - plot.margin.top));
 
-  positionLabel.text('X = ' + x + '　Y = ' + y);
+  positionLabel.text('x = ' + x + '　y = ' + y);
 };
 
 ROSLIB.RWTPlot.prototype.beginScroll = function (e, plot) {

@@ -272,19 +272,22 @@ $(function () {
     printYAxisDomain();
   });
 
-  $('#pause-button').on('click', function () {
+  $('#pause-button').on('click', function (e) {
+    e.preventDefault();
     plot.pause();
     $('#pause-button').hide();
     $('#start-button').show();
   });
 
-  $('#start-button').on('click', function () {
+  $('#start-button').on('click', function (e) {
+    e.preventDefault();
     plot.start();
     $('#pause-button').show();
     $('#start-button').hide();
   });
 
-  $('#clear-button').on('click', function () {
+  $('#clear-button').on('click', function (e) {
+    e.preventDefault();
     if (initPlotSpec.yaxis.autoScale !== $('#y-auto-check').prop('checked')) {
       $('#y-auto-check').click();
     }
