@@ -1,120 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 
 <head>
-  <meta charset="utf-8" />
-  <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" type="text/css" href="css/rwt_plot_marc.css">
-  </link>
+  <meta charset="UTF-8">
   <title>rwt_plot_marc</title>
+  <meta name="author" content="Prototype">
+  <!-- <meta name="viewport" content="width=1000"> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../rwt_utils_marc/common/iconfont/material-icons.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/common/css/common.css">
+  <!-- <link rel="stylesheet" href="../rwt_utils_marc/css/rwt_utils_marc.css" /> -->
+  <link rel="stylesheet" href="css/rwt_plot_marc.css">
 </head>
 
 <body>
-  <div class="container">
-    <div class="page-header">
-      <h1><span class="glyphicon glyphicon-star"></span>rwt_plot_marc <small>robotwebtools plot</small> <span
-          id="config-button"></span></h1>
-    </div>
-
-    <div id="topic-area">
-      <form id="topic-form" role="form" class="form-inline">
-        <div class="form-group">
-          <label class="sr-only" for="topic-select">topic</label>
-          <select id="topic-select" class="form-control">
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="sr-only" for="field-accessor">field-accessor</label>
-          <select id="type-select" name="type-select" class="form-control">
-          </select>
-        </div>
-        <div class="form-group">
-          <button type="button" id="add-topic-button" class="btn btn-success"><span
-              class="glyphicon glyphicon-plus"></span></button>
-        </div>
-
-        <div class="form-group">
-          <label class="sr-only" for="subscribed-select">topic</label>
-          <select id="subscribed-select" class="form-control">
-          </select>
-        </div>
-        <div class="form-group">
-          <button type="button" id="remove-topic-button" class="btn btn-danger"><span
-              class="glyphicon glyphicon-minus"></span>
-          </button>
-        </div>
-
-        <div class="form-group">
-          <button type="button" id="pause-button" class="btn btn-warning"><span
-              class="glyphicon glyphicon-pause"></span></button>
-          <button type="button" id="start-button" class="btn btn-info"><span
-              class="glyphicon glyphicon-play"></span></button>
-          <button type="button" id="clear-button" class="btn btn-default"><span
-              class="glyphicon glyphicon-refresh"></span></button>
-          <a id="help-button" class="btn btn-default" href="http://wiki.ros.org/rqt_plot" target="_blank"><span
-              class="glyphicon glyphicon-question-sign"></span></a>
-        </div>
-      </form>
-    </div>
-
-    <div id="config-area" class="well">
-      <form id="config-form" role="form" class="form-inline">
-        <div class="well-sm">
-          <div class="form-group">
-            <label class="sr-only" for="x-range">X-range(sec)</label>
-            <input type="text" class="form-control" name="x-range" id="x-range" placeholder="X-axis sec" />
-          </div>
-          <div class="form-group">
-            <label class="sr-only" for="max-data">max data(sec)</label>
-            <input type="text" class="form-control" name="max-data" id="max-data" placeholder="max data (sec)" />
-          </div>
-        </div>
-        <div class="well-sm">
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" name="y-auto-check" id="y-auto-check" /> Y-axis auto scale
-            </label>
-          </div>
-          <div class="form-group">
-            <label class="sr-only" for="y-min">Y-min</label>
-            <input type="text" class="form-control" name="y-min" id="y-min" placeholder="Y-axis minimum" />
-          </div>
-          <div class="form-group">
-            <label class="sr-only" for="y-max">Y-max</label>
-            <input type="text" class="form-control" name="y-max" id="y-max" placeholder="Y-axis maximum" />
-          </div>
-        </div>
-        <button type="button" class="btn btn-primary" id="apply-config-button">apply</button>
-      </form>
-    </div>
-
-    <div class="row">
-      <div id="position-area" style="height:1em; margin-left: 50px;"></div>
-      <div id="plot-area" class="col-md-8" style="height: 400px;"></div>
-      <div id="legend-area"></div>
-      <div id="message-detail" class="col-md-4 hidden">
-        <!-- TODO: deprecated -->
-        <div class="row">
-          <h2>topic type info</h2>
-        </div>
-        <div class="row">
-          <pre></pre>
-        </div>
-
+  <div class="root">
+    <header>
+      <div class="column">
+        <h2>rwt_plot_marc</h2>
+        <a href="http://wiki.ros.org/rqt_plot" target="_blank" class="icon"><i
+            class="material-icons">help_outline</i></a>
       </div>
+    </header>
+
+
+    <div class="contents plot">
+
+      <div class="contents_header">
+        <nav>
+          <ul>
+            <li><a id="pause-button" href class="icon"><i class="material-icons">pause</i>Pause</a><a id="start-button"
+                href class="icon"><i class="material-icons">play_arrow</i>Resume</a></li>
+            <li><a id="clear-button" href class="icon"><i class="material-icons">delete_outline</i>Clear</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="contents_body plot_body">
+        <div class="graph-box">
+          <div class="graph-header">
+            <div class="position"><i class="material-icons">filter_center_focus</i><span id="position-area"></span>
+            </div>
+          </div>
+          <div id="plot-area" class="graph-body">
+            <!-- graph area -->
+          </div>
+          <div id="legend-area" class="graph-footer">
+            <!-- <ul>
+              <li class="color_01">/turrle1/pose/x</li>
+              <li class="color_02">/turrle1/pose/y</li>
+              <li class="color_03">/turrle2/pose/x</li>
+              <li class="color_04">/turrle2/pose/y</li>
+            </ul> -->
+          </div>
+        </div>
+      </div>
+
+      <div id="contents_sub" class="contents_sub plot_sub">
+        <div class="column">
+          <div class="column-box">
+            <div class="parts-box">
+              <h3>Topic/Type Add</h3>
+              <div class="parts-set select">
+                <label for="topic-select">Topic</label>
+                <select type="select" id="topic-select">
+                </select>
+              </div>
+              <div class="parts-set select">
+                <label for="type-select">Type</label>
+                <select type="select" id="type-select">
+                </select>
+              </div>
+              <button id="add-topic-button">ADD</button>
+            </div>
+            <div class="parts-box">
+              <h3>Topic/Type Delete</h3>
+              <div class="parts-set select">
+                <label for="subscribed-select">Topic/Type</label>
+                <select type="select" id="subscribed-select">
+                </select>
+              </div>
+              <button id="remove-topic-button">DELETE</button>
+            </div>
+          </div>
+          <div class="column-box">
+            <div class="parts-box">
+              <h3>Setting</h3>
+              <div class="parts-set textbox"><label for="x-range">X-axis range (sec)</label><input id="x-range"
+                  type="text" placeholder="sec"></div>
+              <div class="parts-set textbox"><label for="max-data">X-axis max-data (sec)</label><input id="max-data"
+                  type="text" placeholder="sec"></div>
+              <div class="parts-set checkbox"><input id="y-auto-check" type="checkbox"><label for="y-auto-check">Y-axis
+                  auto scale</label></div>
+              <div class="parts-set textbox"><label for="y-min">Y-axis maxmun</label><input id="y-min" type="text"
+                  placeholder="max"></div>
+              <div class="parts-set textbox"><label for="y-max">Y-axis minimun</label><input id="y-max" type="text"
+                  placeholder="min"></div>
+              <button id="apply-config-button">APPLY</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contents_footer">
+        <a id="open_sub_button" href class="footer_btn open active"><i class="material-icons">expand_more</i>Topic/Type
+          ADD,
+          Setting</a>
+        <a id="close_sub_button" href class="footer_btn close active"><i class="material-icons">expand_less</i>Close</a>
+      </div>
+
 
     </div>
   </div>
 
   <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/d3/d3.min.js"></script>
+
   <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/d3/d3.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
+
   <script type="text/javascript" src="js/rwt_plot_marc.js"></script>
   <script type="text/javascript" src="js/rwt_plot_marc_main.js"></script>
 </body>

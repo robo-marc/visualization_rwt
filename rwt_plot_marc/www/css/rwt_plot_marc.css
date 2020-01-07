@@ -1,24 +1,42 @@
-svg.rwt-plot {
-  font: 10px sans-serif;
-}
-svg.rwt-plot .line {
-  fill: none;
-  stroke-width: 1.5px;
-}
-svg.rwt-plot .axis path,
-svg.rwt-plot .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
+/*** plot area ***/
 
+/* overall */
 #plot-area {
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
+  background-color: #ffffff;
 }
 
 .scroll {
   cursor: grabbing;
+}
+
+/* lines */
+svg.rwt-plot .line {
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+/* axes */
+svg.rwt-plot .axis path {
+  fill: none;
+  stroke-width: 2px;
+  stroke: #e1e1e1;
+  shape-rendering: crispEdges;
+}
+
+/* ticks */
+svg.rwt-plot .axis line {
+  fill: none;
+  stroke-width: 1px;
+  stroke: #c5c5c5;
+  shape-rendering: crispEdges;
+}
+
+/* tick labels */
+svg.rwt-plot .axis .tick text {
+  font-size: 0.75rem;
+  fill: #515151;
 }
