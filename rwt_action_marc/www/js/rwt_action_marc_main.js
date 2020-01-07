@@ -194,24 +194,24 @@ $(function () {
         for (var i = 0; i < rosTypeList.length; i++) {
 
           for (var i2 = 0; i2 < parentInfoList.length; i2++) {
-            var parenfInfo = parentInfoList[i2];
+            var parentInfo = parentInfoList[i2];
 
             for (var i3 = 0; i3 < rosTypeList.length; i3++) {
               var rosType = rosTypeList[i3];
 
-              if (parenfInfo.typeName === rosType.type
+              if (parentInfo.typeName === rosType.type
                 && excludeTypeList.indexOf(rosType.type) === -1) {
 
-                var indent = parenfInfo.indent + 1;
-                var path = parenfInfo.parentPath;
+                var indent = parentInfo.indent + 1;
+                var path = parentInfo.parentPath;
                 for (var i4 = 0; i4 < rosType.fieldnames.length; i4++) {
                   dataList.push({
                     id: actionId,
                     indent: indent,
-                    parent: parenfInfo.parentId,
+                    parent: parentInfo.parentId,
                     tree: rosType.fieldnames[i4],
                     type: rosType.fieldtypes[i4] + (rosType.fieldarraylen[i4] !== -1 ? '[]' : ''),
-                    path: parenfInfo.path + '/' + rosType.fieldnames[i4],
+                    path: parentInfo.path + '/' + rosType.fieldnames[i4],
                     remove: '',
                     parentPath: path + '.' + actionId,
                     _collapsed: true,
@@ -220,12 +220,12 @@ $(function () {
                     typeName: rosType.fieldtypes[i4],
                     parentId: actionId,
                     indent: indent,
-                    path: parenfInfo.path + '/' + rosType.fieldnames[i4],
+                    path: parentInfo.path + '/' + rosType.fieldnames[i4],
                     parentPath: path + '.' + actionId
                   });
                   actionId++;
                 } // loop end of i4
-                excludeTypeList.push(parenfInfo.typeName);
+                excludeTypeList.push(parentInfo.typeName);
               }
 
             } // loop end of i3
