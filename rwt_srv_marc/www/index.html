@@ -7,15 +7,11 @@
   <meta name="author" content="Prototype">
   <!-- <meta name="viewport" content="width=800"> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- TODO  -->
-  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" type="text/css" />
-  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css"
-    type="text/css" />
-  <link rel="stylesheet" type="text/css" href="css/rwt_srv_marc.css" />
-
-  <link rel="stylesheet" href="common/iconfont/material-icons.css">
-  <link rel="stylesheet" href="common/css/common.css">
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" />
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css" />
+  <link rel="stylesheet" href="../rwt_utils_marc/common/iconfont/material-icons.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/common/css/common.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/css/rwt_utils_marc.css" />
 </head>
 
 <body>
@@ -35,7 +31,6 @@
         <div class="column">
           <label for="">Service</label>
           <select type="select" id="service-select">
-
           </select>
           <span class="label">/</span>
           <select type="select" id="message-select">
@@ -45,78 +40,28 @@
       </div>
 
       <div class="contents_body">
-
-        <!-- TODO grid or css  -->
-        <div id="myGrid" style="width:100%; height:500px;"></div>
-
-        <div class="tree-box">
-          <div class="tree-wrap">
-            <table class="tree-table">
-              <thead>
-                <tr>
-                  <th class="tree">Tree</th>
-                  <th class="type">Type</th>
-                  <th class="path">Path</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="expand">
-                  <th class="tree"><span>Service Request</span></th>
-                  <td class="type">gazebo_msgs/SetLinkState</td>
-                  <td class="path">gazebo_msgs/SetLingState
-                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                  </td>
-                </tr>
-                <tr class="leaf leaf1 end">
-                  <th class="tree"><span>link_state</span></th>
-                  <td class="type">gazebo_msgs/LinkState</td>
-                  <td class="path">gazebo_msgs/SetLingState/link_state</td>
-                </tr>
-                <tr class="expand">
-                  <th class="tree"><span>Service Response</span></th>
-                  <td class="type">gazebo_msgs/SetLinkState</td>
-                  <td class="path">gazebo_msgs/SetLingState
-                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                  </td>
-                </tr>
-                <tr class="leaf leaf1 expand">
-                  <th class="tree"><span>success</span></th>
-                  <td class="type">bool</td>
-                  <td class="path">gazebo_msgs/SetLingState/success</td>
-                </tr>
-                <tr class="leaf leaf2 end">
-                  <th class="tree"><span>status_message</span></th>
-                  <td class="type">string</td>
-                  <td class="path">gazebo_msgs/SetLingState/status_message</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <div class="myGrid" id="myGrid"></div>
       </div>
 
     </div>
   </div>
+
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.11.2.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui-1.11.3.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery.event.drag-2.3.0.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.core.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.formatters.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.grid.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.editors.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.dataview.js"></script>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
 
   <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
 
-  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
-
   <script type="text/javascript" src="js/rwt_srv_marc_main.js"></script>
-
 </body>
 
 </html>

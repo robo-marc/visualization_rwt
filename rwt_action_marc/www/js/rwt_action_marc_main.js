@@ -328,7 +328,7 @@ $(function () {
       toggleTree(e, args);
     }
 
-    // event handler: click remove buttom
+    // event handler: click remove button
     else if ($target.parent().hasClass('delete-button')
       || $target.hasClass('delete-button')) {
       deleteItems(args);

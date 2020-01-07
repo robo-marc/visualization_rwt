@@ -1,98 +1,73 @@
-var dataView;
-dataView = new Slick.Data.DataView({ inlineFilters: true });
 
-var data = [];
-var searchString = '';
-
-var resParentId;
-var reqParentId;
+var dataView = new Slick.Data.DataView({ inlineFilters: true });
 
 $(function () {
 
-  var grid;
+  ////////////////////////////////////////
+  // variables
 
-  // subscribe topic
   var ros = new ROSLIB.Ros();
-  ros.autoConnect();
 
   var serviceMap = {};
 
-  //getSrvList request
+  // grid item definition
+  var columns = [
+    { id: 'tree', name: 'Tree', field: 'tree', width: 170, minWidth: 20, maxWidth: 400, formatter: treeFormatter },
+    { id: 'type', name: 'Type', field: 'type', width: 170, minWidth: 20, maxWidth: 400, },
+    { id: 'path', name: 'Path', field: 'path', width: 380, minWidth: 20, },
+    { id: 'remove', name: '', field: 'remove', width: 30, minWidth: 30, maxWidth: 30, formatter: removeButtonFormatter }
+  ];
+
+  var data = [];
+  var grid = new Slick.Grid('#myGrid', dataView, columns);
+
+  var resParentId;
+  var reqParentId;
+
+  var resId = 0;
+  var reqId = 1;
+
+
+  ////////////////////////////////////////
+  // common
+
+  // initialize screen
+  function initScreen() {
+    // common
+    ros.autoConnect();
+
+    // for grid
+    dataView.beginUpdate();
+    dataView.setItems(data);
+    dataView.setFilter(myFilter);
+    dataView.endUpdate();
+
+    // for dropdown
+    requestService();
+  }
+
+  ////////////////////////////////////////
+  // dropdown
+
   function requestService() {
     ros.getSrvList(
       function (result) {
         var objList = [];
-        _.each(result.message,
-          function (msg, index) {
-            var replace = msg.split('\'').join('\"');
-            var obj = JSON.parse(replace);
-            objList.push(obj);
-          });
+        _.each(result.message, function (msg, index) {
+          var replace = msg.split('\'').join('\"');
+          var obj = JSON.parse(replace);
+          objList.push(obj);
+        });
         listDataAcquisition(objList);
       },
       function (mes) {
-        console.log(mes);
+        console.log('getSrvList failed: %s', mes);
       }
     );
   }
 
-
-
-  // Tree structure
-  var treeFormatter = function (row, cell, value, columnDef, dataContext) {
-    if (value === null || value === undefined || dataContext === undefined) { return ''; }
-
-    value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    var spacer = '<span style="display:inline-block;height:1px;width:' + (15 * dataContext['indent']) + 'px"></span>';
-    var idx = dataView.getIdxById(dataContext.id);
-    if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
-      if (dataContext._collapsed) {
-        return spacer + '<span class="toggle expand"></span>&nbsp;' + value;
-      } else {
-        return spacer + '<span class="toggle collapse"></span>&nbsp;' + value;
-      }
-    } else {
-      return spacer + '<span class="toggle"></span>&nbsp;' + value;
-    }
-  };
-
-  // remove column
-  var removeButtonFormatter = function (row, cell, value, columnDef, dataContext) {
-    if (value === null || value === undefined || dataContext === undefined) { return ''; }
-    var parentId = dataContext.parent;
-    if (parentId === null) {
-      return '<a class="icon delete-button"><i class="material-icons">remove_circle</i></a>';
-      return '<button class="delete-button"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></button>';
-    }
-    return '';
-  };
-
-  // grid item definition
-  var columns = [
-    { id: 'tree', name: 'Tree', field: 'tree', width: 200, minWidth: 20, maxWidth: 300, formatter: treeFormatter },
-    { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, },
-    { id: 'path', name: 'Path', field: 'path', width: 260, minWidth: 20, maxWidth: 900, },
-    { id: 'remove', name: 'Remove', field: 'remove', width: 100, minWidth: 20, maxWidth: 200, formatter: removeButtonFormatter }
-  ];
-
-  // Tree structure
-  function myFilter(item) {
-    if (item.parent !== null) {
-      var parent = dataView.getItemById(item.parent);
-
-      while (parent) {
-        if (parent._collapsed) {
-          return false;
-        }
-        parent = dataView.getItemById(parent.parent);
-      }
-    }
-    return true;
-  }
-
   // service drop - down list
   function listDataAcquisition(objList) {
-    objList.sort();
     for (var i = 0; i < objList.length; i++) {
       var recordData = objList[i];
       for (var j = 0; j < recordData.length; j++) {
@@ -114,7 +89,7 @@ $(function () {
   function buildServiceSelect(packageList) {
     var optionsHtml = '';
 
-    // packageList.sort();
+    packageList.sort();
     for (var i = 0; i < packageList.length; i++) {
       optionsHtml += '<option value="' + packageList[i] + '">' + packageList[i] + '</option>';
     }
@@ -130,7 +105,7 @@ $(function () {
     var messageList = serviceMap[selectedValue];
     var optionsHtml = '';
 
-    // messageList.sort();
+    messageList.sort();
     for (var i = 0; i < messageList.length; i++) {
       optionsHtml += '<option value="' + messageList[i] + '">' + messageList[i] + '</option>';
     }
@@ -141,8 +116,54 @@ $(function () {
     $select.change();
   });
 
-  var resId = 0;
-  var reqId = 1;
+
+  ////////////////////////////////////////
+  // grid
+
+  function treeFormatter(row, cell, value, columnDef, dataContext) {
+    if (value === null || value === undefined || dataContext === undefined) { return ''; }
+
+    value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    var spacer = '<span style="display:inline-block;height:1px;width:' + (15 * dataContext['indent']) + 'px"></span>';
+    var idx = dataView.getIdxById(dataContext.id);
+    if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
+      if (dataContext._collapsed) {
+        return spacer + '<span class="toggle expand"></span>' + value;
+      } else {
+        return spacer + '<span class="toggle collapse"></span>' + value;
+      }
+    } else {
+      if (data[idx].indent === 0) {
+        return spacer + '<span class="toggle"></span>' + value;
+      }
+      return spacer + '<span class="toggle leaf"></span>' + value;
+    }
+  }
+
+  // remove column
+  function removeButtonFormatter(row, cell, value, columnDef, dataContext) {
+    if (value === null || value === undefined || dataContext === undefined) { return ''; }
+    var parentId = dataContext.parent;
+    if (parentId === null) {
+      return '<a class="icon delete-button"><i class="material-icons">remove_circle</i></a>';
+    }
+    return '';
+  }
+
+  // Tree structure
+  function myFilter(item) {
+    if (item.parent !== null) {
+      var parent = dataView.getItemById(item.parent);
+
+      while (parent) {
+        if (parent._collapsed) {
+          return false;
+        }
+        parent = dataView.getItemById(parent.parent);
+      }
+    }
+    return true;
+  }
 
   $('#add-button').on('click', function () {
     var serviceName = $('#service-select').val();
@@ -154,6 +175,8 @@ $(function () {
     var promises = [requestDefer.promise(), responseDefer.promise()];
 
     var reqData = [];
+    var resData = [];
+
     ros.getServiceRequestDetails(typeName,
       function (types) {
 
@@ -167,10 +190,10 @@ $(function () {
           remove: '',
           _collapsed: true,
         });
+
         reqParentId = reqId;
         reqId = reqId + 2;
         var reqChildren = [];
-        // TODO: push
         var typedefsData = types['typedefs'];
         var childReqData = typedefsData[0];
         var fieldarraylen = childReqData['fieldarraylen'];
@@ -200,7 +223,7 @@ $(function () {
         requestDefer.resolve();
       }
     );
-    var resData = [];
+
     ros.getServiceResponseDetails(typeName,
       function (types) {
         var resDataRetention = ({
@@ -217,7 +240,6 @@ $(function () {
         resParentId = resId;
         resId = resId + 2;
         var resChildren = [];
-        // TODO: push★
         var typedefsData = types['typedefs'];
         var childReqData = typedefsData[0];
         var fieldarraylen = childReqData['fieldarraylen'];
@@ -287,15 +309,6 @@ $(function () {
     });
   });
 
-  // initialize the model
-  // dataView = new Slick.Data.DataView({ inlineFilters: true });
-  dataView.setItems(data);
-  dataView.setFilter(myFilter);
-
-  // initialize the grid
-  grid = new Slick.Grid('#myGrid', dataView, columns);
-
-  //
   grid.onClick.subscribe(function (e, args) {
     var $target = $(e.target);
 
@@ -333,10 +346,12 @@ $(function () {
     }
   });
 
-  //★ wire up model events to drive the grid
+  // wire up model events to drive the grid
   dataView.onRowCountChanged.subscribe(function (e, args) {
     grid.updateRowCount();
     grid.render();
+    grid.resizeCanvas();
+    grid.autosizeColumns();
   });
 
   dataView.onRowsChanged.subscribe(function (e, args) {
@@ -344,7 +359,15 @@ $(function () {
     grid.render();
   });
 
-  requestService();
+  $(window).on('load resize', function () {
+    grid.resizeCanvas();
+    grid.autosizeColumns();
+
+    // prevent the delete button from being hidden when switching screens vertically
+    grid.resizeCanvas();
+  });
+
+  ////////////////////////////////////////
+  // start screen
+  initScreen();
 });
-
-
