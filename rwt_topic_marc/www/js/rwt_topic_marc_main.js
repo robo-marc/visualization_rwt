@@ -16,7 +16,7 @@ $(function () {
     cssClass: 'slick-cell-checkboxsel'
   });
 
-  // ★グリッドアイテム取得/////////////////////////////////////////
+  // ★グリッドアイテム取得////////////////////////////////////////
   var columns = [
     checkboxSelector.getColumnDefinition(),
     { id: 'topic', name: 'Topic', field: 'topic', width: 160, minWidth: 20, maxWidth: 300, sortable: true },
