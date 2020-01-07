@@ -299,6 +299,20 @@ $(function () {
     printYAxisDomain();
   });
 
+  $('#open_sub_button').on('click', function (e) {
+    e.preventDefault();
+    $('#contents_sub').show();
+    $('#close_sub_button').show();
+    $('#open_sub_button').hide();
+  });
+
+  $('#close_sub_button').on('click', function (e) {
+    e.preventDefault();
+    $('#contents_sub').hide();
+    $('#close_sub_button').hide();
+    $('#open_sub_button').show();
+  });
+
   ////////////////////////////////////////
   // ros events
 
