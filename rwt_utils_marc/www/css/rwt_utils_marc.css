@@ -1,0 +1,83 @@
+/* grid - overall*/
+.ui-widget {
+  margin: calc(0.75rem + 35px) 1.75rem 2.5rem;
+  padding: 2px;
+
+  border: 0;
+  box-sizing: border-box;
+  height: 300px;
+  position: relative;
+
+  font-family: "Noto Sans JP", "メイリオ", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+  font-size: 0.6875rem;
+  color: #474747;
+}
+
+.ui-widget .slick-pane,
+.ui-widget .slick-pane div {
+  border: 0;
+}
+
+.ui-widget .slick-pane .grid-canvas {
+  border: 1px solid #ccc;
+}
+
+.slick-cell,
+.slick-headerrow-column,
+.slick-footerrow-column {
+  padding-top: 4px;
+}
+
+.even {
+  background: #F7F7F7;
+}
+
+/* grid - header */
+.slick-pane-header div {
+  background: none;
+  font-weight: bold;
+  font-size: 0.8125rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+/* grid - tree toggle button */
+.slick-cell.r0 {
+  padding-left: 8px;
+}
+
+.toggle {
+  height: 4px;
+  width: 4px;
+  display: inline-block;
+  box-sizing: border-box;
+  margin-right: 5px;
+}
+
+.toggle.expand {
+  border: 4px solid transparent;
+  border-left: 4px solid #474747;
+}
+
+.toggle.collapse {
+  border: 4px solid transparent;
+  border-top: 4px solid #474747;
+}
+
+.toggle.leaf {
+  width: 4px;
+  height: 1px;
+  border-left: 6px solid #474747;
+  margin-bottom: 3px;
+}
+
+/* grid - remove button */
+.ui-widget-content a.icon {
+  font-size: 0;
+  color: #E85454;
+  cursor: pointer;
+}
+
+.ui-widget-content a.icon i {
+  font-size: 1rem;
+}
