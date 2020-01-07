@@ -19,14 +19,12 @@ $(function () {
   // ★グリッドアイテム取得/////////////////////////////////////////
   var columns = [
     checkboxSelector.getColumnDefinition(),
-    { id: 'topic', name: 'Topic', field: 'topic', width: 200, minWidth: 20, maxWidth: 300, sortable: true },
+    { id: 'topic', name: 'Topic', field: 'topic', width: 160, minWidth: 20, maxWidth: 300, sortable: true },
     { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, sortable: true },
-    { id: 'bandwidth', name: 'Bandwidth', field: 'bandwidth', width: 260, minWidth: 20, maxWidth: 300, sortable: true },
-    { id: 'hz', name: 'Hz', field: 'hz', width: 260, minWidth: 20, maxWidth: 300, sortable: true },
+    { id: 'bandwidth', name: 'Bandwidth', field: 'bandwidth', width: 120, minWidth: 20, maxWidth: 300, sortable: true },
+    { id: 'hz', name: 'Hz', field: 'hz', width: 120, minWidth: 20, maxWidth: 300, sortable: true },
     { id: 'value', name: 'Value', field: 'value', width: 260, minWidth: 20, maxWidth: 300, sortable: true },
   ];
-
-  // grid = new Slick.Grid("#myGrid", data, columns);
 
   $(document).ready(function aiuo() {
     var deferTopic = $.Deferred();
@@ -40,6 +38,7 @@ $(function () {
     ros.getTopics(function (topic_info) {
       for (var j = 0; j < topic_info.topics.length; j++) {
         topicNameList.push(topic_info.topics[j]);
+
       }
 
       deferTopic.resolve(topic_info);
@@ -76,15 +75,13 @@ $(function () {
         // console.log(topicTypeList);
         // console.log(detailItems);
         // console.log(detailList);
-        TopicData(topicNameList);
+        // TopicData(topicNameList);
         NumList(numberList);
         // console.log(data);
       });
-      grid = new Slick.Grid('#myGrid', data, columns);
     });
 
   });
-
   // initialize screen
   function initScreen() {
     // common
@@ -117,7 +114,6 @@ $(function () {
 
           var promiseHzBw = getHzBw(topics[index], name, info);
           promises.push(promiseHzBw);
-
         });
 
         deferTopic.resolve();
@@ -127,6 +123,8 @@ $(function () {
           console.log('---- get topic end ----');
           // gridList(rosparamList);
           // });
+
+          grid = new Slick.Grid('#myGrid', data, columns);
         });
       });
   }
@@ -141,6 +139,17 @@ $(function () {
       console.log(value);
       info = value;
       defer.resolve();
+
+      var bandwidth = value.bw;
+      var hz = value.hz;
+
+      data.push({
+        topic: topic,
+        type: type,
+        bandwidth: bandwidth,
+        hz: hz,
+        value: ''
+      })
     });
     return defer.promise();
   }
@@ -206,16 +215,6 @@ $(function () {
     );
 
     return defer.promise();
-  }
-
-  function TopicData(topicNameList) {
-    for (var i = 0; i < topicNameList.length; i++) {
-      var recordTopicData = topicNameList[i];
-      // console.log(recordTopicData);
-      data.push({
-        topic: recordTopicData,
-      });
-    }
   }
 
   function NumList(numberList) {
