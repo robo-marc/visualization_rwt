@@ -75,6 +75,7 @@
 .ui-widget-content a.icon {
   font-size: 0;
   color: #E85454;
+  cursor: pointer;
 }
 
 .ui-widget-content a.icon i {
