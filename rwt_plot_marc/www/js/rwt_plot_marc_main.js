@@ -311,6 +311,10 @@ $(function () {
     $('#open_sub_button').show();
   });
 
+  $(window).on('resize', function () {
+    plot.resizePlot();
+  });
+
   ////////////////////////////////////////
   // ros events
 

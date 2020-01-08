@@ -48,6 +48,40 @@ ROSLIB.RWTPlot.prototype.clearData = function () {
   }
 };
 
+ROSLIB.RWTPlot.prototype.resizePlot = function () {
+  if (!this.spec) {
+    return;
+  }
+
+  var $content = $('#' + this.contentId);
+  var width = $content.width();
+  var height = $content.height();
+  var margin = this.spec.margin || { top: 20, right: 20, bottom: 20, left: 40 };
+
+  ///// resize svg /////
+  $('svg.rwt-plot')
+    .attr('width', width)
+    .attr('height', height);
+
+  ///// resize clip area /////
+  this.svg.select('#clip > rect')
+    .attr('width', width - margin.left - margin.right)
+    .attr('height', height - margin.top - margin.bottom);
+
+  ///// resize x-axis /////
+  this.xScale.range([0, width - margin.left - margin.right]);
+  this.x.scale(this.xScale);
+  this.svg.select('.x.axis').call(this.x);
+
+  ///// re-draw path /////
+  // right edge of x-axis domain
+  var xEndTime = this.xScale.domain()[1];
+  var xEndRosTime = ROSLIB.Time.fromDate(xEndTime);
+
+  // this.drawTimestampedData(xEndRosTime);
+  this.lineDrawingThrottle(xEndRosTime);
+};
+
 ROSLIB.RWTPlot.prototype.pause = function () {
   this.isPaused = true;
   $('#' + this.contentId).addClass('scroll');
@@ -249,6 +283,7 @@ ROSLIB.RWTPlot.prototype.beginScroll = function (e, plot) {
 ROSLIB.RWTPlot.prototype.endScroll = function (e, plot) {
   // console.log('end scroll');
   plot.scrollBeginPosX = undefined;
+  plot.scrollBeginMaxX = undefined;
 };
 
 ROSLIB.RWTPlot.prototype.scroll = function (e, plot) {
