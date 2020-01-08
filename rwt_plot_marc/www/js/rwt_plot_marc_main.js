@@ -41,6 +41,7 @@ $(function () {
     $('#y-auto-check').click();
     $('#pause-button').show();
     $('#start-button').hide();
+    $('#open_sub_button').click();
 
     printPlotSpec();
     printXAxisSec();
@@ -217,9 +218,6 @@ $(function () {
       ros.getMessageDetails(topicType, function (details) {
         var decoded = ros.decodeTypeDefs(details);
 
-        // TODO: deprecated
-        $('#message-detail').find('pre').html(JSON.stringify(decoded, null, '  ')); // pretty print
-
         var typeList = getFieldList(decoded);
         $('#type-select').empty();
         _.each(typeList, function (value, index) {
@@ -301,16 +299,20 @@ $(function () {
 
   $('#open_sub_button').on('click', function (e) {
     e.preventDefault();
-    $('#contents_sub').show();
+    $('#contents_sub').slideDown('normal');
     $('#close_sub_button').show();
     $('#open_sub_button').hide();
   });
 
   $('#close_sub_button').on('click', function (e) {
     e.preventDefault();
-    $('#contents_sub').hide();
+    $('#contents_sub').slideUp('normal');
     $('#close_sub_button').hide();
     $('#open_sub_button').show();
+  });
+
+  $(window).on('resize', function () {
+    plot.resizePlot();
   });
 
   ////////////////////////////////////////
