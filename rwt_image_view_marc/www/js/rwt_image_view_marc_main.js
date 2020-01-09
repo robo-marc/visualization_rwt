@@ -53,20 +53,22 @@ $(function () {
       return;
     }
 
-    var topOffset = 0;
+    var width = $canvas.prop('width');
+    var height = $canvas.prop('height');
+    var canvasTopOffset = 0;
     if (currentAngle % 180 === 0) { // when 0 or 180 degree
-      topOffset = 0;
+      canvasTopOffset = 0;
+      $('#canvas-area').css('height', height);
     } else { // when 90 or 270 degree
-      var width = $canvas.prop('width');
-      var height = $canvas.prop('height');
-      topOffset = (width - height) / 2;
+      canvasTopOffset = (width - height) / 2;
+      $('#canvas-area').css('height', width);
     }
 
     $canvas
       .css('transform-origin', 'center center')
       .css('transform', 'rotate(' + currentAngle + 'deg)')
       .css('position', 'relative')
-      .css('top', topOffset)
+      .css('top', canvasTopOffset)
       ;
   }
 
