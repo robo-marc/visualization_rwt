@@ -2,18 +2,20 @@
 <html lang="ja">
 
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8">
   <title>rwt_rosparam_marc</title>
   <meta name="author" content="Prototype">
   <!-- <meta name="viewport" content="width=1000"> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css">
+  <!-- <link rel="stylesheet" href="common/iconfont/material-icons.css"> -->
+  <!-- <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css"> -->
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" type="text/css" />
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css"
     type="text/css" />
-  <link rel="stylesheet" href="common/iconfont/material-icons.css">
-  <link rel="stylesheet" href="common/css/common.css">
-  </link>
+  <link rel="stylesheet" href="../rwt_utils_marc/common/iconfont/material-icons.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/common/css/common.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/css/rwt_utils_marc.css" />
+  <link rel="stylesheet" href="css/rwt_rosparam_marc.css" />
 
 </head>
 
@@ -21,65 +23,60 @@
 
   <div class="root">
 
-    <div class="container">
+    <header>
+      <div class="column">
+        <h2>rwt_rosparam_marc</h2>
+        <a href="http://wiki.ros.org/rosparam" target="_blank" class="icon"><i
+            class="material-icons">help_outline</i></a>
+      </div>
+    </header>
 
-      <!-- <div class="page-header">
-      <h1>rwt_rosparam_marc</h1>
-    </div> -->
+    <div class="contents rosparam">
 
-      <header>
+      <div class="contents_header parts-box">
         <div class="column">
-          <h2>rwt_rosparam_marc</h2>
-          <a href="http://wiki.ros.org/rosparam" target="_blank" class="icon"><i
-              class="material-icons">help_outline</i></a>
-        </div>
-      </header>
+          <label for="">rosparam</label>
+          <!-- <select type="select" class="mini"> -->
+          <!-- <select id="rosparam-select" class="form-control"></select> -->
+          <select id="rosparam-select" type="select" class="mini"></select>
 
-      <div id="rosparam-area">
-        <form id="rosparam-form" role="form" class="form-inline">
-          <div class="form-group">
-            <label class="sr-only" for="rosparam-select">rosparam</label>
-            <select id="rosparam-select" class="form-control">
-            </select>
-          </div>
-          <!-- <div class="form-group">
-          <label class="sr-only" for="rosparam-arg1">rosparam-arg1</label>
-          <select id="rosparam-arg1" class="form-control">
           </select>
-        </div> -->
-          <div class="form-group">
-            <label class="sr-only" for="rosparam-arg1">rosparam-arg1</label>
-            <input type="text" class="form-control" name="rosparam-arg1" id="rosparam-arg1" list="rosparam-arg1-data">
-            <datalist id="rosparam-arg1-data"></datalist>
-          </div>
 
-          <div class="form-group">
-            <label class="sr-only" for="rosparam-arg2">rosparam-arg2</label>
-            <input type="name" class="form-control" name="rosparam-arg2" id="rosparam-arg2"
-              placeholder="specify a parameter" />
-          </div>
+          <a href class="icon" id="folder"><i class="material-icons">folder</i>
+            <span class="md_none">File</span></a>
+
+          <!-- <span class="label">/</span> -->
+          <input type="text" class="form-control" name="rosparam-arg1" id="rosparam-arg1" list="rosparam-arg1-data">
+          <datalist id="rosparam-arg1-data"></datalist>
+
+          <input type="name" class="form-control" name="rosparam-arg2" id="rosparam-arg2"
+            placeholder="specify a parameter" />
+          <!-- <input type="text" placeholder="Text Box"> -->
           <button type="button" id="execute-button" class="btn btn-primary">execute</button>
-          <!-- TODO load test -->
+          <!-- <button>EXECUTE</button> -->
+
           <form id="fileform" name="fileform">
             <input type="file" name="load" id="load" />
           </form>
-          <!-- <a button type="button" id="execute-button" class="btn btn-primary" href="#"
-          download="rosparam.yaml">execute</button></a> -->
-        </form>
+
+        </div>
       </div>
 
-      <br>
-      <div id="result-area">
-        <div id="myGrid" style="width:800px;height:400px;"></div>
-      </div>
-      <br>
+      <div class="contents_body">
 
-      <div class="message-group">
-        <p>
-          <textarea name="message" rows="3" cols="100" value="" disabled="disabled">System message might be shown here when necessary
-        </textarea>
-        </p>
+        <div id="result-area">
+          <div class="myGrid" id="myGrid"></div>
+        </div>
+
+        <div class="sys-message-box">
+          <div class="sys-message-text">
+            <span textarea name="message" class="placeholder">System message might be shown here when
+              necessary</span>　message text color
+          </div>
+        </div>
+
       </div>
+
     </div>
   </div>
 
@@ -98,6 +95,7 @@
   <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
   <script type="text/javascript" src="js/rwt_rosparam_marc_main.js"></script>
+
 </body>
 
 </html>

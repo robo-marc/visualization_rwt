@@ -29,6 +29,7 @@ $(function () {
 
   var rosparamList = {};
   var fileObj = document.getElementById('load');
+  // var fileObj = $('#load');
   var fileData = [];
 
   var columns = [
@@ -40,8 +41,10 @@ $(function () {
     enableColumnReorder: false
   };
 
+  var data = [];
+  var grid = new Slick.Grid('#myGrid', data, columns, options);
+
   function gridList(rosparamList) {
-    var data = [];
     var i = 0;
     for (var key in rosparamList) {
       data[i] = {
@@ -60,7 +63,6 @@ $(function () {
       }
     });
 
-    var grid = new Slick.Grid('#myGrid', data, columns, options);
     grid.onSort.subscribe(function (e, args) {
       grid.invalidateAllRows();
       grid.render();
@@ -133,9 +135,23 @@ $(function () {
   $('#rosparam-arg1').hide();
   $('#rosparam-arg2').hide();
   $('#load').hide();
+  $('#folder').hide();
+
 
   // file change
+  $('#folder').on('click', function (e) {
+    e.preventDefault();
+    $('#load').click();
+  });
+
+  $('#load').on('change', function (evt) {
+    $load = $(this);
+    var file = $load.val();
+  });
+
   fileObj.addEventListener('change', function (evt) {
+    // $('#load').on('click', function (evt) {
+    // function handleFileSelect(evt) {
     var file = evt.target.files;
     // read text
     var reader = new FileReader();
@@ -148,6 +164,8 @@ $(function () {
     };
   });
 
+  // });
+
   $('#rosparam-select').change(function () {
     var rosparamOption = $('#rosparam-select').val();
     $('#rosparam-arg2').val('');
@@ -156,12 +174,14 @@ $(function () {
       case 'list':
         $('#rosparam-arg1').hide();
         $('#rosparam-arg2').hide();
+        $('#folder').hide();
         $('#load').hide();
         initMessage();
         break;
       case 'set':
         $('#rosparam-arg1').show();
         $('#rosparam-arg2').show();
+        $('#folder').hide();
         $('#load').hide();
         setArg1List();
         initMessage();
@@ -169,6 +189,7 @@ $(function () {
       case 'get':
         $('#rosparam-arg1').show();
         $('#rosparam-arg2').hide();
+        $('#folder').hide();
         $('#load').hide();
         setArg1List();
         initMessage();
@@ -176,18 +197,21 @@ $(function () {
       case 'load':
         $('#rosparam-arg1').hide();
         $('#rosparam-arg2').show();
-        $('#load').show();
+        $('#folder').show();
+        $('#load').hide();
         initMessage();
         break;
       case 'dump':
         $('#rosparam-arg1').hide();
         $('#rosparam-arg2').hide();
+        $('#folder').hide();
         $('#load').hide();
         initMessage();
         break;
       case 'delete':
         $('#rosparam-arg1').show();
         $('#rosparam-arg2').hide();
+        $('#folder').hide();
         $('#load').hide();
         setArg1List();
         initMessage();
@@ -408,6 +432,14 @@ $(function () {
         }
         break;
     }
+  });
+
+  $(window).on('load resize', function () {
+    grid.resizeCanvas();
+    grid.autosizeColumns();
+
+    // prevent the delete button from being hidden when switching screens vertically
+    grid.resizeCanvas();
   });
 
   clearList();
