@@ -1,6 +1,6 @@
 /* grid - overall*/
 .ui-widget {
-  margin: calc(0.75rem + 35px) 1.75rem 2.5rem;
+  margin: 0.75rem 1.75rem 2.5rem;
   padding: 2px;
 
   border: 0;
