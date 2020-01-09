@@ -4,18 +4,21 @@ $(function () {
 
   var ros = new ROSLIB.Ros();
 
-  var checkboxSelector;
-
   var topicTypeDetail = {};
   var info = {};
   var topicId = 0;
-  checkboxSelector = new Slick.CheckboxSelectColumn({
-    cssClass: 'slick-cell-checkboxsel'
+
+  var checkboxSelector = new Slick.CheckboxSelectColumn({
+    cssClass: 'slick-cell-checkboxsel',
+    hideInColumnTitleRow: true,
   });
 
-  // ★グリッドアイテム取得/////////////////////////////////////////
+  var checkboxColumnDef = checkboxSelector.getColumnDefinition();
+  var checkboxDefaultFormatter = checkboxColumnDef.formatter;
+  checkboxColumnDef.formatter = checkboxCustomFormatter;
+
   var columns = [
-    checkboxSelector.getColumnDefinition(),
+    checkboxColumnDef,
     { id: 'topic', name: 'Topic', field: 'topic', width: 200, minWidth: 20, maxWidth: 300, sortable: true, formatter: treeFormatter },
     { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, sortable: true },
     { id: 'bandwidth', name: 'Bandwidth', field: 'bandwidth', width: 50, minWidth: 20, maxWidth: 300, sortable: true },
@@ -50,6 +53,13 @@ $(function () {
   }
 
 
+  function checkboxCustomFormatter(row, cell, value, columnDef, dataContext) {
+    var idx = dataView.getIdxById(dataContext.id);
+    if (data[idx] && data[idx].parent === null) {
+      return checkboxDefaultFormatter(row, cell, value, columnDef, dataContext);
+    }
+    return '';
+  }
 
   function treeFormatter(row, cell, value, columnDef, dataContext) {
     if (value === null || value === undefined || dataContext === undefined) { return ''; }
@@ -83,171 +93,53 @@ $(function () {
     return true;
   }
 
-  function getDetailList(topic, type) {
+  function decodeTypeDefs(type_defs, root) {
+    // It calls itself recursively to resolve type definition
+    // using hint_defs.
+    var decodeTypeDefsRec = function (theType, parent, hint_defs) {
+      var typeList = [];
+      var sub_type;
 
-    //get rootTopic
-    console.log(topicId + ':' + parentTopicDetailList.length);
-    // if (parentTopicDetailList.length === 0) {
-    //   parentTopicDetailList.push({
-    //     id: topicId,
-    //     indent: 0,
-    //     parent: null,
-    //     topic: topic,
-    //     type: type,
-    //     remove: '',
-    //     parentPath: String(topicId),
-    //     _collapsed: true,
-    //   });
-    //   topicId++;
-    //   return getDetailList(topic, type);
-    // }
-
-
-    var promise = getMessageDetailsAsync(type,
-      function (result) {
-        // detailItemList.push(result);
-        topicDetailMap[topic] = result;
-      },
-      function (mes) {
-        console.log(mes);
-      }
-    );
-
-    // $.when(promise).done(function () {
-    // console.log("aaaa");
-    var indent = 1;
-    if (detailItemList.length > 1) {
-      // console.log("bbbb");
-      // console.log(detailItemList);
-      _.each(detailItemList, function (item, index) {
-        // console.log(item);
-        // console.log(type);
-        _.each(item, function (item2, index) {
-
-          if (item2.type === type) {
-            console.log(item2);
-            for (var i = 0; i < item2.fieldnames.length; i++) {
-              parentTopicDetailList.push({
-                id: topicId,
-                indent: indent,
-                parent: topic,
-                topic: item2.fieldnames[i],
-                type: item2.fieldtypes[i],
-                remove: '',
-                parentPath: String(topicId),
-                _collapsed: true,
-              });
-              topicId++;
-            }
-            // return item2.fieldnames[i], item2.fieldtypes[i];
-          }
-          indent++;
-        });
-        // return getDetailList(item,)
-      });
-    }
-    allTopicDetailList.push(parentTopicDetailList);
-
-    console.log(allTopicDetailList);
-
-    // last processing
-    return;
-    // });
-  }
-
-
-  function getFieldList(typeInfo, parent) {
-    var typeList = [];
-
-    _.each(typeInfo, function (fieldType, fieldName) {
-      topicId++;
-      var item = {
-        id: topicId,
-        topic: fieldName,
-        type: fieldType + (_.isArray(fieldType) ? '[]' : ''),
-        bandwidth: undefined,
-        hz: undefined,
-        value: undefined,
-        parent: parent.id,
-        indent: parent.indent + 1,
-        _collapsed: true,
-      };
-      typeList.push(item);
-
-      if (typeof fieldType === 'object' && !(_.isArray(fieldType))) {
-        // console.log('[name, type]: [' + fieldName + ', ' + fieldType + '] is object');
-        // typeList.push(fieldName); // For set all member, but not implemented.
-        var children = getFieldList(fieldType, item);
-        _.each(children, function (child, index) {
-          // var s = fieldName + '/' + child;
-          typeList.push(child);
-        });
-
-        // } else {
-        //   typeList.push(item);
-      }
-    });
-
-    return typeList;
-  }
-
-
-  var decodeTypeDefs = function (defs) {
-    // var that = this;
-
-    // calls itself recursively to resolve type definition using hints.
-    var decodeTypeDefsRec = function (theType, hints) {
-      var typeDefDict = {};
       for (var i = 0; i < theType.fieldnames.length; i++) {
         var arrayLen = theType.fieldarraylen[i];
         var fieldName = theType.fieldnames[i];
         var fieldType = theType.fieldtypes[i];
-        if (fieldType.indexOf('/') === -1) { // check the fieldType includes '/' or not
-          if (arrayLen === -1) {
-            typeDefDict[fieldName] = fieldType;
-          }
-          else {
-            typeDefDict[fieldName] = [fieldType];
+
+        topicId++;
+        var item = {
+          id: topicId,
+          topic: fieldName,
+          type: fieldType + ((arrayLen === -1) ? '' : '[]'),
+          bandwidth: undefined,
+          hz: undefined,
+          value: undefined,
+          parent: parent.id,
+          indent: parent.indent + 1,
+          _collapsed: true,
+        };
+        typeList.push(item);
+
+        // lookup the name
+        sub_type = undefined;
+        for (var j = 0; j < hint_defs.length; j++) {
+          if (hint_defs[j].type.toString() === fieldType.toString()) {
+            sub_type = hint_defs[j];
+            break;
           }
         }
-        else {
-          // lookup the name
-          var sub = false;
-          for (var j = 0; j < hints.length; j++) {
-            if (hints[j].type.toString() === fieldType.toString()) {
-              sub = hints[j];
-              break;
-            }
-          }
-          if (sub) {
-            var subResult = decodeTypeDefsRec(sub, hints);
-            if (arrayLen === -1) {
-            }
-            else {
-              typeDefDict[fieldName] = [subResult];
-            }
-          }
-          else {
-            // that.emit('error', 'Cannot find ' + fieldType + ' in decodeTypeDefs');
-          }
+        if (sub_type) {
+          var sub_type_result = decodeTypeDefsRec(sub_type, item, hint_defs);
+          typeList = typeList.concat(sub_type_result);
         }
       }
-      return typeDefDict;
-    };
 
-    return decodeTypeDefsRec(defs[0], defs);
-  };
+      return typeList;
+    }; // end of decodeTypeDefsRec
+
+    return decodeTypeDefsRec(type_defs[0], root, type_defs);
+  }
 
   function getTopics() {
-    // var defer = $.Deferred();
-    // var topicNameList = [];
-    // var topicTypeList = [];
-    // var detailItems = [];
-    // var detailList = [];
-    // var numberList = [];
-    // var nameList = [];
-    // var parentList = [];
-
     ros.getTopics(function (topicInfo) {
       // console.log(topicInfo);
       var promises = [];
@@ -258,6 +150,7 @@ $(function () {
         var promise = getMessageDetailsAsync(
           topicType,
           function (result) {
+            // console.log(result);
             topicDetailMap[topicName] = {
               topicType: topicType,
               detail: result
@@ -270,13 +163,17 @@ $(function () {
         promises.push(promise);
       });
 
+      // TODO: bandwidth, hz を取得する
+      // $.when.apply(null, promises).done(function () {
+      //   _.each(topicDetailMap, function (details, topicName) {
+
+      //   });
+      // });
+
       $.when.apply(null, promises).done(function () {
-        // 整形する
+        // format type information
         var fieldList = [];
         _.each(topicDetailMap, function (details, topicName) {
-          console.log(details);
-          var decoded = ros.decodeTypeDefs(details.detail);
-          // var decoded = decodeTypeDefs(details.detail);
 
           topicId++;
           var parent = {
@@ -292,8 +189,8 @@ $(function () {
           };
           fieldList.push(parent);
 
-          var typeList = getFieldList(decoded, parent);
-          fieldList = fieldList.concat(typeList);
+          var decoded = decodeTypeDefs(details.detail, parent);
+          fieldList = fieldList.concat(decoded);
         });
 
         // TODO: treeの開閉の状態をdataから取得して引き継ぐ
@@ -301,8 +198,11 @@ $(function () {
         // TODO: ソートの状態を引き継ぐ
         // 初回表示なら topicNameでソートする
 
+
+        //TODO:subscribe
+
         data = fieldList;
-        console.log(fieldList);
+        // console.log(fieldList);
 
         // draw grid
         dataView.beginUpdate();
@@ -311,55 +211,6 @@ $(function () {
 
       });
     });
-
-    // $.when(deferTopic).done(function (topicInfo) {
-    //   var promises = [];
-    //   $.each(topicInfo.types, function (index, topic_item) {
-    //     var promise = getMessageDetailsAsync(topic_item,
-    //       function (detailItem) {
-    //         // console.log('detailItem');
-    //         // console.log(detailItem);
-    //         // console.log(topic_item);
-    //         topicTypeList.push(topic_item);
-
-
-    //         // _.each(detailItem, function (item, index) {
-    //         //   detailItems.push({ name: item.fieldnames, type: item.fieldtypes });
-    //         // });
-
-    //         var decodedItem = ros.decodeTypeDefs(detailItem);
-    //         // console.log(detailItem);
-    //         // console.log(decodedItem);
-    //         detailList.push(decodedItem);
-    //         numberList.push(index);
-    //       },
-    //       function (message) {
-    //         console.error('error at getMessageDetailsAsync().' + message);
-    //       }
-    //     );
-    //     promises.push(promise);
-    //   });
-
-    //   $.when(promises).done(function () {
-    //     // console.log(detailItems);
-    //     $.each(numberList, function (numberIndex, number) {
-    //       var number_change = parseInt(number, 10);
-    //       nameList.push(topicNameList[number_change]);
-    //     });
-
-    //     // console.log(topicNameList);
-    //     // console.log(nameList);
-    //     // console.log(numberList);
-    //     // console.log(topicTypeList);
-    //     // console.log(detailItems);
-    //     // console.log(detailList);
-    //     getTopicData(topicNameList);
-    //     getNumList(numberList);
-    //     // console.log(data);
-    //   });
-    //   // grid = new Slick.Grid('#myGrid', data, columns);
-    // });
-
   }
 
 
@@ -456,31 +307,31 @@ $(function () {
     return defer.promise();
   }
 
-  function getTopicData(topicNameList) {
-    for (var i = 0; i < topicNameList.length; i++) {
-      var recordTopicData = topicNameList[i];
-      // console.log(recordTopicData);
-      // data.push({
-      //   topic: recordTopicData,
-      // });
-      dataView.beginUpdate();
-      dataView.addItem({
-        topic: recordTopicData,
-      });
-      dataView.endUpdate();
+  // function getTopicData(topicNameList) {
+  //   for (var i = 0; i < topicNameList.length; i++) {
+  //     var recordTopicData = topicNameList[i];
+  //     // console.log(recordTopicData);
+  //     // data.push({
+  //     //   topic: recordTopicData,
+  //     // });
+  //     dataView.beginUpdate();
+  //     dataView.addItem({
+  //       topic: recordTopicData,
+  //     });
+  //     dataView.endUpdate();
 
-    }
-  }
+  //   }
+  // }
 
-  function getNumList(numberList) {
-    for (var i = 0; i < numberList.length; i++) {
-      var recordNumData = numberList[i];
-      // console.log(recordNumData);
-      data.push({
-        type: recordNumData,
-      });
-    }
-  }
+  // function getNumList(numberList) {
+  //   for (var i = 0; i < numberList.length; i++) {
+  //     var recordNumData = numberList[i];
+  //     // console.log(recordNumData);
+  //     data.push({
+  //       type: recordNumData,
+  //     });
+  //   }
+  // }
 
 
 
