@@ -57,6 +57,10 @@ ROSLIB.Ros.prototype.dumpParams = function (callback, failedCallback) {
     client.callService(request,
       function (result) {
         callback(result);
+        // TODO test
+        // console.log(JSON.parse(result));
+        // console.log(result);
+        // console.log(JSON.stringify(result));
       },
       function (message) {
         failedCallback(message);
@@ -65,6 +69,8 @@ ROSLIB.Ros.prototype.dumpParams = function (callback, failedCallback) {
   } else {
     client.callService(request, function (result) {
       callback(result);
+      // TODO test
+      // console.log(result);
     });
   }
 };
@@ -81,6 +87,9 @@ ROSLIB.Ros.prototype.loadParams = function (params, callback, failedCallback) {
     name: '/load_params',
     serviceType: 'rwt_rosparam_marc/LoadParams'
   });
+
+  // TODO test
+  console.log(params);
 
   var request = new ROSLIB.ServiceRequest({
     name: this.name,
@@ -103,6 +112,7 @@ ROSLIB.Ros.prototype.loadParams = function (params, callback, failedCallback) {
   }
 };
 
+// TODO del
 /**
  * Retrieves Hz Bandwidth in ROS from Topic
  * @class Ros
@@ -120,6 +130,60 @@ ROSLIB.Ros.prototype.getTopicInfo = function (topicName, topicType, callback, fa
     name: topicName,
     type: topicType
   });
+  if (typeof failedCallback === 'function') {
+    client.callService(request,
+      function (result) {
+        callback(result);
+      },
+      function (message) {
+        failedCallback(message);
+      }
+    );
+  } else {
+    client.callService(request, function (result) {
+      callback(result);
+    });
+  }
+};
+
+// TODO test
+ROSLIB.Ros.prototype.startMonitoring = function (topicName, topicType, callback, failedCallback) {
+  var client = new ROSLIB.Service({
+    ros: this,
+    // name: '/topic_hz_bw2',
+    name: '/start_monitoring',
+    serviceType: 'rwt_rostopic_marc/StartMonitoring'
+  });
+
+  var request = new ROSLIB.ServiceRequest({
+    name: topicName,
+    type: topicType
+  });
+  if (typeof failedCallback === 'function') {
+    client.callService(request,
+      function (result) {
+        callback(result);
+      },
+      function (message) {
+        failedCallback(message);
+      }
+    );
+  } else {
+    client.callService(request, function (result) {
+      callback(result);
+    });
+  }
+};
+
+ROSLIB.Ros.prototype.getMonitoringInfo = function (callback, failedCallback) {
+  var client = new ROSLIB.Service({
+    ros: this,
+    name: '/get_monitoring_info',
+    serviceType: 'rwt_rostopic_marc/GetMonitoringInfo'
+  });
+
+  var request = new ROSLIB.ServiceRequest(
+  );
   if (typeof failedCallback === 'function') {
     client.callService(request,
       function (result) {

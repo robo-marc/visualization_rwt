@@ -338,12 +338,37 @@ $(function () {
         break;
       case 'dump':
         var download = '';
+        // var test = '';
         initMessage();
         ros.dumpParams(function (value) {
           if (value) {
-            _.each(value, function (params, index) {
-              download = params;
-            });
+
+            // TODO test
+            console.log(value);
+            for (var i = 0; i < value.params.length; i++) {
+              var param = value.params[i].replace(/^"(.*)"$/, '$1');
+              console.log(param);
+              // var str = value.params[i].replace(/\"/g, '')
+              // console.log(value.params[i]);
+              // var param1 = value.params[i].slice(1);
+              // console.log(param1);
+              // var param = param1.slice(0, -1);
+              // console.log(param);
+
+              download = download + param;
+              console.log(download);
+            }
+
+            // _.each(value, function (params, index) {
+            //   download = params;
+
+            // TODO test
+            // console.log(download);
+            // var test = params.replace(/\"/g, '');
+            // console.log(test);
+
+            // });
+
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(new Blob([download]));
             link.download = 'rosparam.yaml';
