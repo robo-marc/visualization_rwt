@@ -1,0 +1,14 @@
+<launch>
+  <arg name="launch_roswww" default="true" />
+  <arg name="display" default=":103" />
+  <include file="$(find rwt_py_console)/launch/www.launch" if="$(arg launch_roswww)" />
+
+  <node pkg="rwt_py_console" type="xvnc.sh" args="$(arg display)" name="xvnc" output="screen" />
+  <node pkg="rwt_py_console" type="launch_websockify.sh" args="$(arg display)" name="websocktify" output="screen" />
+  <node pkg="rwt_py_console" type="wm.sh" args="-f $(find rwt_py_console)/config/ratpoisonrc" name="wm" output="screen">
+    <env name="DISPLAY" value="$(arg display)" />
+  </node>
+  <node pkg="rqt_py_console" type="rqt_py_console" name="py_console" output="screen" respawn="true" respawn_delay="1">
+    <env name="DISPLAY" value="$(arg display)" />
+  </node>
+</launch>
