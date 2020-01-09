@@ -4,18 +4,21 @@ $(function () {
 
   var ros = new ROSLIB.Ros();
 
-  var checkboxSelector;
-
   var topicTypeDetail = {};
   var info = {};
   var topicId = 0;
-  checkboxSelector = new Slick.CheckboxSelectColumn({
-    cssClass: 'slick-cell-checkboxsel'
+
+  var checkboxSelector = new Slick.CheckboxSelectColumn({
+    cssClass: 'slick-cell-checkboxsel',
+    hideInColumnTitleRow: true,
   });
 
-  // ★グリッドアイテム取得/////////////////////////////////////////
+  var checkboxColumnDef = checkboxSelector.getColumnDefinition();
+  var checkboxDefaultFormatter = checkboxColumnDef.formatter;
+  checkboxColumnDef.formatter = checkboxCustomFormatter;
+
   var columns = [
-    checkboxSelector.getColumnDefinition(),
+    checkboxColumnDef,
     { id: 'topic', name: 'Topic', field: 'topic', width: 200, minWidth: 20, maxWidth: 300, sortable: true, formatter: treeFormatter },
     { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, sortable: true },
     { id: 'bandwidth', name: 'Bandwidth', field: 'bandwidth', width: 50, minWidth: 20, maxWidth: 300, sortable: true },
@@ -47,6 +50,15 @@ $(function () {
 
     // draw grid
     getTopics();
+  }
+
+
+  function checkboxCustomFormatter(row, cell, value, columnDef, dataContext) {
+    var idx = dataView.getIdxById(dataContext.id);
+    if (data[idx] && data[idx].parent === null) {
+      return checkboxDefaultFormatter(row, cell, value, columnDef, dataContext);
+    }
+    return '';
   }
 
   function treeFormatter(row, cell, value, columnDef, dataContext) {
@@ -185,6 +197,9 @@ $(function () {
 
         // TODO: ソートの状態を引き継ぐ
         // 初回表示なら topicNameでソートする
+
+
+        //TODO:subscribe
 
         data = fieldList;
         // console.log(fieldList);
