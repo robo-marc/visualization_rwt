@@ -219,6 +219,10 @@ ROSLIB.RWTPlot.prototype.setMouseHandler = function () {
       // start scrolling only from above svg
       that.beginScroll(this, that);
     })
+    .on('touchstart', function () {
+      // start scrolling only from above svg
+      that.beginScroll(this, that);
+    })
     .on('mousemove', function () {
       that.paintPosition(this, that, $positionLabel);
     })
@@ -236,7 +240,16 @@ ROSLIB.RWTPlot.prototype.setMouseHandler = function () {
       // End scrolling when dragging ends
       that.endScroll(this, that);
     })
+    .on('touchend', function () {
+      that.endScroll(this, that);
+    })
+    .on('touchcancel', function () {
+      that.endScroll(this, that);
+    })
     .on('mousemove', function () {
+      that.scroll(this, that);
+    })
+    .on('touchmove', function () {
       that.scroll(this, that);
     })
     ;
