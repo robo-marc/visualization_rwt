@@ -13,3 +13,6 @@
 [submodule "rwt_utils_3rdparty/www/SlickGrid"]
 	path = rwt_utils_3rdparty/www/SlickGrid
 	url = https://github.com/6pac/SlickGrid
+[submodule "rwt_utils_3rdparty/www/noVNC"]
+	path = rwt_utils_3rdparty/www/noVNC
+	url = https://github.com/novnc/noVNC
