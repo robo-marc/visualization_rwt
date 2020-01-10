@@ -192,7 +192,7 @@ $(function () {
       // do not preventDefault.
 
       var arr = [];
-      var itemList = _.cloneDeep(list);
+      var itemList = _.cloneDeep(dataView.getItems().reverse());
       _.each(itemList, function (value, index) {
         delete value.id;
         delete value['#'];
