@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>rwt_graph</name>
+  <name>rwt_rviz_marc</name>
   <version>0.0.0</version>
-  <description>The rwt_graph package</description>
+  <description>The rwt_rviz_marc package</description>
 
   <author email="F-ROSROBO@fsi.co.jp">F-ROSROBO</author>
   <maintainer email="F-ROSROBO@fsi.co.jp">F-ROSROBO</maintainer>
+
 
   <license>BSD</license>
 
@@ -15,6 +16,7 @@
   <depend>rwt_utils_3rdparty</depend>
 
   <exec_depend>roswww</exec_depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
