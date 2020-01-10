@@ -36,24 +36,19 @@
       <div class="contents_header parts-box">
         <div class="column">
           <label for="">rosparam</label>
-          <!-- <select type="select" class="mini"> -->
-          <!-- <select id="rosparam-select" class="form-control"></select> -->
           <select id="rosparam-select" type="select" class="mini"></select>
-
           </select>
 
-          <a href class="icon" id="folder"><i class="material-icons">folder</i>
-            <span class="md_none">File</span></a>
-
-          <!-- <span class="label">/</span> -->
           <input type="text" class="form-control" name="rosparam-arg1" id="rosparam-arg1" list="rosparam-arg1-data">
           <datalist id="rosparam-arg1-data"></datalist>
 
           <input type="name" class="form-control" name="rosparam-arg2" id="rosparam-arg2"
             placeholder="specify a parameter" />
-          <!-- <input type="text" placeholder="Text Box"> -->
+
+          <a href class="icon" id="folder"><i class="material-icons">folder</i>
+            <span class="md_none">File</span></a>
+
           <button type="button" id="execute-button" class="btn btn-primary">execute</button>
-          <!-- <button>EXECUTE</button> -->
 
           <form id="fileform" name="fileform">
             <input type="file" name="load" id="load" />
@@ -70,8 +65,8 @@
 
         <div class="sys-message-box">
           <div class="sys-message-text">
-            <span textarea name="message" class="placeholder">System message might be shown here when
-              necessary</span>　message text color
+            <span textarea id="message" class="placeholder" value="" disabled="disabled">
+              System message might be shown here when necessary</span>
           </div>
         </div>
 
