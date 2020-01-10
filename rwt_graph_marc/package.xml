@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>rwt_graph</name>
+  <name>rwt_graph_marc</name>
   <version>0.0.0</version>
-  <description>The rwt_graph package</description>
+  <description>The rwt_graph_marc package</description>
 
   <author email="F-ROSROBO@fsi.co.jp">F-ROSROBO</author>
   <maintainer email="F-ROSROBO@fsi.co.jp">F-ROSROBO</maintainer>
