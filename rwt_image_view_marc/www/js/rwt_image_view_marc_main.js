@@ -72,6 +72,26 @@ $(function () {
       ;
   }
 
+  function splitTopicAndType(topic) {
+    var index = -1;
+
+    // Judgment by naming rules, but want to judge by topicType
+    if ((index = topic.indexOf('/compressedDepth')) !== -1) {
+      // ignore because unsupported format
+    } else if ((index = topic.indexOf('/compressed')) !== -1) {
+      return {
+        topic: topic.substring(0, index),
+        type: 'ros_compressed'
+      };
+    }
+
+    // sensor_msgs/Image or unsupported format
+    return {
+      topic: topic,
+      type: undefined
+    };
+  }
+
 
   ////////////////////////////////////////
   // screen events
@@ -85,14 +105,16 @@ $(function () {
     }
     var topic = $('#topic-select').val();
     // first of all, subscribe the topic and detect the width/height
-    var div_width = $('#canvas-area').width();
+    var divWidth = $('#canvas-area').width();
     currentImageTopic = topic;
+    var topicAndType = splitTopicAndType(topic);
     mjpegCanvas = new MJPEGCANVAS.Viewer({
       divID: 'canvas-area',
       host: ros.url().hostname,
-      topic: topic,
-      width: div_width,
-      height: 480 * div_width / 640.0
+      topic: topicAndType.topic,
+      type: topicAndType.type,
+      width: divWidth,
+      height: 480 * divWidth / 640.0
     });
 
     // display at current angle
@@ -101,17 +123,12 @@ $(function () {
 
   $('#refresh-button').on('click', function (e) {
     e.preventDefault();
-    // TODO:
-  });
-
-  $('#fit-button').on('click', function (e) {
-    e.preventDefault();
-    // TODO:
+    // TODO: ドロップダウンの中身だけを更新する
   });
 
   $('#save-button').on('click', function (e) {
     e.preventDefault();
-    // TODO:
+    // TODO: 
   });
 
   $('#rotate-left-button').on('click', function (e) {
@@ -124,55 +141,59 @@ $(function () {
     rotateCanvas(90);
   });
 
-  // unused
-  $('#record-button').on('click', function (e) {
-    e.preventDefault();
-    var $button = $(this);
-    if (currentImageTopic) {
-      if (!isInRecording) {
-        var rosbagStartClient = new ROSLIB.Service({
-          ros: ros,
-          name: '/rosbag_record',
-          serviceType: 'rwt_image_view/RosbagRecordRequest'
-        });
-        var topicRequest = new ROSLIB.ServiceRequest({
-          topics: [currentImageTopic]
-        });
-        rosbagStartClient.callService(topicRequest,
-          function (result) {
-            isInRecording = true;
-            $button.removeClass('btn-success')
-              .addClass('btn-danger')
-              .html('stop recording');
-            // download
-
-          }
-        );
-      } else {
-        isInRecording = false;
-        var rosbagStopClient = new ROSLIB.Service({
-          ros: ros,
-          name: '/rosbag_record_stop',
-          serviceType: 'std_srvs/Empty'
-        });
-        var emptyRequest = new ROSLIB.ServiceRequest({});
-        rosbagStopClient.callService(emptyRequest,
-          function (result) {
-            // download here
-            var html = '<div class="alert alert-info alert-dismissable" id="download-alert">'
-              + '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'
-              + '<a class="alert-link" href="/rwt_image_view/tmp.bag">download the bagfile from here via right-click</a>'
-              + '</div>';
-            //$button.html('<a href="/rwt_image_view/tmp.bag">download</a>');
-            $('#topic-area').before(html);
-            $button.removeClass('btn-danger')
-              .addClass('btn-success')
-              .html('record');
-          }
-        );
-      }
-    }
+  $(window).on('resize', function () {
+    // TODO: ウィンドウサイズに追従してcanvasのサイズを変更する
   });
+
+  // obsolated
+  // $('#record-button').on('click', function (e) {
+  //   e.preventDefault();
+  //   var $button = $(this);
+  //   if (currentImageTopic) {
+  //     if (!isInRecording) {
+  //       var rosbagStartClient = new ROSLIB.Service({
+  //         ros: ros,
+  //         name: '/rosbag_record',
+  //         serviceType: 'rwt_image_view/RosbagRecordRequest'
+  //       });
+  //       var topicRequest = new ROSLIB.ServiceRequest({
+  //         topics: [currentImageTopic]
+  //       });
+  //       rosbagStartClient.callService(topicRequest,
+  //         function (result) {
+  //           isInRecording = true;
+  //           $button.removeClass('btn-success')
+  //             .addClass('btn-danger')
+  //             .html('stop recording');
+  //           // download
+  //
+  //         }
+  //       );
+  //     } else {
+  //       isInRecording = false;
+  //       var rosbagStopClient = new ROSLIB.Service({
+  //         ros: ros,
+  //         name: '/rosbag_record_stop',
+  //         serviceType: 'std_srvs/Empty'
+  //       });
+  //       var emptyRequest = new ROSLIB.ServiceRequest({});
+  //       rosbagStopClient.callService(emptyRequest,
+  //         function (result) {
+  //           // download here
+  //           var html = '<div class="alert alert-info alert-dismissable" id="download-alert">'
+  //             + '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'
+  //             + '<a class="alert-link" href="/rwt_image_view/tmp.bag">download the bagfile from here via right-click</a>'
+  //             + '</div>';
+  //           //$button.html('<a href="/rwt_image_view/tmp.bag">download</a>');
+  //           $('#topic-area').before(html);
+  //           $button.removeClass('btn-danger')
+  //             .addClass('btn-success')
+  //             .html('record');
+  //         }
+  //       );
+  //     }
+  //   }
+  // });
 
 
   ////////////////////////////////////////
