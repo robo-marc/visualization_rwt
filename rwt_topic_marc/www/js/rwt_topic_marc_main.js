@@ -26,7 +26,7 @@ $(function () {
     { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, sortable: true },
     { id: 'bandwidth', name: 'Bandwidth', field: 'bandwidth', width: 70, minWidth: 20, maxWidth: 70, sortable: true },
     { id: 'hz', name: 'Hz', field: 'hz', width: 50, minWidth: 20, maxWidth: 50, sortable: true },
-    { id: 'value', name: 'Value', field: 'value', width: 100, minWidth: 20, maxWidth: 900, sortable: true },
+    { id: 'value', name: 'Value', field: 'value', width: 260, minWidth: 20, maxWidth: 900, sortable: true },
   ];
   var data = [];
   var grid = new Slick.Grid('#myGrid', dataView, columns);
@@ -48,7 +48,8 @@ $(function () {
     dataView.endUpdate();
 
     // draw grid
-    getTopics();
+    setInterval(getTopics, 1000);
+    // getTopics();
   }
 
 
@@ -56,9 +57,9 @@ $(function () {
     var idx = dataView.getIdxById(dataContext.id);
     if (data[idx] && data[idx].parent === null && !(dataContext._checked)) {
       // return checkboxDefaultFormatter(row, cell, value, columnDef, dataContext);
-      return '<input type="checkbox" class="checkbox"></span>';
+      return '<input type="checkbox" class="checkbox">';
     } else if (data[idx] && data[idx].parent === null) {
-      return '<input type="checkbox" class="checkbox" checked="checked"></span>';
+      return '<input type="checkbox" class="checkbox" checked="checked">';
     }
 
     return '';
@@ -103,15 +104,15 @@ $(function () {
       var typeList = [];
       var sub_type;
 
-      // _.each(theType.fieldarraylen, function (value, index) {
       for (var i = 0; i < theType.fieldnames.length; i++) {
         var arrayLen = theType.fieldarraylen[i];
         var fieldName = theType.fieldnames[i];
         var fieldType = theType.fieldtypes[i];
 
         topicId++;
+        var newId = parent.id + '.' + fieldName;
         var item = {
-          id: topicId,
+          id: newId,
           topic: fieldName,
           type: fieldType + ((arrayLen === -1) ? '' : '[]'),
           bandwidth: undefined,
@@ -120,7 +121,6 @@ $(function () {
           parent: parent.id,
           indent: parent.indent + 1,
           root: root.topic,
-          path: parent.path + '.' + fieldName,
           subType: true,
           _collapsed: true,
         };
@@ -143,7 +143,7 @@ $(function () {
           // get value
           var valueObj = subscribingValueMap[root.topic];
           if (valueObj) {
-            var itemPropNames = item.path.split('.');
+            var itemPropNames = item.id.split('.');
 
             // start search from 1 because itemPropNames[0] is topicName
             for (var k = 1; k < itemPropNames.length; k++) {
@@ -170,7 +170,7 @@ $(function () {
 
   function getTopics() {
     ros.getTopics(function (topicInfo) {
-      console.log(topicInfo);
+      // console.log(topicInfo);
 
       var promises = [];
 
@@ -202,16 +202,15 @@ $(function () {
         _.each(topicDetailMap, function (details, topicName) {
           topicId++;
           var parent = {
-            id: topicId,
+            id: topicName,
             topic: topicName,
             type: details.topicType,
             bandwidth: undefined,
             hz: undefined,
-            value: undefined,
+            value: 'not monitored',
             parent: null,
             indent: 0,
             root: topicName,
-            path: topicName,
             subType: true,
             _collapsed: true,
             _checked: false,
@@ -224,18 +223,37 @@ $(function () {
 
         });
 
-        // TODO: treeの開閉の状態をdataから取得して引き継ぐ
+        if (data.length > 0) {
+          // Inherit tree OPEN / CLOSE and check ON / OFF status from previous data
+          for (var i = 0; i < fieldList.length; i++) {
+            var newItem = fieldList[i];
+            var oldItem = dataView.getItemById(newItem.id);
+            if (oldItem) {
+              newItem._collapsed = oldItem._collapsed;
+              newItem._checked = oldItem._checked;
+              if (newItem.parent === null && newItem._checked) {
+                newItem.value = undefined; // hide 'not monitored'
+              }
+            } else {
+              // Do nothing because old items are not found
+            }
+          }
+        }
 
-        // TODO: ソートの状態を引き継ぐ
-        // 初回表示なら topicNameでソートする
+        fieldList.sort(function (a, b) {
+          if (a.root < b.root) {
+            return -1;
+          } else if (a.root > b.root) {
+            return 1;
+          }
+          return 0;
+        });
 
         data = fieldList;
 
         // draw grid
-        dataView.beginUpdate();
         dataView.setItems(fieldList);
-        dataView.endUpdate();
-
+        grid.invalidate();
       });
     });
   }
@@ -279,7 +297,7 @@ $(function () {
 
     ros.getMessageDetails(message,
       function (result) {
-        console.log('getMessageDetailsAsync success');
+        // console.log('getMessageDetailsAsync success');
         callback(result);
         defer.resolve();
       },
@@ -372,9 +390,6 @@ $(function () {
     grid.resizeCanvas();
   });
 
-  $('#reload').on('click', function () {
-    getTopics();
-  });
 
   ////////////////////////////////////////
   // start screen
