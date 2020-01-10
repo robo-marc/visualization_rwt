@@ -351,15 +351,20 @@ $(function () {
 
           list.push(associationItem);
 
-          if (isAsc === false) {
-            dataView.insertItem(count, associationItem);
-            grid.invalidate();
-          }
+          // if (isAsc === false) {
+          //   dataView.insertItem(count, associationItem);
+          //   grid.invalidate();
+          // }
 
-          if (isAsc === true) {
-            dataView.insertItem(0, associationItem);
-            grid.invalidate();
-          }
+          // if (isAsc === true) {
+          //   dataView.insertItem(0, associationItem);
+          //   grid.invalidate();
+          // }
+          // dataView.sort(comparer, true);
+          // grid.invalidateAllRows();
+          // grid.render();
+          var view = list.slice().reverse();
+          dataView.setItems(view);
         }
       }
       // count++;
@@ -402,7 +407,7 @@ $(function () {
       }
       if (sortcol === 'Stamp') {
         isAsc = args.sortAsc;
-        dataView.sort(comparer, isAsc);
+        dataView.sort(comparer, true);
         grid.invalidateAllRows();
         grid.render();
       }
