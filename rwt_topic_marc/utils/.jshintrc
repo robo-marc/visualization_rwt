@@ -3,7 +3,6 @@
     "module": true,
     "EventEmitter2": true,
     "ROSLIB": true,
-    "Slick": true,
     "_": true,
     "$": true
   },

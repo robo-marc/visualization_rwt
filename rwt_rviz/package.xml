@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rwt_rviz</name>
+  <version>0.0.0</version>
+  <description>The rwt_rviz package</description>
+
+  <author email="F-ROSROBO@fsi.co.jp">F-ROSROBO</author>
+  <maintainer email="F-ROSROBO@fsi.co.jp">F-ROSROBO</maintainer>
+
+
+  <license>BSD</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>rwt_utils_3rdparty</depend>
+
+  <exec_depend>roswww</exec_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

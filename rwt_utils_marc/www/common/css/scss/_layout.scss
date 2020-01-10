@@ -46,9 +46,6 @@ button {
 .lg_none {
 	@media #{$large}{ display: none !important; }
 }
-.md_none {
-	@media #{$medium}{ display: none !important; }
-}
 .sm_none {
 	@media #{$small}{ display: none !important; }
 }
