@@ -70,8 +70,8 @@ $(function () {
     var ros = new ROSLIB.Ros();
     ros.autoConnect();
 
-    $('#pauseButton').show();
-    $('#startButton').hide();
+    $('#pause-button').show();
+    $('#resume-button').hide();
 
     // display start
     function startDrawing() {
@@ -105,7 +105,7 @@ $(function () {
             RawTime: msg.header.stamp.secs + '.' + regular,
             Topics: topics,
             Location: location,
-            Number: count
+            // Number: count
           };
 
           if (count >= 20001) {
@@ -126,8 +126,8 @@ $(function () {
 
           count++;
 
-          var txt = list.length + ' messages';
-          document.getElementById('NumberOfMessage').innerHTML = txt;
+          var txt = 'Displaying <h3>' + list.length + '</h3> messages';
+          // document.getElementById('NumberOfMessage').innerHTML = txt;
         }
       });
     }
@@ -137,19 +137,19 @@ $(function () {
       var severity;
       switch (level) {
         case 1:
-          severity = 'DEBUG';
+          severity = 'Debug';
           break;
         case 2:
-          severity = 'INFO';
+          severity = 'Info';
           break;
         case 4:
-          severity = 'WARN';
+          severity = 'Warn';
           break;
         case 8:
-          severity = 'ERROR';
+          severity = 'Error';
           break;
         case 16:
-          severity = 'FATAL';
+          severity = 'Fatal';
           break;
       }
       return severity;
@@ -173,31 +173,35 @@ $(function () {
     // clear list
     function clearList() {
       list.length = 0;
-      data.length = 0;
+      data = [];
       count = 1;
       dataView.setItems(data);
-      dataView.setFilter(myFilter);
+      // dataView.setFilter(myFilter);
       grid.invalidate();
-      document.getElementById('NumberOfMessage').innerHTML = '0 messages';
+      // document.getElementById('NumberOfMessage').innerHTML = 'Displaying <h3>0</h3> messages';
     }
 
     // clear list
-    $('#clearButton').click(function () {
+    $('#clear-button').click(function (e) {
+      e.preventDefault();
       clearList();
     });
 
     // CSV download
-    $('#download').click(function () {
+    $('#download-button').click(function (e) {
+      // do not preventDefault.
+
       var arr = [];
       var itemList = _.cloneDeep(list);
       _.each(itemList, function (value, index) {
         delete value.id;
         delete value['#'];
-        // delete value.Stamp;
-        delete value.RawTime;
+        delete value.Stamp;
+        // delete value.RawTime;
         delete value.indent;
-        // delete value.Severity;
-        delete value.SeverityNumber;
+        delete value.Severity;
+        // delete value.Number;
+        // delete value.SeverityNumber;
         arr.push(Object.keys(value).map(function (key) {
           return value[key];
         })
@@ -205,24 +209,47 @@ $(function () {
       });
       var csvData = '';
       _.each(arr, function (value, index) {
-        var row = value.join(';');
-        csvData = row + '\n' + csvData;
+        var row = value.join('";"');
+        console.log(row);
+        if (row) {
+          csvData = '"' + row + '"' + '\n' + csvData;
+        }
       });
+      if (!(csvData === '')) {
+        csvData = csvData.slice(0, -1); + '"' + '\n';
+      }
       var csvText = 'message;severity;node;stamp;topics;location\n' + csvData;
       var blob = new Blob([csvText], { 'type': 'text/plain' });
       if (window.navigator.msSaveBlob) {
-        window.navigator.msSaveBlob(blob, 'test.csv');
-        window.navigator.msSaveOrOpenBlob(blob, 'test.csv');
+        window.navigator.msSaveBlob(blob, 'rwt_console_marc.csv');
+        window.navigator.msSaveOrOpenBlob(blob, 'rwt_console_marc.csv');
+        console.log('aaa');
       } else {
-        document.getElementById('download').href = window.URL.createObjectURL(blob);
-        // $('#download').href = window.URL.createObjectURL(blob);
+        console.log(blob);
+        // document.getElementById('download').href = window.URL.createObjectURL(blob);
+        $('#download-button').attr('href', window.URL.createObjectURL(blob));
       }
+      delete csvData;
     });
 
     // CSV load
     // file change
+    $('#load-button').on('click', function (e) {
+      e.preventDefault();
+      if (list.length === 0 && isSubscribe === 0) {
+        $('#load').click();
+      }
+    })
+
+    // $('#load').on('change', function (evt) {
+    //   $load = $(this);
+    //   var file = $load.val();
+    // });
+
     var fileObj = document.getElementById('load');
     fileObj.addEventListener('change', function (evt) {
+      var test = [];
+      dataView.setItems(test);
       var file = evt.target.files[0];
       console.log(file);
 
@@ -237,10 +264,17 @@ $(function () {
       reader.readAsText(file);
 
       reader.onload = function () {
+        // reader.result.replace('"', '');
+        // reader.result = reader.result.replace(/"/g, '');
+        console.log(reader.result);
         var cols = reader.result.split('\n');
+        console.log(cols);
         var data = [];
+        var keep;
         for (var i = 0; i < cols.length; i++) {
-          data[i] = cols[i].split(';');
+          // keep = cols[i].substring();
+          keep = cols[i].substr(1, cols[i].length - 2);
+          data[i] = keep.split('";"');
         }
         console.log('---- data ----');
         console.log(data);
@@ -250,6 +284,7 @@ $(function () {
 
     // grid List
     function gridList(dataList) {
+      // console.log(dataList);
 
       // var data = [];
 
@@ -274,8 +309,14 @@ $(function () {
       //     };
       //   }
       // }
+      // var keep = dataList.length;
+      dataList = dataList.slice().reverse();
+      var number = 1;
       for (var i = 1; i < dataList.length - 1; i++) {
         if (dataList[i]) {
+          var time = dataList[i][3].split('.');
+          var secs = time[0];
+          var nsecs = time[1];
           // var mes = msg.msg;
           // var severityNumber = msg.level;
           // var severity = getErrorLevel(msg.level);
@@ -286,21 +327,23 @@ $(function () {
           // var topics = msg.topics.join(',');
           // var location = msg.file + ':' + msg.function + ':' + msg.line;
 
+
           var associationItem = {
-            id: dataList[i][6],
+            id: i,
             indent: 0,
-            '#': '#' + dataList[i][6],
+            '#': '#' + number,
             Message: dataList[i][0],
-            // SeverityNumber: severityNumber,
-            Severity: dataList[i][1],
+            SeverityNumber: dataList[i][1],
+            Severity: getErrorLevel(parseInt(dataList[i][1], 10)),
             Node: dataList[i][2],
-            Stamp: dataList[i][3],
+            Stamp: getTimestamp(secs, nsecs),
             // RawTime: msg.header.stamp.secs + '.' + regular,
             Topics: dataList[i][4],
             Location: dataList[i][5],
-            Number: dataList[i][6]
+            // Number: dataList[i][6]
           };
-          console.log(associationItem);
+          number++;
+          // console.log(associationItem);
 
           if (count >= 20001) {
             dataView.deleteItem(count - 20000);
@@ -309,20 +352,20 @@ $(function () {
           list.push(associationItem);
 
           if (isAsc === false) {
-            dataView.insertItem(0, associationItem);
+            dataView.insertItem(count, associationItem);
             grid.invalidate();
           }
 
           if (isAsc === true) {
-            dataView.insertItem(count, associationItem);
+            dataView.insertItem(0, associationItem);
             grid.invalidate();
           }
         }
       }
       // count++;
 
-      var txt = list.length + ' messages';
-      document.getElementById('NumberOfMessage').innerHTML = txt;
+      var txt = 'Displaying <h3>' + list.length + '</h3> messages';
+      // document.getElementById('NumberOfMessage').innerHTML = txt;
 
       // console.log(list);
       // var grid = new Slick.Grid('#myGrid', list, columns, options);
@@ -334,17 +377,19 @@ $(function () {
     }
 
     // pause
-    $('#pauseButton').click(function () {
+    $('#pause-button').click(function (e) {
+      e.preventDefault();
       isSubscribe = 0;
-      $('#pauseButton').hide();
-      $('#startButton').show();
+      $('#pause-button').hide();
+      $('#resume-button').show();
     });
 
     // start
-    $('#startButton').click(function () {
+    $('#resume-button').click(function (e) {
+      e.preventDefault();
       isSubscribe = 1;
-      $('#pauseButton').show();
-      $('#startButton').hide();
+      $('#pause-button').show();
+      $('#resume-button').hide();
     });
 
     // sort
@@ -353,11 +398,19 @@ $(function () {
       sortcol = args.sortCol.field;
 
       if (sortcol === '#') {
-        sortcol = 'Number';
+        sortcol = 'Stamp';
       }
-      if (sortcol === 'Number' || sortcol === 'Stamp') {
+      if (sortcol === 'Stamp') {
         isAsc = args.sortAsc;
         dataView.sort(comparer, isAsc);
+        grid.invalidateAllRows();
+        grid.render();
+      }
+
+      if (!(sortcol === 'Stamp')) {
+        isAsc = args.sortAsc;
+        dataView.sort(comparer, isAsc);
+        dataView.sort(comparer2, isAsc);
         grid.invalidateAllRows();
         grid.render();
       }
@@ -367,6 +420,14 @@ $(function () {
       var x = a[sortcol], y = b[sortcol];
       return (x === y ? 0 : (x > y ? 1 : -1));
     }
+
+    function comparer2(a, b) {
+      var x = a[sortcol], y = b[sortcol];
+      var z = a['Stamp'], w = b['Stamp'];
+      return (x === y ? (z > w ? 1 : -1) : 0);
+    }
+
+
 
     startDrawing();
 
@@ -430,5 +491,26 @@ $(function () {
   //     dataView.refresh();
   //   });
   // };
+
+  dataView.onRowCountChanged.subscribe(function (e, args) {
+    grid.updateRowCount();
+    grid.render();
+    grid.resizeCanvas();
+    grid.autosizeColumns();
+  });
+
+  dataView.onRowsChanged.subscribe(function (e, args) {
+    grid.invalidateRows(args.rows);
+    grid.render();
+  });
+
+  $(window).on('load resize', function () {
+    grid.resizeCanvas();
+    grid.autosizeColumns();
+
+    // prevent the delete button from being hidden when switching screens vertically
+    grid.resizeCanvas();
+  });
+
 
 });
