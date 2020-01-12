@@ -1,5 +1,7 @@
 /* css */
-
+.ui-widget {
+  margin-bottom: 0;
+}
 .hidden {
     display: none !important;
     visibility: hidden !important;

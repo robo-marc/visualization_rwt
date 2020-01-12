@@ -7,12 +7,12 @@
   <meta name="author" content="Prototype">
   <!-- <meta name="viewport" content="width=1000"> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" />
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css">
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css" />
   <link rel="stylesheet" href="../rwt_utils_marc/common/iconfont/material-icons.css">
   <link rel="stylesheet" href="../rwt_utils_marc/common/css/common.css">
-  <link rel="stylesheet" href="../rwt_utils_marc/css/rwt_utils_marc.css" />
+  <link rel="stylesheet" href="../rwt_utils_marc/css/rwt_utils_marc.css">
+  <link rel="stylesheet" href="css/rwt_console_marc.css">
 </head>
 
 <body>
@@ -20,261 +20,258 @@
     <header>
       <div class="column">
         <h2>rwt_console_marc</h2>
-        <a href="http://wiki.ros.org/rqt_console" class="icon"><i class="material-icons">help_outline</i></a>
+        <a href="http://wiki.ros.org/rqt_console" target="_blank" class="icon"><i
+            class="material-icons">help_outline</i></a>
       </div>
     </header>
+
     <div class="contents console">
+
       <div class="contents_header">
-        <div>
-          <nav>
-            <ul>
-              <li><a id="load-button" href class="icon"><i class="material-icons">folder</i><span class="md_none">Load
-                    File
-                    (csv)</span></a></li>
-              <li><a id="download-button" href class="icon" download="rwt_console_marc.csv"><i
-                    class="material-icons">save_alt</i><span class="md_none">Save
-                    File
-                    (csv)</span></a></li>
-              <li><a id="pause-button" href class="icon"><i class="material-icons">pause</i><span
-                    class="md_none">Pause</span></a>
-                <a id="resume-button" href class="icon"><i class="material-icons">play_arrow</i><span
-                    class="md_none">Resume</span></a></li>
-              <li><a id="clear-button" href class="icon"><i class="material-icons">delete_outline</i><span
-                    class="md_none">Clear</span></a></li>
-            </ul>
-          </nav>
-          <form id="fileform" name="fileform" class='hiddenFile' style="display:none;">
-            <input type="file" name="load" id="load" />
-          </form>
-        </div>
-
-        <div class="contents_body">
-          <table width="100%">
-            <tr>
-              <td valign="top" width="50%">
-                <div id="myGrid" style="width:1200px;height:500px;"></div>
-              </td>
-            </tr>
-          </table>
-
-          <!-- <div class="table-wrap">
-  <table width="100%">
-      <tr>
-        <td valign="top" width="50%">
-          <div id="myGrid" style="width:1200px;height:500px;"></div>
-        </td>
-      </tr>
-    </table>
-</div> -->
-
-
-        </div>
-
-
-
-
-        <div class="contents_sub console_sub">
-
-          <div class="parts-box">
-            <h3>Exclude Messages</h3>
-            <div class="column clearfix">
-              <div class="parts-set select-btn">
-                <select type="select">
-                  <option value="0">Filter Selected</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                </select>
-                <button class="icon"><i class="material-icons">add</i></button>
-              </div>
-              <div class="parts-set radio"><input type="radio" name="exclude_input" value=""><label for="">AND</label>
-              </div>
-              <div class="parts-set radio"><input type="radio" name="exclude_input" value=""><label for="">OR</label>
-              </div>
-            </div>
-
-            <div class="filter-box">
-              <div class="filter-wrap">
-                <ul class="filter-list">
-                  <li class="severities active">
-                    <div class="column">
-                      <div class="name">
-                        <div class="parts-set checkbox"><input type="checkbox"><label for="">Severities</label></div>
-                      </div>
-                      <div class="data">
-                        <ul class="chips">
-                          <li><a href="#" class="active">Debug</a></li>
-                          <li><a href="#">Info</a></li>
-                          <li><a href="#">Warn</a></li>
-                          <li><a href="#" class="active">Error</a></li>
-                          <li><a href="#">Fatal</a></li>
-                        </ul>
-                      </div>
-                    </div>
-                    <div class="delete">
-                      <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                    </div>
-                  </li>
-                  <li class="topics">
-                    <div class="column">
-                      <div class="name">
-                        <div class="parts-set checkbox"><input type="checkbox"><label for="">Topics</label></div>
-                      </div>
-                      <div class="data">
-                        <select type="select">
-                          <option value="0">Topic Selected</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="delete">
-                      <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                    </div>
-                  </li>
-                  <li class="message">
-                    <div class="column">
-                      <div class="name">
-                        <div class="parts-set checkbox"><input type="checkbox"><label for="">Message</label></div>
-                      </div>
-                      <div class="data">
-                        <div class="parts-set textbox"><input type="text" placeholder="Message Text"></div>
-                        <div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>
-                      </div>
-                    </div>
-                    <div class="delete">
-                      <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-          </div>
-
-
-          <div class="parts-box">
-            <h3>Highlight Messages</h3>
-
-            <div class="column clearfix">
-              <div class="parts-set select-btn">
-                <select type="select">
-                  <option value="0">Filter Selected</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                </select>
-                <button class="icon"><i class="material-icons">add</i></button>
-              </div>
-              <div class="parts-set radio"><input type="radio" name="highlight_input" value=""><label for="">AND</label>
-              </div>
-              <div class="parts-set radio"><input type="radio" name="highlight_input" value=""><label for="">OR</label>
-              </div>
-              <div class="parts-set checkbox"><input type="checkbox"><label for="">Show only highlighted rows</label>
-              </div>
-            </div>
-
-
-            <div class="filter-box">
-              <div class="filter-wrap">
-                <ul class="filter-list">
-                  <li class="node">
-                    <div class="column">
-                      <div class="name">
-                        <div class="parts-set checkbox"><input type="checkbox"><label for="">Node</label></div>
-                      </div>
-                      <div class="data">
-                        <select type="select">
-                          <option value="0">Node Selected</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="delete">
-                      <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                    </div>
-                  </li>
-
-                  <li class="time">
-                    <div class="column">
-                      <div class="name">
-                        <div class="parts-set checkbox"><input type="checkbox"><label for="">from time range</label>
-                        </div>
-                      </div>
-                      <div class="data">
-                        <select type="select">
-                          <option value="0">Time Selected</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                        </select>
-                        <input type="checkbox">
-                        <select type="select" disabled>
-                          <option value="0">Time Selected</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="delete">
-                      <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                    </div>
-                  </li>
-
-                  <li class="location">
-                    <div class="column">
-                      <div class="name">
-                        <div class="parts-set checkbox"><input type="checkbox"><label for="">Location</label></div>
-                      </div>
-                      <div class="data">
-                        <div class="parts-set textbox"><input type="text" placeholder="Location Text"></div>
-                        <div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>
-                      </div>
-                    </div>
-                    <div class="delete">
-                      <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                    </div>
-                  </li>
-
-                </ul>
-
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-        <div class="contents_footer">
-          <a href="" class="footer_btn open"><i class="material-icons">expand_more</i>Topic/Type ADD, Setting</a>
-          <a href="" class="footer_btn close active"><i class="material-icons">expand_less</i>Close</a>
-        </div>
-
-
+        <!-- <div> -->
+        <nav>
+          <ul>
+            <li><a id="load-button" href class="icon"><i class="material-icons">folder</i><span class="md_none">Load
+                  File
+                  (csv)</span></a></li>
+            <li><a id="download-button" href class="icon" download="rwt_console_marc.csv"><i
+                  class="material-icons">save_alt</i><span class="md_none">Save
+                  File
+                  (csv)</span></a></li>
+            <li><a id="pause-button" href class="icon"><i class="material-icons">pause</i><span
+                  class="md_none">Pause</span></a>
+              <a id="resume-button" href class="icon"><i class="material-icons">play_arrow</i><span
+                  class="md_none">Resume</span></a></li>
+            <li><a id="clear-button" href class="icon"><i class="material-icons">delete_outline</i><span
+                  class="md_none">Clear</span></a></li>
+          </ul>
+        </nav>
+        <form id="fileform" name="fileform" class='hiddenFile' style="display:none;">
+          <input type="file" name="load" id="load" />
+        </form>
       </div>
-    </div>
 
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/firebugx.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.12.4.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery.event.drag-2.3.0.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.core.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.formatters.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.editors.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.grid.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.dataview.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
-    <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
-    <script type="text/javascript" src="js/rwt_console_marc_main.js"></script>
+      <div class="contents_body">
+
+        <div class="contents-box message">Displaying <span class="num">78</span> messages</div>
+
+        <!-- <table width="100%">
+          <tr>
+            <td valign="top" width="50%"> -->
+        <div class="myGrid" id="myGrid"></div>
+        <!-- <div id="myGrid"></div> -->
+        <!-- <div id="myGrid" style="width:1200px;height:500px;"></div> -->
+        <!-- </td>
+          </tr>
+        </table> -->
+      </div>
+
+      <div id="contents_sub" class="contents_sub console_sub">
+
+        <div class="parts-box">
+          <h3>Exclude Messages</h3>
+          <div class="column clearfix">
+            <div class="parts-set select-btn">
+              <select type="select" id="exclude-select">
+                <!-- <option value="0">Filter Selected</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option> -->
+              </select>
+              <button class="icon"><i class="material-icons">add</i></button>
+            </div>
+            <div class="parts-set radio"><input type="radio" name="exclude_input" value="" checked><label
+                for="">AND</label>
+            </div>
+            <div class="parts-set radio"><input type="radio" name="exclude_input" value=""><label for="">OR</label>
+            </div>
+          </div>
+
+          <div class="filter-box">
+            <div class="filter-wrap">
+              <ul class="filter-list">
+                <li class="severities active">
+                  <div class="column">
+                    <div class="name">
+                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Severities</label></div>
+                    </div>
+                    <div class="data">
+                      <ul class="chips">
+                        <li><a href="#" class="active">Debug</a></li>
+                        <li><a href="#">Info</a></li>
+                        <li><a href="#">Warn</a></li>
+                        <li><a href="#" class="active">Error</a></li>
+                        <li><a href="#">Fatal</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="delete">
+                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
+                  </div>
+                </li>
+                <li class="topics">
+                  <div class="column">
+                    <div class="name">
+                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Topics</label></div>
+                    </div>
+                    <div class="data">
+                      <select type="select">
+                        <option value="0">Topic Selected</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="delete">
+                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
+                  </div>
+                </li>
+                <li class="message">
+                  <div class="column">
+                    <div class="name">
+                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Message</label></div>
+                    </div>
+                    <div class="data">
+                      <div class="parts-set textbox"><input type="text" placeholder="Message Text"></div>
+                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>
+                    </div>
+                  </div>
+                  <div class="delete">
+                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="parts-box">
+          <h3>Highlight Messages</h3>
+
+          <div class="column clearfix">
+            <div class="parts-set select-btn">
+              <select type="select" id="highlight-select">
+                <!-- <option value="0">Filter Selected</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option> -->
+              </select>
+              <button class="icon"><i class="material-icons">add</i></button>
+            </div>
+            <div class="parts-set radio"><input type="radio" name="highlight_input" value="" checked><label
+                for="">AND</label>
+            </div>
+            <div class="parts-set radio"><input type="radio" name="highlight_input" value=""><label for="">OR</label>
+            </div>
+            <div class="parts-set checkbox"><input type="checkbox"><label for="">Show only highlighted rows</label>
+            </div>
+          </div>
+
+
+          <div class="filter-box">
+            <div class="filter-wrap">
+              <ul class="filter-list">
+                <li class="node">
+                  <div class="column">
+                    <div class="name">
+                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Node</label></div>
+                    </div>
+                    <div class="data">
+                      <select type="select">
+                        <option value="0">Node Selected</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="delete">
+                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
+                  </div>
+                </li>
+
+                <li class="time">
+                  <div class="column">
+                    <div class="name">
+                      <div class="parts-set checkbox"><input type="checkbox"><label for="">from time range</label>
+                      </div>
+                    </div>
+                    <div class="data">
+                      <select type="select">
+                        <option value="0">Time Selected</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                      </select>
+                      <input type="checkbox">
+                      <select type="select" disabled>
+                        <option value="0">Time Selected</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="delete">
+                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
+                  </div>
+                </li>
+
+                <li class="location">
+                  <div class="column">
+                    <div class="name">
+                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Location</label></div>
+                    </div>
+                    <div class="data">
+                      <div class="parts-set textbox"><input type="text" placeholder="Location Text"></div>
+                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>
+                    </div>
+                  </div>
+                  <div class="delete">
+                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
+                  </div>
+                </li>
+
+              </ul>
+
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="contents_footer">
+        <!-- <a href="" class="footer_btn open"><i class="material-icons">expand_more</i>Topic/Type ADD, Setting</a>
+        <a href="" class="footer_btn close active"><i class="material-icons">expand_less</i>Close</a> -->
+        <a id="open_sub_button" href class="footer_btn open active"><i class="material-icons">expand_more</i>Filter</a>
+        <a id="close_sub_button" href class="footer_btn close active"><i class="material-icons">expand_less</i>Close</a>
+      </div>
+
+
+    </div>
+  </div>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/firebugx.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.12.4.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery.event.drag-2.3.0.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.core.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.formatters.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.editors.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.grid.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.dataview.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
+  <script type="text/javascript" src="js/rwt_console_marc_main.js"></script>
 </body>
 
 </html>

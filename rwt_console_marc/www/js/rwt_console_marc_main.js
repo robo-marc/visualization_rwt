@@ -8,6 +8,8 @@ function requiredFieldValidator(value) {
 
 $(function () {
 
+  // subscribe topic
+  var ros = new ROSLIB.Ros();
 
   var dataView;
   var grid;
@@ -29,6 +31,34 @@ $(function () {
     enableCellNavigation: true,
     asyncEditorLoading: false
   };
+
+  var FilterOptionList = [
+    'Filter Selected',
+    'Message',
+    'Severity',
+    'Node',
+    'Stamp',
+    'Topics',
+    'Location',
+  ];
+
+  function initScreen() {
+    // common
+    ros.autoConnect();
+    // for dropdown
+    setDropdownList('#exclude-select', FilterOptionList);
+    setDropdownList('#highlight-select', FilterOptionList);
+    $('#open_sub_button').click();
+    // clear list
+
+  }
+
+  function setDropdownList(select, list) {
+    $(select).append(list.map(function (value) {
+      return '<option value="' + value + '">' + value + '</option>';
+    }).join('\n'));
+    $(select).change();
+  }
 
   function myFilter(item) {
     var percentCompleteThreshold = 0;
@@ -66,9 +96,9 @@ $(function () {
   var isAsc = false;
 
   $(function () {
-    // subscribe topic
-    var ros = new ROSLIB.Ros();
-    ros.autoConnect();
+    // // subscribe topic
+    // var ros = new ROSLIB.Ros();
+    // ros.autoConnect();
 
     $('#pause-button').show();
     $('#resume-button').hide();
@@ -509,6 +539,20 @@ $(function () {
     grid.render();
   });
 
+  $('#open_sub_button').on('click', function (e) {
+    e.preventDefault();
+    $('#contents_sub').slideDown('normal');
+    $('#close_sub_button').show();
+    $('#open_sub_button').hide();
+  });
+
+  $('#close_sub_button').on('click', function (e) {
+    e.preventDefault();
+    $('#contents_sub').slideUp('normal');
+    $('#close_sub_button').hide();
+    $('#open_sub_button').show();
+  });
+
   $(window).on('load resize', function () {
     grid.resizeCanvas();
     grid.autosizeColumns();
@@ -517,5 +561,6 @@ $(function () {
     grid.resizeCanvas();
   });
 
+  initScreen();
 
 });
