@@ -30,12 +30,16 @@ $(function () {
   var fileData = [];
 
   var columns = [
-    { id: 'list', name: 'List', field: 'list', width: 340, sortable: true },
-    { id: 'value', name: 'Value', field: 'value', width: 340, sortable: true },
+    // { id: 'list', name: 'List', field: 'list', width: 340, sortable: true },
+    // { id: 'value', name: 'Value', field: 'value', width: 340, sortable: true },
+    { id: 'list', name: 'List', field: 'list', width: 340 },
+    { id: 'value', name: 'Value', field: 'value', width: 340 },
   ];
   var options = {
     enableCellNavigation: true,
-    enableColumnReorder: false
+    enableColumnReorder: false,
+    // autoEdit: true
+
   };
 
   var data = [];
@@ -90,7 +94,14 @@ $(function () {
 
   // clear messagebox
   function initMessage() {
+    // TODO placeholder
     $('#message').text('System message might be shown here when necessary');
+    // $('#message').text('');
+  }
+
+  // set messagebox
+  function setMessage(message) {
+    $('#message').text(message);
   }
 
   // clear list
