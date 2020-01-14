@@ -81,3 +81,10 @@
 .ui-widget-content a.icon i {
   font-size: 1rem;
 }
+
+/* grid - checkbox */
+.ui-widget-content .slick-cell-checkboxsel input {
+  height: auto;
+  margin: 0;
+  vertical-align: middle;
+}
