@@ -22,11 +22,11 @@ $(function () {
 
   var columns = [
     checkboxColumnDef,
-    { id: 'topic', name: 'Topic', field: 'topic', width: 200, minWidth: 20, maxWidth: 300, sortable: true, formatter: treeFormatter },
-    { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900, sortable: true },
-    { id: 'bandwidth', name: 'Bandwidth', field: 'bandwidth', width: 70, minWidth: 20, maxWidth: 70, sortable: true },
-    { id: 'hz', name: 'Hz', field: 'hz', width: 50, minWidth: 20, maxWidth: 50, sortable: true },
-    { id: 'value', name: 'Value', field: 'value', width: 260, minWidth: 20, maxWidth: 900, sortable: true },
+    { id: 'topic', name: 'Topic', field: 'topic', width: 200, minWidth: 20, maxWidth: 300, formatter: treeFormatter },
+    { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900 },
+    { id: 'bandwidth', name: 'Bandwidth', field: 'bandwidth', width: 100, minWidth: 20, maxWidth: 100 },
+    { id: 'hz', name: 'Hz', field: 'hz', width: 50, minWidth: 20, maxWidth: 50 },
+    { id: 'value', name: 'Value', field: 'value', width: 260, minWidth: 20, maxWidth: 900 },
   ];
   var data = [];
   var grid = new Slick.Grid('#myGrid', dataView, columns);
