@@ -18,8 +18,6 @@ $(function () {
   var fileData = [];
 
   var columns = [
-    // { id: 'list', name: 'List', field: 'list', width: 340, sortable: true },
-    // { id: 'value', name: 'Value', field: 'value', width: 340, sortable: true },
     { id: 'list', name: 'List', field: 'list', width: 340 },
     { id: 'value', name: 'Value', field: 'value', width: 340 },
   ];
@@ -272,6 +270,11 @@ $(function () {
               }
             );
           });
+        } else if (rosparamArg1) {
+          message = 'Usage: rosparam set [options] parameter value\n'
+            + 'rosparam: error: '
+            + 'invalid arguments. Please specify a parameter value';
+          setMessage(message);
         } else {
           message = 'Usage: rosparam set [options] parameter\n'
             + 'rosparam: error: '
@@ -288,14 +291,14 @@ $(function () {
             name: rosparamArg1,
           });
           paramGet.get(function (value) {
-            if (value) {
-              clearList();
-              rosparamList[rosparamArg1] = value;
-              gridList(rosparamList);
-            } else {
+            if (value === null) {
               clearList();
               message = 'ERROR: Parameter [' + rosparamArg1 + '] is not set';
               setMessage(message);
+            } else {
+              clearList();
+              rosparamList[rosparamArg1] = value;
+              gridList(rosparamList);
             }
           });
         } else {
