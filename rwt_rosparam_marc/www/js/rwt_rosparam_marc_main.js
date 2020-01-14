@@ -1,17 +1,6 @@
 
 $(function () {
 
-  //TODO callback test
-  var test2 = function (arg) {
-    console.log('hello, ' + arg);
-  };
-  var test1 = function (arg) {
-    console.log(typeof arg);
-    arg('abc');
-    arg('def');
-  };
-  test1(test2);
-
   // service rosparam
   var ros = new ROSLIB.Ros();
 
@@ -26,7 +15,6 @@ $(function () {
 
   var rosparamList = {};
   var fileObj = document.getElementById('load');
-  // var fileObj = $('#load');
   var fileData = [];
 
   var columns = [
@@ -35,11 +23,10 @@ $(function () {
     { id: 'list', name: 'List', field: 'list', width: 340 },
     { id: 'value', name: 'Value', field: 'value', width: 340 },
   ];
+
   var options = {
     enableCellNavigation: true,
     enableColumnReorder: false,
-    // autoEdit: true
-
   };
 
   var data = [];
@@ -94,7 +81,6 @@ $(function () {
 
   // clear messagebox
   function initMessage() {
-    // TODO placeholder
     $('.placeholder').text('System message');
     $('.error').text('');
   }
@@ -141,7 +127,6 @@ $(function () {
 
   $('#rosparam-arg1').hide();
   $('#rosparam-arg2').hide();
-  $('#load').hide();
   $('#folder').hide();
 
   // file change
@@ -170,14 +155,12 @@ $(function () {
         $('#rosparam-arg1').hide();
         $('#rosparam-arg2').hide();
         $('#folder').hide();
-        $('#load').hide();
         initMessage();
         break;
       case 'set':
         $('#rosparam-arg1').show();
         $('#rosparam-arg2').show();
         $('#folder').hide();
-        $('#load').hide();
         setArg1List();
         initMessage();
         break;
@@ -185,7 +168,6 @@ $(function () {
         $('#rosparam-arg1').show();
         $('#rosparam-arg2').hide();
         $('#folder').hide();
-        $('#load').hide();
         setArg1List();
         initMessage();
         break;
@@ -193,21 +175,18 @@ $(function () {
         $('#rosparam-arg1').hide();
         $('#rosparam-arg2').show();
         $('#folder').show();
-        $('#load').hide();
         initMessage();
         break;
       case 'dump':
         $('#rosparam-arg1').hide();
         $('#rosparam-arg2').hide();
         $('#folder').hide();
-        $('#load').hide();
         initMessage();
         break;
       case 'delete':
         $('#rosparam-arg1').show();
         $('#rosparam-arg2').hide();
         $('#folder').hide();
-        $('#load').hide();
         setArg1List();
         initMessage();
         break;
@@ -217,12 +196,10 @@ $(function () {
   // get param value
   function getParam(name, param, rosparamList) {
     var defer = $.Deferred();
-
     param.get(function (value) {
       rosparamList[name] = value;
       defer.resolve();
     });
-
     return defer.promise();
   }
 
