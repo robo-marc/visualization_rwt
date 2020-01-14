@@ -474,33 +474,90 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
   var root = this.history.root;
 
   // TODO test
-  $('.data_1').dblclick(function () {
+  $('.data_1').on('dblclick', function () {
+    // var dialog = document.getElementById('dialog');
+
+    var the_directory = root.findByName($(this).attr('data-name'));
+
+    var dialogHeader =
+      // '<div class="dialog" id="dialog">'
+      '<div id="dialogBackground"></div>'
+      + '<div id="dialogContent">'
+      + '<div class="dialog_wrap">'
+      + '<div class="dialog_header"><h4>'
+      // title
+      + the_directory.fullName()
+      + '</h4></div>'
+      + '<div class="dialog_body">'
+      + '<div class="dialog_box_1">'
+      + '<table class="table-type-3"><tbody>'
+      + '<tr><th>Full name</th><td>'
+      // full name
+      + the_directory.fullName()
+      + '</td></tr>'
+      + '<tr><th>Component</th><td>'
+      // component
+      + the_directory.status.name
+      + '</td></tr>'
+      + '<tr><th>Hardware ID</th><td>'
+      // hardware id
+      + the_directory.status.hardware_id
+      + '</td></tr>'
+      + '<tr><th>Level</th><td>'
+      // level
+      + the_directory.status.levelString()
+      + '</td></tr>'
+      + '<tr><th>Message</th><td>'
+      // message
+      + the_directory.status.message
+      + '</td></tr></tbody></table></div>';
+
+    var dialogList = '<div class="dialog_box_2">'
+      + '<table class="table-type-4">'
+      + '<tbody>';
+
+    for (var second_key in the_directory.status.values) {
+      // $second_body_html.append('<dt>' + second_key + ':</dt>' + '<dd>' + the_directory.status.values[second_key] + '</dd>');
+      dialogList = dialogList
+        + '<tr><th>'
+        + second_key
+        + '</th><td>'
+        + the_directory.status.values[second_key]
+        + '</td></tr>';
+    }
+
+    var dialogFooter = '</tbody></table></div></div>'
+      + '<div class="dialog_footer">'
+      + '<button id="close">OK</button>'
+      + '</div></div>'
+      + '</div>';
+    // </div > ';
+
+    var dialogBox = dialogHeader
+      + dialogList
+      + dialogFooter;
+
+    console.log(dialogBox);
+    document.getElementById('dialog').innerHTML = dialogBox;
     var dialog = document.getElementById('dialog');
-
-    var dialogMessage = ''
-      + ''
-      + ''
-      + ''
-      + ''
-      + ''
-      + ''
-      + ''
-      + ''
-      + ''
-      + '';
-
-
     dialog.style.display = 'block';
+
+    // dialog close
+    $('#close').on('click', function () {
+      var dialog = document.getElementById('dialog');
+      dialog.style.display = 'none';
+    });
+
   });
 
-  // dialog close
-  $('#close').on('click', function () {
-    var dialog = document.getElementById('dialog');
-    dialog.style.display = 'none';
-  });
+  // // dialog close
+  // $('#close').on('click', function () {
+  //   var dialog = document.getElementById('dialog');
+  //   dialog.style.display = 'none';
+  // });
 
   // TODO delete
-  $('.list-group-item').dblclick(function () {
+  $('.list-group-item').on('dblclick', function () {
     if ($(this).find('.in').length !== 0) {
       return;                   // skip
     }
@@ -565,10 +622,8 @@ $('#start-button').on('click', function (e) {
   $('#start-button').hide();
 });
 
-// history click event
+// time list click event
 var timeListClick = function (event) {
-  // TODO test
-  // console.log('----- ' + event.data.name + '  click----- ');
 
   // monitor pause
   ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
@@ -578,12 +633,8 @@ var timeListClick = function (event) {
   var num = event.data.name.substr(3);
   var data = {};
   data = arrData[Math.abs(parseInt(num, 10) - (arrData.length - 1))];
-  // TODO test
-  // console.log(data);
 
   var msg = data[0];
-  // TODO test
-  // console.log(msg);
   ROSLIB.RWTRobotMonitor.prototype.showHistory(msg);
 };
 
@@ -620,21 +671,7 @@ $('#btn28').on('click', { name: 'btn28' }, timeListClick);
 $('#btn29').on('click', { name: 'btn29' }, timeListClick);
 
 ROSLIB.RWTRobotMonitor.prototype.clearData = function () {
-  // if (this.useTimestamp) {
-  //   // Key: msgFieldPath without array index number
-  //   // Value: dataItem array of series
-  //   this.seriesMap = {};
-  // }
-  // else {
   this.data = new ROSLIB.RingBuffer({ bufferCount: this.maxData });
-  // }
-  // this.yMinValue = undefined;
-  // this.yMaxValue = undefined;
-  // this.needToAnimate = false;
-  // if (this.spec) {
-  //   $('#' + this.contentId).find('svg').remove();
-  //   this.initializePlot(this.contentId, this.posisionId, this.legendId, this.spec);
-  // }
 };
 
 ROSLIB.RWTRobotMonitor.prototype.addData = function (data) {
@@ -644,29 +681,8 @@ ROSLIB.RWTRobotMonitor.prototype.addData = function (data) {
     data = [data];          // force to encapsulate into array
   }
   this.data.push(data);
-
-  // TODO test
-  // console.log('---- add data ----');
-  // console.log(data);
-
   arrData = this.data.toArray();
-
-  // TODO test
-  // console.log('---- arrData ----');
-  // console.log(arrData);
-
-  // previousData.push(data);
-  // console.log('---- previousData ----');
-  // console.log(previousData);
-
-  // var arrData = this.data.toArray();
-
 };
-
-/**
- * @fileOverview a file to define RingBuffer class
- * @author Ryohei Ueda
- */
 
 /**
  * a class for ring buffer.
@@ -692,18 +708,10 @@ ROSLIB.RingBuffer.prototype.push = function (data) {
     if (this.startIndex === this.bufferCount) {
       this.startIndex = 0;
     }
-  }
-  else {                        // not filled yet
+  } else {
     this.buffer[this.endIndex] = data;
   }
   this.count++;
-
-  // TODO test
-  // console.log('---- startIndex ----');
-  // console.log(this.startIndex);
-  // console.log('---- endIndex ----');
-  // console.log(this.endIndex);
-
   return data;
 };
 
@@ -724,10 +732,6 @@ ROSLIB.RingBuffer.prototype.map = function (proc) {
       ret.push(proc.call(this, this.buffer[j]));
     }
   }
-
-  // TODO test
-  // console.log('---- map ret ----');
-  // console.log(ret);
   return ret;
 };
 
