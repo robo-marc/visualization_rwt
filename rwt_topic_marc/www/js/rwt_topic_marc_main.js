@@ -165,6 +165,35 @@ $(function () {
     return defer.promise();
   }
 
+  function getValueFromObj(name, valueObj, path) {
+    var keys = Object.keys(valueObj);
+    var value;
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      value = valueObj[keys[i]];
+      if (keys[i] === name) {
+        if (typeof value === 'object') {
+          value = undefined; // hide value of object 
+        }
+        path = path + '.' + key;
+        break;
+      } else {
+        if (typeof value === 'object') {
+          var result = getValueFromObj(name, value, path);
+          if (result.value) {
+            path = '.' + key + result.path;
+            value = result.value;
+            break;
+          }
+        } else {
+          // name missmatch
+          value = undefined;
+        }
+      }
+    }
+    return { path: path, value: value };
+  }
+
   function decodeTypeDefs(type_defs, root) {
     // It calls itself recursively to resolve type definition
     // using hint_defs.
@@ -178,10 +207,11 @@ $(function () {
         var fieldType = theType.fieldtypes[i];
 
         var newId = parent.id + '.' + fieldName;
+        var isArray = (arrayLen !== -1);
         var item = {
           id: newId,
           topic: fieldName,
-          type: fieldType + ((arrayLen === -1) ? '' : '[]'),
+          type: fieldType + (isArray ? '[]' : ''),
           bandwidth: undefined,
           hz: undefined,
           value: undefined,
@@ -203,7 +233,46 @@ $(function () {
         }
         if (sub_type) {
           var sub_type_result = decodeTypeDefsRec(sub_type, item, hint_defs);
-          typeList = typeList.concat(sub_type_result);
+          if (isArray) {
+            // get object array value
+            var valueObj2 = subscribingValueMap[root.topic];
+            if (valueObj2) {
+              var itemPropNames2 = item.id.split('.');
+
+              // start search from 1 because itemPropNames2[0] is topicName
+              for (var k2 = 1; k2 < itemPropNames2.length; k2++) {
+                var propName2 = itemPropNames2[k2];
+                if (propName2 in valueObj2) {
+                  valueObj2 = valueObj2[propName2];
+                }
+              }
+              for (var valueObjIndex = 0; valueObjIndex < valueObj2.length; valueObjIndex++) {
+                var indexName = '[' + valueObjIndex + ']';
+                var arrItemParent = _.cloneDeep(item);
+                arrItemParent.id = item.id + '.' + indexName;
+                arrItemParent.topic = indexName;
+                arrItemParent.type = fieldType;
+                arrItemParent.parent = item.id;
+                arrItemParent.indent = item.indent + 1;
+                typeList.push(arrItemParent);
+
+                for (var subTypeIndex = 0; subTypeIndex < sub_type_result.length; subTypeIndex++) {
+                  var arrItem = _.cloneDeep(sub_type_result[subTypeIndex]);
+                  var result = getValueFromObj(arrItem.topic, valueObj2[valueObjIndex], '');
+
+                  arrItem.id = arrItemParent.id + result.path;
+                  arrItem.parent = arrItem.id.substring(0, arrItem.id.lastIndexOf('.'));
+                  arrItem.indent = arrItem.indent + 1;
+                  arrItem.value = result.value;
+
+                  // console.log(arrItem);
+                  typeList.push(arrItem);
+                }
+              }
+            }
+          } else {
+            typeList = typeList.concat(sub_type_result);
+          }
         } else {
           item.subType = false;
 
@@ -221,7 +290,11 @@ $(function () {
             }
 
             if (_.isArray(valueObj) && valueObj.length > 0) {
-              item.value = '(' + valueObj.join(', ') + ')';
+              if (typeof valueObj[0] === 'object') {
+                // object array valueis already set
+              } else {
+                item.value = '(' + valueObj.join(', ') + ')';
+              }
             } else {
               item.value = valueObj;
             }
