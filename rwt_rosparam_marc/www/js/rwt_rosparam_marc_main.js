@@ -95,13 +95,14 @@ $(function () {
   // clear messagebox
   function initMessage() {
     // TODO placeholder
-    $('#message').text('System message might be shown here when necessary');
-    // $('#message').text('');
+    $('.placeholder').text('System message');
+    $('.error').text('');
   }
 
   // set messagebox
   function setMessage(message) {
-    $('#message').text(message);
+    $('.placeholder').text('');
+    $('.error').text(message);
   }
 
   // clear list
@@ -232,6 +233,7 @@ $(function () {
     var rosparamArg;
     var requestDefer = $.Deferred();
     var promises = [requestDefer.promise()];
+    var message = '';
 
     switch (rosparamOption) {
       case 'list':
@@ -257,8 +259,7 @@ $(function () {
             });
           },
           function (message) {
-            //error message
-            $('#message').text(message);
+            setMessage(message);
             requestDefer.resolve();
           }
         );
@@ -274,7 +275,7 @@ $(function () {
             requestDefer.resolve();
           },
             function (message) {
-              $('#message').val(message);
+              setMessage(message);
               requestDefer.resolve();
             }
           );
@@ -290,16 +291,15 @@ $(function () {
               console.log(result);
             },
               function (message) {
-                //error message
-                $('#message').text(message);
+                setMessage(message);
               }
             );
           });
         } else {
-          //error message
-          $('#message').text('Usage: rosparam set [options] parameter\n'
+          message = 'Usage: rosparam set [options] parameter\n'
             + 'rosparam: error: '
-            + 'invalid arguments. Please specify a parameter name');
+            + 'invalid arguments. Please specify a parameter name';
+          setMessage(message);
         }
         break;
       case 'get':
@@ -317,18 +317,16 @@ $(function () {
               gridList(rosparamList);
             } else {
               clearList();
-              //error message
-              $('#message').text('ERROR: Parameter ['
-                + rosparamArg1
-                + '] is not set');
+              message = 'ERROR: Parameter [' + rosparamArg1 + '] is not set';
+              setMessage(message);
             }
           });
         } else {
           clearList();
-          //error message
-          $('#message').text('Usage: rosparam get [options] parameter\n'
+          message = 'Usage: rosparam get [options] parameter\n'
             + 'rosparam: error: '
-            + 'invalid arguments. Please specify a parameter name');
+            + 'invalid arguments. Please specify a parameter name';
+          setMessage(message);
         }
         break;
       case 'load':
@@ -339,19 +337,17 @@ $(function () {
               console.log(result);
             },
               function (message) {
-                console.log('gloadParams failed: %s', message);
-                //error message
-                $('#message').text(message);
+                setMessage(message);
               }
             );
           }
-          // }
         } else {
           clearList();
           //error message
-          $('#message').text('Usage: rosparam load [options] file [namespace]\n'
+          message = 'Usage: rosparam load [options] file [namespace]\n'
             + 'rosparam: error: '
-            + 'invalid arguments. Please specify a file name or - for stdin');
+            + 'invalid arguments. Please specify a file name or - for stdin';
+          setMessage(message);
         }
         break;
       case 'dump':
@@ -361,9 +357,7 @@ $(function () {
           if (value) {
             for (var i = 0; i < value.params.length; i++) {
               var param = value.params[i].replace(/^"(.*)"$/, '$1');
-              console.log(param);
               download = download + param;
-              console.log(download);
             }
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(new Blob([download]));
@@ -372,9 +366,7 @@ $(function () {
           }
         },
           function (message) {
-            console.log('dumpParams failed: %s', message);
-            //error message
-            $('#message').text(message);
+            setMessage(message);
           }
         );
         break;
@@ -391,9 +383,10 @@ $(function () {
         }
         else {
           //error message
-          $('#message').text('Usage: rosparam delete [options] parameter\n'
+          message = 'Usage: rosparam delete [options] parameter\n'
             + 'rosparam: error: '
-            + 'invalid arguments. Please specify a parameter name');
+            + 'invalid arguments. Please specify a parameter name';
+          setMessage(message);
         }
         break;
     }
