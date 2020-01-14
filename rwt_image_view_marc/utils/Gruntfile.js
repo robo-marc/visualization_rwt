@@ -41,6 +41,7 @@ module.exports = function (grunt) {
       files: [
         'Gruntfile.js',
         '../src/*.js',
+        '../www/js/mjpegcanvasjs_viewer.js',
         '../www/js/rwt_image_view_marc_main.js'
       ]
     },
@@ -65,7 +66,7 @@ module.exports = function (grunt) {
     }
   }
 
-//  grunt.registerTask('build', ['concat', 'jshint', 'uglify', 'less']);
+  //  grunt.registerTask('build', ['concat', 'jshint', 'uglify', 'less']);
   grunt.registerTask('build', ['jshint', 'less']);
   grunt.registerTask('default', ['build']);
   grunt.registerTask('doc', ['jsdoc']);

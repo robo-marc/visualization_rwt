@@ -1,6 +1,4 @@
 
-// var dataView = new Slick.Data.DataView();
-
 $(function () {
 
   //TODO callback test
@@ -16,7 +14,6 @@ $(function () {
 
   // service rosparam
   var ros = new ROSLIB.Ros();
-  ros.autoConnect();
 
   var rosparamOptionList = [
     'list',
@@ -29,19 +26,45 @@ $(function () {
 
   var rosparamList = {};
   var fileObj = document.getElementById('load');
+  // var fileObj = $('#load');
   var fileData = [];
 
   var columns = [
-    { id: 'list', name: 'List', field: 'list', width: 340, sortable: true },
-    { id: 'value', name: 'Value', field: 'value', width: 340, sortable: true },
+    // { id: 'list', name: 'List', field: 'list', width: 340, sortable: true },
+    // { id: 'value', name: 'Value', field: 'value', width: 340, sortable: true },
+    { id: 'list', name: 'List', field: 'list', width: 340 },
+    { id: 'value', name: 'Value', field: 'value', width: 340 },
   ];
   var options = {
-    enableCellNavigation: false,
-    enableColumnReorder: false
+    enableCellNavigation: true,
+    enableColumnReorder: false,
+    // autoEdit: true
+
   };
 
+  var data = [];
+  var grid = new Slick.Grid('#myGrid', data, columns, options);
+
+  // initialize screen
+  function initScreen() {
+    // common
+    ros.autoConnect();
+    // for dropdown
+    getSelectList();
+    // clear list
+    clearList();
+  }
+
+  function getSelectList() {
+    $('#rosparam-select').append(rosparamOptionList.map(function (value) {
+      return '<option value="' + value + '">' + value + '</option>';
+    }).join('\n'));
+    $('#rosparam-select').change();
+  }
+
   function gridList(rosparamList) {
-    var data = [];
+    data = [];
+    grid.setData(data);
     var i = 0;
     for (var key in rosparamList) {
       data[i] = {
@@ -60,16 +83,26 @@ $(function () {
       }
     });
 
-    var grid = new Slick.Grid('#myGrid', data, columns, options);
-    grid.onSort.subscribe(function (e, args) {
-      grid.invalidateAllRows();
-      grid.render();
-    });
+    grid.invalidateAllRows();
+    grid.render();
+
+    grid.resizeCanvas();
+    grid.autosizeColumns();
+    // prevent the delete button from being hidden when switching screens vertically
+    grid.resizeCanvas();
   }
 
   // clear messagebox
   function initMessage() {
-    $('textarea[name="message"]').val('System message might be shown here when necessary');
+    // TODO placeholder
+    $('.placeholder').text('System message');
+    $('.error').text('');
+  }
+
+  // set messagebox
+  function setMessage(message) {
+    $('.placeholder').text('');
+    $('.error').text(message);
   }
 
   // clear list
@@ -89,11 +122,6 @@ $(function () {
     }
   }
 
-  $('#rosparam-select').append(rosparamOptionList.map(function (value) {
-    return '<option value="' + value + '">' + value + '</option>';
-  }).join('\n'));
-  $('#rosparam-select').change();
-
   //set arg1
   function setArg1List() {
     $('#rosparam-arg1').val('');
@@ -111,30 +139,17 @@ $(function () {
     );
   }
 
-  //TODO test set arg3 comboBox
-  // function setArg3List() {
-  //   ros.getParams(function (names) {
-  //     names.sort();
-  //     $('#rosparam-arg3').append(names.map(function (name) {
-  //       return '<option value="' + name + '">' + name + '</option>';
-  //     }).join('\n'));
-  //     // $('#rosparam-arg3').change();
-  //   },
-  //     function (message) {
-  //       console.log('getParams failed: %s', message);
-  //     }
-  //   );
-  // }
-  // $('#rosparam-arg1').append(rosparamArg1List.map(function (value) {
-  //   return '<option value=' + value + '>' + value + '</option>';
-  // }).join('\n'));
-  // $('#rosparam-arg1').change();
-
   $('#rosparam-arg1').hide();
   $('#rosparam-arg2').hide();
   $('#load').hide();
+  $('#folder').hide();
 
   // file change
+  $('#folder').on('click', function (e) {
+    e.preventDefault();
+    $('#load').click();
+  });
+
   fileObj.addEventListener('change', function (evt) {
     var file = evt.target.files;
     // read text
@@ -142,8 +157,6 @@ $(function () {
     reader.readAsText(file[0]);
     $('#rosparam-arg2').val(file[0].name);
     reader.onload = function (ev) {
-      // TODO yaml? array? string? 
-      // fileData.push(reader.result);
       fileData = reader.result;
     };
   });
@@ -156,12 +169,14 @@ $(function () {
       case 'list':
         $('#rosparam-arg1').hide();
         $('#rosparam-arg2').hide();
+        $('#folder').hide();
         $('#load').hide();
         initMessage();
         break;
       case 'set':
         $('#rosparam-arg1').show();
         $('#rosparam-arg2').show();
+        $('#folder').hide();
         $('#load').hide();
         setArg1List();
         initMessage();
@@ -169,6 +184,7 @@ $(function () {
       case 'get':
         $('#rosparam-arg1').show();
         $('#rosparam-arg2').hide();
+        $('#folder').hide();
         $('#load').hide();
         setArg1List();
         initMessage();
@@ -176,18 +192,21 @@ $(function () {
       case 'load':
         $('#rosparam-arg1').hide();
         $('#rosparam-arg2').show();
-        $('#load').show();
+        $('#folder').show();
+        $('#load').hide();
         initMessage();
         break;
       case 'dump':
         $('#rosparam-arg1').hide();
         $('#rosparam-arg2').hide();
+        $('#folder').hide();
         $('#load').hide();
         initMessage();
         break;
       case 'delete':
         $('#rosparam-arg1').show();
         $('#rosparam-arg2').hide();
+        $('#folder').hide();
         $('#load').hide();
         setArg1List();
         initMessage();
@@ -214,6 +233,7 @@ $(function () {
     var rosparamArg;
     var requestDefer = $.Deferred();
     var promises = [requestDefer.promise()];
+    var message = '';
 
     switch (rosparamOption) {
       case 'list':
@@ -239,8 +259,7 @@ $(function () {
             });
           },
           function (message) {
-            //error message
-            $('textarea[name="message"]').val(message);
+            setMessage(message);
             requestDefer.resolve();
           }
         );
@@ -256,7 +275,7 @@ $(function () {
             requestDefer.resolve();
           },
             function (message) {
-              $('textarea[name="message"]').val(message);
+              setMessage(message);
               requestDefer.resolve();
             }
           );
@@ -272,16 +291,15 @@ $(function () {
               console.log(result);
             },
               function (message) {
-                //error message
-                $('textarea[name="message"]').val(message);
+                setMessage(message);
               }
             );
           });
         } else {
-          //error message
-          $('textarea[name="message"]').val('Usage: rosparam set [options] parameter\n'
+          message = 'Usage: rosparam set [options] parameter\n'
             + 'rosparam: error: '
-            + 'invalid arguments. Please specify a parameter name');
+            + 'invalid arguments. Please specify a parameter name';
+          setMessage(message);
         }
         break;
       case 'get':
@@ -299,18 +317,16 @@ $(function () {
               gridList(rosparamList);
             } else {
               clearList();
-              //error message
-              $('textarea[name="message"]').val('ERROR: Parameter ['
-                + rosparamArg1
-                + '] is not set');
+              message = 'ERROR: Parameter [' + rosparamArg1 + '] is not set';
+              setMessage(message);
             }
           });
         } else {
           clearList();
-          //error message
-          $('textarea[name="message"]').val('Usage: rosparam get [options] parameter\n'
+          message = 'Usage: rosparam get [options] parameter\n'
             + 'rosparam: error: '
-            + 'invalid arguments. Please specify a parameter name');
+            + 'invalid arguments. Please specify a parameter name';
+          setMessage(message);
         }
         break;
       case 'load':
@@ -321,19 +337,17 @@ $(function () {
               console.log(result);
             },
               function (message) {
-                console.log('gloadParams failed: %s', message);
-                //error message
-                $('textarea[name="message"]').val(message);
+                setMessage(message);
               }
             );
           }
-          // }
         } else {
           clearList();
           //error message
-          $('textarea[name="message"]').val('Usage: rosparam load [options] file [namespace]\n'
+          message = 'Usage: rosparam load [options] file [namespace]\n'
             + 'rosparam: error: '
-            + 'invalid arguments. Please specify a file name or - for stdin');
+            + 'invalid arguments. Please specify a file name or - for stdin';
+          setMessage(message);
         }
         break;
       case 'dump':
@@ -341,26 +355,18 @@ $(function () {
         initMessage();
         ros.dumpParams(function (value) {
           if (value) {
-            _.each(value, function (params, index) {
-              download = params;
-            });
+            for (var i = 0; i < value.params.length; i++) {
+              var param = value.params[i].replace(/^"(.*)"$/, '$1');
+              download = download + param;
+            }
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(new Blob([download]));
             link.download = 'rosparam.yaml';
             link.click();
-            // var blob = new Blob([download], { "type": "text/plain" });
-            // if (window.navigator.msSaveBlob) {
-            //   window.navigator.msSaveBlob(blob, "rospara.yaml");
-            //   window.navigator.msSaveOrOpenBlob(blob, "rosparam.yaml");
-            // } else {
-            //   document.getElementById("execute-button").href = window.URL.createObjectURL(blob);
-            // }
           }
         },
           function (message) {
-            console.log('dumpParams failed: %s', message);
-            //error message
-            $('textarea[name="message"]').val(message);
+            setMessage(message);
           }
         );
         break;
@@ -377,15 +383,24 @@ $(function () {
         }
         else {
           //error message
-          $('textarea[name="message"]').val('Usage: rosparam delete [options] parameter\n'
+          message = 'Usage: rosparam delete [options] parameter\n'
             + 'rosparam: error: '
-            + 'invalid arguments. Please specify a parameter name');
+            + 'invalid arguments. Please specify a parameter name';
+          setMessage(message);
         }
         break;
     }
   });
 
-  clearList();
+  $(window).on('load resize', function () {
+    grid.resizeCanvas();
+    grid.autosizeColumns();
+
+    // prevent the delete button from being hidden when switching screens vertically
+    grid.resizeCanvas();
+  });
+
+  initScreen();
 });
 
 

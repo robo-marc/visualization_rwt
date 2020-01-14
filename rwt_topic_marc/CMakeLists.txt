@@ -12,9 +12,17 @@ find_package(catkin REQUIRED COMPONENTS
   roswww
 )
 
+add_message_files(
+  FILES
+  MonitoringInfo.msg
+)
+
 add_service_files(
    FILES
    TopicHzBw.srv
+   StartMonitoring.srv
+   StopMonitoring.srv
+   GetMonitoringInfo.srv
 )
 
 generate_messages(
@@ -23,10 +31,10 @@ generate_messages(
   geometry_msgs
 )
 
-
 catkin_package(
   CATKIN_DEPENDS geometry_msgs rosbridge_server rospy std_msgs rwt_utils_3rdparty rwt_utils_marc roswww
 )
+
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )

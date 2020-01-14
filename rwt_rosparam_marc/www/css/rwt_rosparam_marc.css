@@ -1,2 +1,22 @@
-/* css */
+.ui-widget {
+  margin-bottom: 0;
+}
 
+.error {
+  color: red;
+}
+
+.contents_header.parts-box select.mini {
+  max-width: 120px; 
+}
+
+.contents_header.parts-box input.form-control{
+  flex: 2 0 auto;
+  min-width: 150px; 
+
+  height: 2.2rem;
+  font-size: 0.875rem;
+  color: #0a0000;
+  padding: 0.25rem 0.5rem;  
+  
+}

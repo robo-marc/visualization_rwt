@@ -3,6 +3,6 @@ $(function () {
   ros.autoConnect();
   var robot_monitor = new ROSLIB.RWTRobotMonitor({
     ros: ros,
-    last_time_id: '#last-message-sec'
+    last_time_id: '#number'
   });
 });

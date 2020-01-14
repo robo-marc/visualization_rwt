@@ -40,6 +40,33 @@
   font-weight: bold;
   margin-right: 5px;
 }
+#dialog {
+  display: none;
+}
+#dialogBackground {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  opacity: 0.05;
+}
+#dialogContent {
+  position: absolute;
+  left: 10%;
+  top: 10%;
+  z-index: 2;
+  background-color: #fff;
+  border: 1px solid #707070;
+  border-radius: 5px;
+  max-width: 500px;
+  margin: 0 auto;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+}
+.contents-box {
+  z-index: 1;
+}
 .no-transition {
   -webkit-transition: height 0;
   -moz-transition: height 0;
@@ -95,19 +122,6 @@ svg.rwt-plot .axis line {
 .rwt-plot-info-container .windows-inner {
   margin-top: 10px;
 }
-.btn-circle-flat {
-  display: inline-block;
-  text-decoration: none;
-  background: #87befd;
-  color: #FFF;
-  width: 25px;
-  height: 25px;
-  line-height: 25px;
-  border-radius: 50%;
-  text-align: center;
-  overflow: hidden;
-  transition: .4s;
-}
-.btn-circle-flat:hover {
-  background: #668ad8;
+.time-item.no {
+  background-color: #fff;
 }

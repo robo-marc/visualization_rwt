@@ -1,85 +1,144 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="ja">
 
 <head>
-  <meta charset="utf-8" />
-  <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css" />
+  <meta charset="UTF-8">
+  <title>rwt_moveit_monitor_marc</title>
+  <meta name="author" content="Prototype">
+  <!-- <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css" /> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" type="text/css" />
   <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css"
     type="text/css" />
+  <link rel="stylesheet" href="../rwt_utils_marc/common/iconfont/material-icons.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/common/css/common.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/css/rwt_utils_marc.css" />
   <link rel="stylesheet" type="text/css" href="css/rwt_moveit_monitor_marc.css" />
-  <style>
-    .toggle {
-      height: 9px;
-      width: 9px;
-      display: inline-block;
-    }
-
-    .toggle.expand {
-      background: url(../rwt_utils_3rdparty/SlickGrid//images/expand.gif) no-repeat center center;
-    }
-
-    .toggle.collapse {
-      background: url(../rwt_utils_3rdparty/SlickGrid/images/collapse.gif) no-repeat center center;
-    }
-  </style>
-  <title>rwt_moveit_monitor_marc</title>
-
 </head>
 
 <body>
-  <div class="container">
-    <div class="page-header">
-      <h1>rwt_moveit_monitor_marc </h1>
-    </div>
+  <div class="root">
+    <header>
+      <div class="column">
+        <h2>rwt_moveit_monitor_marc</h2>
+        <a href="http://wiki.ros.org/rqt_moveit" target="_blank" class="icon"><i
+            class="material-icons">help_outline</i></a>
+      </div>
+    </header>
 
-    <div>
-      <table width="100%">
-        <tr>
-          <div id="nodeGrid" style="width:600px;height:200px;"></div>
-          </select>
-        </tr>
-      </table>
-    </div>
+    <div class="contents moveit">
 
-    <div>
-      <table width="100%">
-        <tr>
-          <div id="paramGrid" style="width:600px;height:200px;"></div>
-          </select>
-        </tr>
-      </table>
-    </div>
+      <div class="contents-box box_1">
+        <div class="node">
+          <h3>Node</h3>
+          <div class="node-box">
+            <div class="name">/move_group</div>
+            <div class="status">Not running</div>
+          </div>
+        </div>
+        <div class="parameter">
+          <h3>Parameter List</h3>
+          <div class="table-wrap">
+            <table class="table-type-1">
+              <thead>
+                <tr>
+                  <th class="name_1">Param name</th>
+                  <th class="name_2">Found on Parameter Server?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="data_1">/robot_description</td>
+                  <td class="data_2"><span class="label yes" id="robot_description">No</span></td>
+                </tr>
+                <tr>
+                  <td class="data_1">/robot_description_semantic</td>
+                  <td class="data_2"><span class="label yes" id="robot_description_semantic">No</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-    <div>
-      <table width="100%">
-        <tr>
-          <div id="topicGrid" style="width:800px;height:200px;"></div>
-          </select>
-        </tr>
-      </table>
-    </div>
+      <!-- TODO topic monitore -->
+      <div class="contents-box box_2">
+        <h3>Topic List</h3>
 
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.11.2.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui-1.11.3.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery.event.drag-2.3.0.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.core.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.formatters.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.grid.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.editors.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.dataview.js"></script>
+        <div class="tree-box">
+          <div class="tree-wrap">
+            <table class="tree-table">
+              <thead>
+                <tr>
+                  <th class="check">&nbsp;</th>
+                  <th class="tree">Tree</th>
+                  <th class="type">Type</th>
+                  <th class="band">Bandwidth</th>
+                  <th class="hz">Hz</th>
+                  <th class="value">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-    <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
-    <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
 
-    <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
-    <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
+      <div class="sys-message-box box_3">
+        <div class="sys-message-text">
+          <span class="placeholder">System message might be shown here when necessary</span> message text color
+        </div>
+      </div>
 
-    <script type="text/javascript" src="js/rwt_moveit_monitor_marc_main.js"></script>
+
+      <!-- TODO delete -->
+      <!-- <div>
+        <table width="100%">
+          <tr>
+            <div id="nodeGrid" style="width:600px;height:200px;"></div>
+            </select>
+          </tr>
+        </table>
+      </div> -->
+
+      <!-- TODO delete -->
+      <!-- <div>
+        <table width="100%">
+          <tr>
+            <div id="paramGrid" style="width:600px;height:200px;"></div>
+            </select>
+          </tr>
+        </table>
+      </div> -->
+
+      <!-- TODO delete -->
+      <div>
+        <table width="100%">
+          <tr>
+            <div id="topicGrid" style="width:800px;height:200px;"></div>
+            </select>
+          </tr>
+        </table>
+      </div>
+
+      <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.11.2.min.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui-1.11.3.min.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery.event.drag-2.3.0.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.core.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.formatters.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.grid.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.editors.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.dataview.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
+      <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
+      <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
+      <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
+      <script type="text/javascript" src="js/rwt_moveit_monitor_marc_main.js"></script>
 
 </body>
 
