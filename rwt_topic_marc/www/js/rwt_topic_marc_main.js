@@ -1,12 +1,15 @@
+////////////////////////////////////////
+// global variables
+
 var dataView = new Slick.Data.DataView({ inlineFilters: true });
+
 
 $(function () {
 
-  var ros = new ROSLIB.Ros();
+  ////////////////////////////////////////
+  // variables
 
-  var topicTypeDetail = {};
-  var info = {};
-  var topicId = 0;
+  var ros = new ROSLIB.Ros();
 
   var subscribingMap = {};
   var subscribingValueMap = {};
@@ -14,7 +17,6 @@ $(function () {
   var checkboxSelector = new Slick.CheckboxSelectColumn({
     cssClass: 'slick-cell-checkboxsel',
     hideInColumnTitleRow: true,
-
   });
 
   var checkboxColumnDef = checkboxSelector.getColumnDefinition();
@@ -25,7 +27,7 @@ $(function () {
     { id: 'topic', name: 'Topic', field: 'topic', width: 200, minWidth: 20, maxWidth: 300, formatter: treeFormatter },
     { id: 'type', name: 'Type', field: 'type', width: 260, minWidth: 20, maxWidth: 900 },
     { id: 'bandwidth', name: 'Bandwidth', field: 'bandwidth', width: 100, minWidth: 20, maxWidth: 100 },
-    { id: 'hz', name: 'Hz', field: 'hz', width: 50, minWidth: 20, maxWidth: 50 },
+    { id: 'hz', name: 'Hz', field: 'hz', width: 100, minWidth: 20, maxWidth: 100 },
     { id: 'value', name: 'Value', field: 'value', width: 260, minWidth: 20, maxWidth: 900 },
   ];
   var data = [];
@@ -33,8 +35,9 @@ $(function () {
 
   var topicDetailMap = {}; // key: topic name, value: message detail
 
+
   ////////////////////////////////////////
-  // common
+  // functions
 
   // initialize screen
   function initScreen() {
@@ -47,16 +50,15 @@ $(function () {
     dataView.setFilter(myFilter);
     dataView.endUpdate();
 
-    // draw grid
-    setInterval(getTopics, 1000);
-    // getTopics();
+    // start
+    setInterval(refreshTopics, 1000);
+    // renderTopics();
   }
 
 
   function checkboxCustomFormatter(row, cell, value, columnDef, dataContext) {
     var idx = dataView.getIdxById(dataContext.id);
     if (data[idx] && data[idx].parent === null && !(dataContext._checked)) {
-      // return checkboxDefaultFormatter(row, cell, value, columnDef, dataContext);
       return '<input type="checkbox" class="checkbox">';
     } else if (data[idx] && data[idx].parent === null) {
       return '<input type="checkbox" class="checkbox" checked="checked">';
@@ -97,6 +99,72 @@ $(function () {
     return true;
   }
 
+  function getMessageDetailsAsync(message, callback) {
+    var defer = $.Deferred();
+
+    ros.getMessageDetails(message,
+      function (result) {
+        // console.log('getMessageDetailsAsync success');
+        callback(result);
+        defer.resolve();
+      },
+      function (message) {
+        console.log('getMessageDetailsAsync failed: ' + message);
+        defer.resolve();
+      }
+    );
+
+    return defer.promise();
+  }
+
+  function startMonitoringAsync(topicName, topicType) {
+    var defer = $.Deferred();
+
+    ros.startMonitoring(topicName, topicType,
+      function (result) {
+        // console.log('startMonitoring success: ' + topicName);
+        defer.resolve();
+      },
+      function (message) {
+        console.log('startMonitoring failed: ' + topicName, ': ' + message);
+        defer.resolve();
+      }
+    );
+    return defer.promise();
+  }
+
+  function stopMonitoringAsync(topicName, topicType) {
+    var defer = $.Deferred();
+
+    ros.stopMonitoring(topicName, topicType,
+      function (result) {
+        // console.log('stopMonitoring success: ' + topicName);
+        defer.resolve();
+      },
+      function (message) {
+        console.log('stopMonitoring failed: ' + topicName, ': ' + message);
+        defer.resolve();
+      }
+    );
+    return defer.promise();
+  }
+
+  function getMonitoringInfoAsync() {
+    var defer = $.Deferred();
+
+    ros.getMonitoringInfo(
+      function (result) {
+        // console.log('getMonitoringInfo success');
+        defer.resolve(result.info);
+      },
+      function (message) {
+        console.log('getMonitoringInfo failed: ' + message);
+        defer.resolve();
+      }
+    );
+    return defer.promise();
+  }
+
   function decodeTypeDefs(type_defs, root) {
     // It calls itself recursively to resolve type definition
     // using hint_defs.
@@ -109,7 +177,6 @@ $(function () {
         var fieldName = theType.fieldnames[i];
         var fieldType = theType.fieldtypes[i];
 
-        topicId++;
         var newId = parent.id + '.' + fieldName;
         var item = {
           id: newId,
@@ -168,11 +235,21 @@ $(function () {
     return decodeTypeDefsRec(type_defs[0], root, type_defs);
   }
 
-  function getTopics() {
+  function getMonitoringInfoByName(list, name) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].name === name) {
+        return list[i];
+      }
+    }
+    return undefined;
+  }
+
+  function refreshTopics() {
     ros.getTopics(function (topicInfo) {
       // console.log(topicInfo);
 
-      var promises = [];
+      var monitoringInfoDefer = $.Deferred();
+      var messageDetailPromises = [];
 
       _.each(topicInfo.topics, function (topicName, index) {
         var topicType = topicInfo.types[index];
@@ -185,22 +262,24 @@ $(function () {
               topicType: topicType,
               detail: result
             };
-          },
-          function (mes) {
-            console.log(mes);
           }
         );
-        promises.push(promise);
+        messageDetailPromises.push(promise);
       });
 
-      // TODO: bandwidth, hz を取得する
+      $.when.apply(null, messageDetailPromises).done(function () {
+        // get list of bandwidth, hz
+        var promise = getMonitoringInfoAsync();
+        promise.done(function (monitoringInfoList) {
+          monitoringInfoDefer.resolve(monitoringInfoList);
+        });
+      });
 
-      $.when.apply(null, promises).done(function () {
+      monitoringInfoDefer.promise().done(function (monitoringInfoList) {
         // format type information
         var fieldList = [];
 
         _.each(topicDetailMap, function (details, topicName) {
-          topicId++;
           var parent = {
             id: topicName,
             topic: topicName,
@@ -224,18 +303,34 @@ $(function () {
         });
 
         if (data.length > 0) {
-          // Inherit tree OPEN / CLOSE and check ON / OFF status from previous data
+          var isRootCheckOff = false;
           for (var i = 0; i < fieldList.length; i++) {
+            // Inherit data status from previous data
+            // (tree OPEN/CLOSE, check ON/OFF, value )
             var newItem = fieldList[i];
             var oldItem = dataView.getItemById(newItem.id);
             if (oldItem) {
               newItem._collapsed = oldItem._collapsed;
               newItem._checked = oldItem._checked;
+              if (newItem.parent === null) {
+                isRootCheckOff = !newItem._checked;
+              }
               if (newItem.parent === null && newItem._checked) {
                 newItem.value = undefined; // hide 'not monitored'
+              } else if (newItem.parent !== null && isRootCheckOff) {
+                newItem.value = oldItem.value; // keep last value
               }
             } else {
               // Do nothing because old items are not found
+            }
+
+            // get bandwidth, hz
+            if (newItem.parent === null && newItem._checked) {
+              var info = getMonitoringInfoByName(monitoringInfoList, newItem.topic);
+              if (info) {
+                newItem.bandwidth = info.bw;
+                newItem.hz = info.hz;
+              }
             }
           }
         }
@@ -258,60 +353,10 @@ $(function () {
     });
   }
 
-  // get Hz Bw
-  function getHzBw(topic, type, info) {
-    var defer = $.Deferred();
 
-    ros.getTopicInfo(topic, type, function (value) {
-      console.log('---- Hz Bw ----');
-      // console.log(topic + '  /  ' + type);
-      // console.log(value);
-      info = value;
-      defer.resolve();
-    });
-    return defer.promise();
-  }
+  ////////////////////////////////////////
+  // grid events
 
-  function subscribeTopic(topic, type, subTopic) {
-    var defer = $.Deferred();
-
-    var sub = new ROSLIB.Topic({
-      ros: ros,
-      name: topic,
-      messageType: type
-    });
-    sub.subscribe(function (message) {
-      console.log('---- Received message ----');
-      // console.log(topic + '  /  ' + type);
-      // console.log(message);
-      // console.log(message.data);
-
-      defer.resolve();
-    });
-
-    return defer.resolve();
-  }
-
-  function getMessageDetailsAsync(message, callback, failedCallback) {
-    var defer = $.Deferred();
-
-    ros.getMessageDetails(message,
-      function (result) {
-        // console.log('getMessageDetailsAsync success');
-        callback(result);
-        defer.resolve();
-      },
-      function (message) {
-        console.log('getMessageDetailsAsync failed');
-        failedCallback(message);
-        defer.resolve();
-      }
-    );
-
-    return defer.promise();
-  }
-
-  // var isCheckbox = false;
   function toggleTree(e, args) {
     var item = dataView.getItem(args.row);
     if (item) {
@@ -325,12 +370,15 @@ $(function () {
     e.stopImmediatePropagation();
   }
 
-  function changeCheckbox(e, args) {
+  function toggleCheckbox(e, args) {
     var item = dataView.getItem(args.row);
     var sub;
     if (item) {
       if (!item._checked) {
         item._checked = true;
+
+        // start monitoring of bandwidth, Hz
+        startMonitoringAsync(item.topic, item.type);
 
         //subscribe
         sub = new ROSLIB.Topic({
@@ -351,6 +399,9 @@ $(function () {
         subscribingMap[item.topic].unsubscribe();
         delete subscribingValueMap[item.topic];
         delete subscribingMap[item.topic];
+
+        // stop monitoring of bandwidth, Hz
+        stopMonitoringAsync(item.topic, item.type);
       }
     }
     e.stopImmediatePropagation();
@@ -359,15 +410,11 @@ $(function () {
   grid.onClick.subscribe(function gridClickhandler(e, args) {
     var $target = $(e.target);
 
-    // event handler: toggle tree button
     if ($target.hasClass('toggle')) {
       toggleTree(e, args);
+    } else if ($target.hasClass('checkbox')) {
+      toggleCheckbox(e, args);
     }
-
-    if ($target.hasClass('checkbox')) {
-      changeCheckbox(e, args);
-    }
-
   });
 
   dataView.onRowCountChanged.subscribe(function (e, args) {
@@ -382,12 +429,41 @@ $(function () {
     grid.render();
   });
 
+
+  ////////////////////////////////////////
+  // resize events
+
   $(window).on('load resize', function () {
     grid.resizeCanvas();
     grid.autosizeColumns();
 
     // prevent the delete button from being hidden when switching screens vertically
     grid.resizeCanvas();
+  });
+
+
+  ////////////////////////////////////////
+  // button events
+
+  function closeAllTree(toClosed) {
+    dataView.beginUpdate();
+    var items = dataView.getItems();
+    for (var i = 0; i < items.length; i++) {
+      items[i]._collapsed = toClosed;
+    }
+    dataView.setItems(items);
+    dataView.endUpdate();
+    grid.invalidate();
+  }
+
+  $('#expand-button').on('click', function (e) {
+    e.preventDefault();
+    closeAllTree(false);
+  });
+
+  $('#collapse-button').on('click', function (e) {
+    e.preventDefault();
+    closeAllTree(true);
   });
 
 
