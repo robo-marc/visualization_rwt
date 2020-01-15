@@ -180,7 +180,7 @@ $(function () {
       } else {
         if (typeof value === 'object') {
           var result = getValueFromObj(name, value, path);
-          if (result.value !== undefined) {
+          if (result.path !== '') {
             path = '.' + key + result.path;
             value = result.value;
             break;
