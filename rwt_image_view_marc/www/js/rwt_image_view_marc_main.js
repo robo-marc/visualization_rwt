@@ -135,7 +135,20 @@ $(function () {
 
   $('#save-button').on('click', function (e) {
     e.preventDefault();
-    // TODO: 
+
+    var filename = 'image.png';
+    var canvas = $('#canvas-area canvas').get(0);
+
+    if (canvas.msToBlob) {
+      var blob = canvas.msToBlob();
+      window.navigator.msSaveBlob(blob, filename);
+    } else {
+      var downloadLink = document.getElementById('save-image-link');
+      // cannot excute 'toDataURL' in chrome because the canvas is determined to be Tainted 
+      downloadLink.href = canvas.toDataURL('image/png');
+      downloadLink.download = filename;
+      downloadLink.click();
+    }
   });
 
   $('#rotate-left-button').on('click', function (e) {
