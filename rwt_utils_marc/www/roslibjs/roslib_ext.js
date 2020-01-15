@@ -9,6 +9,17 @@ ROSLIB.Ros.prototype.autoConnect = function () {
 /**
  * 
  */
+ROSLIB.Ros.prototype.url = function () {
+  if (this.socket) {
+    return new URL(this.socket.url);
+  } else {
+    return null;
+  }
+};
+
+/**
+ * 
+ */
 ROSLIB.Ros.prototype.getSrvList = function (callback, failedCallback) {
   var client = new ROSLIB.Service({
     ros: this,
