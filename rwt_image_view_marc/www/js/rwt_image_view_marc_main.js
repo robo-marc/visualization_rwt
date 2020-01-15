@@ -13,6 +13,8 @@ $(function () {
   // unused
   var isInRecording = false;
 
+  var isRefreshing = false;
+
 
   ////////////////////////////////////////
   // functions
@@ -123,7 +125,12 @@ $(function () {
 
   $('#refresh-button').on('click', function (e) {
     e.preventDefault();
-    // TODO: ドロップダウンの中身だけを更新する
+    if (ros.isConnected) {
+      isRefreshing = true;
+      ros.close();
+    } else {
+      ros.autoConnect();
+    }
   });
 
   $('#save-button').on('click', function (e) {
@@ -210,7 +217,10 @@ $(function () {
         topics = topics.concat(arguments[i]);
       }
       topics.sort();
-      $('#topic-select').append(_.map(topics, function (topic) {
+
+      var $select = $('#topic-select');
+      $select.empty();
+      $select.append(_.map(topics, function (topic) {
         return '<option value="' + topic + '">' + topic + '</option>';
       }).join('\n'));
     });
@@ -218,6 +228,10 @@ $(function () {
 
   ros.on('close', function () {
     $('#topic-select').empty();
+    if (isRefreshing) {
+      isRefreshing = false;
+      ros.autoConnect();
+    }
   });
 
 
