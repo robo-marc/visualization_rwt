@@ -1,6 +1,14 @@
 /**
  * 
  */
+ROSLIB.Ros.prototype.autoConnect = function () {
+  var value = "ws://" + location.hostname + ":8888/";
+  this.connect(value);
+};
+
+/**
+ * 
+ */
 ROSLIB.Ros.prototype.getSrvList = function (callback, failedCallback) {
   var client = new ROSLIB.Service({
     ros: this,
