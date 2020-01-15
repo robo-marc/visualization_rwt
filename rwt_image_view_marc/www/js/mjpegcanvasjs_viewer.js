@@ -41,6 +41,7 @@ MJPEGCANVAS.Viewer = function (options) {
 
   // create no image initially
   this.image = new Image();
+  this.image.crossOrigin = 'anonymous';
 
   // used if there was an error loading the stream
   var errorIcon = new MJPEGCANVAS.ErrorIcon();
@@ -99,6 +100,7 @@ MJPEGCANVAS.Viewer.prototype.__proto__ = EventEmitter2.prototype;
  */
 MJPEGCANVAS.Viewer.prototype.changeStream = function (topic, type) {
   this.image = new Image();
+  this.image.crossOrigin = 'anonymous';
   // create the image to hold the stream
   var src = 'http://' + this.host + ':' + this.port + '/stream?topic=' + topic;
   // add various options
