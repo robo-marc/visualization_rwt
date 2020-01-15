@@ -117,16 +117,16 @@ $(function () {
     if (value === null || value === undefined || dataContext === undefined) { return ''; }
 
     value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    var spacer = '<span style="display:inline-block;height:1px;width:' + (15 * dataContext['indent']) + 'px"></span>';
+    var spacer = RwtUtils.getTreeSpacer(dataContext['indent']);
     var idx = dataView.getIdxById(dataContext.id);
     if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
       if (dataContext._collapsed) {
-        return spacer + '<span class="toggle expand"></span>' + value;
+        return spacer + RwtUtils.getTreeExpandButton() + value;
       } else {
-        return spacer + '<span class="toggle collapse"></span>' + value;
+        return spacer + RwtUtils.getTreeCollapseButton() + value;
       }
     } else {
-      return spacer + '<span class="toggle leaf"></span>' + value;
+      return spacer + RwtUtils.getTreeLeafButton() + value;
     }
   }
 
@@ -324,7 +324,7 @@ $(function () {
     var $target = $(e.target);
 
     // event handler: toggle tree button
-    if ($target.hasClass('toggle')) {
+    if (RwtUtils.isTreeToggleButton($target)) {
       toggleTree(e, args);
     }
 
