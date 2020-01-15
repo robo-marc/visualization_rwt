@@ -21,7 +21,6 @@
     <header>
       <div class="column">
         <h2>rwt_robot_monitor_marc</h2>
-        <!-- <a href="/rwt_robot_monitor/plotter.html">plotter is here</a></small></h1> -->
         <a href="http://wiki.ros.org/rqt_robot_monitor" target="_blank" class="icon"><i
             class="material-icons">help_outline</i></a>
       </div>
@@ -58,6 +57,8 @@
                   </tr>
                 </thead>
                 <tbody>
+                  <td class="data_1" id=error_data_1></td>
+                  <td class="data_2" id=error_data_2></td>
                   <!-- sample -->
                   <!-- <tr class="error">
                     <td class="data_1">/robot</td>
@@ -86,6 +87,8 @@
                   </tr>
                 </thead>
                 <tbody>
+                  <td class="data_1" id=warn_data_1></td>
+                  <td class="data_2" id=warn_data_2></td>
                   <!-- <tr class="warn">
                     <td class="data_1">/robot/dummy</td>
                     <td class="data_2">Warning</td>
@@ -202,47 +205,48 @@
           </div>
         </div>
 
-        <div class="dialog" id="dialog"></div>
-        <!-- TODO delete -->
-        <!-- <div class="dialog" id="dialog">
+        <!-- <div class="dialog" id="dialog"></div> -->
+        <div class="dialog_back" id="status-dialog">
+          <!-- TODO delete -->
+          <div class="dialog">
 
-          <div id="dialogBackground"></div>
-          <div id="dialogContent">
+            <!-- <div id="dialogBackground"></div>
+            <div id="dialogContent"> -->
 
             <div class="dialog_wrap">
-              <div class="dialog_header">
-                <h4>/robot/joy/joy_node: Joystick Driver Status</h4>
+              <div class="dialog_header" id="dialog_header">
+                <h4 id="dialog_header_title"></h4>
               </div>
               <div class="dialog_body">
                 <div class="dialog_box_1">
-                  <table class="table-type-3">
+                  <table class="table-type-3" id="table-type-3">
                     <tbody>
                       <tr>
                         <th>Full name</th>
-                        <td>/robot/joy/joy_node: Joystick Driver Status</td>
+                        <td id="dialog_full_name"></td>
                       </tr>
                       <tr>
                         <th>Component</th>
-                        <td>/robot/joy/joy_node: Joystick Driver Status</td>
+                        <td id="dialog_component"></td>
                       </tr>
                       <tr>
                         <th>Hardware ID</th>
-                        <td>none</td>
+                        <td id="dialog_hardware"></td>
                       </tr>
                       <tr>
                         <th>Level</th>
-                        <td>OK</td>
+                        <td id="dialog_level"></td>
                       </tr>
                       <tr>
                         <th>Message</th>
-                        <td>OK</td>
+                        <td id="dialog_message"></td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
                 <div class="dialog_box_2">
-                  <table class="table-type-4">
-                    <tbody>
+                  <table class="table-type-4" id="table-type-4">
+                    <!-- <tbody>
                       <tr>
                         <th>topic</th>
                         <td>/joy</td>
@@ -287,7 +291,7 @@
                         <th>sticky buttons</th>
                         <td>-</td>
                       </tr>
-                    </tbody>
+                    </tbody> -->
                   </table>
                 </div>
               </div>
@@ -295,9 +299,10 @@
                 <button id="close">OK</button>
               </div>
             </div>
+            <!-- </div> -->
           </div>
-        </div> -->
-        <!-- TODO test -->
+          <!-- TODO test -->
+        </div>
 
       </div>
     </div>

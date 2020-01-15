@@ -10,6 +10,9 @@
 var arrData = [];
 var maxData = 30;
 
+// dialog hidden
+$('#status-dialog').hide();
+
 /**
  * a class to visualize diagnostics messages
  * @class RWTRobotMonitor
@@ -39,9 +42,6 @@ ROSLIB.RWTRobotMonitor = function (spec) {
       return;
     }
     that.diagnosticsCallback(msg);
-    // // // TODO test
-    // console.log('---- diagnosticsCallback msg ----');
-    // console.log(msg);
     that.addData(msg);
   });
 
@@ -61,20 +61,9 @@ ROSLIB.RWTRobotMonitor.prototype.diagnosticsCallback = function (msg) {
   this.last_diagnostics_update = ROSLIB.Time.now();
   var diagnostics_statuses
     = ROSLIB.DiagnosticsStatus.createFromArray(msg);
-
-  // // TODO test
-  // console.log('----- diagnostics_statuses ----');
-  // console.log(diagnostics_statuses);
-
   var that = this;
-
   _.forEach(diagnostics_statuses, function (status) {
     that.history.registerStatus(status);
-
-    // // TODO test
-    // console.log('----- status ----');
-    // console.log(status);
-
   });
   var history = false;
   this.updateView(history);
@@ -93,19 +82,9 @@ ROSLIB.RWTRobotMonitor.prototype.showHistory = function (msg) {
 
   var diagnostics_statuses
     = ROSLIB.DiagnosticsStatus.createFromArray(msg);
-
   var that = this;
-  // // TODO test
-  // console.log('----- show history ----');
-  // console.log(diagnostics_statuses);
-
-  // console.log('----- show that ----');
-  // console.log(that);
   _.forEach(diagnostics_statuses, function (status) {
     that.history.registerStatus(status);
-    // // TODO test
-    // console.log('----- show status ----');
-    // console.log(status);
   });
   this.updateView(history);
 };
@@ -161,9 +140,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateList = function (list_id, level, icon) {
     }
   });
 
-  // TODO test
-  console.log('---- directories ----');
-
   _.forEach(directories, function (dir) {
     var html_pre = '<li class="list-group-item" data-name="'
       + dir.fullName()
@@ -176,15 +152,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateList = function (list_id, level, icon) {
       + ':'
       + dir.status.message
       + html_suf);
-
-    // TODO test
-    console.log('---- dir.fullName ----');
-    console.log(dir.fullName());
-    console.log('---- dir.status.message ----');
-    console.log(dir.status.message);
-    console.log('---- dir ----');
-    console.log(dir);
-
   });
 
   if (directories.length) {
@@ -199,7 +166,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, leve
   //delete table
   $('#' + list_id + ' tr:gt(0)').remove();
   $('#' + list_id + ' tr:gt(0)').size();
-  // $('#' + list_id + ' tr').remove();
 
   var directories = this.history.root.getDirectories(level);
   directories.sort(function (a, b) {
@@ -215,7 +181,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, leve
   });
 
   _.forEach(directories, function (dir) {
-
     var table = '<tr class="'
       + tr_class
       + '">'
@@ -228,22 +193,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, leve
       + dir.status.message
       + '</td>'
       + '</tr>';
-
-    // backup
-    // var table = '<tr class="'
-    //   + tr_class
-    //   + '">'
-    //   + '<td class="data_1">'
-    //   + dir.fullName()
-    //   + '</td>'
-    //   + '<td class="data_2">'
-    //   + dir.status.message
-    //   + '</td>'
-    //   + '</tr>';
-
-    console.log(table);
     $('#' + list_id).append(table);
-
   });
 
   if (directories.length) {
@@ -260,104 +210,154 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
   // check opened list first
   var open_ids = [];
 
-  // bootstrap
-  // $('#all-list .in, #all-list .collapsing').each(function () {
+  // Tree collapsing check
   // $('#all-table .in, #all-table .collapsing').each(function () {
-  //   open_ids.push($(this).attr('id'));
-  // });
+  $('#all-table').each(function () {
+    open_ids.push($(this).attr('id'));
+  });
+
+  // TODO test
+  open_ids = ['robot', 'robot-dummy', 'robot-dummy2', 'joy'];
+
+  console.log('----- allTable open_ids ----');
+  console.log(open_ids);
 
   //delete table
   $('#all-table tr:gt(0)').remove();
   $('#all-table tr:gt(0)').size();
 
   // return jquery object
-  var rec = function (directory) {
-    var $html = $(''
+  var rec = function (directory, indent) {
+    // indent
+    var leaf = ' leaf leaf' + indent + ' expand';
+
+    var allTableTree = $(''
       + directory.getIconHTML2()
+      + leaf
       + '">'
-      // + '<td class="data_1">'
       + '<td class="data_1" data-name="'
       + directory.fullName()
-      + '">'
+      + '"><span>'
       + directory.uniqID()
-      + '</td>'
+      + '</span></td>'
       + '<td class="data_2">'
       + directory.status.message
       + '</td>'
       + '</tr>');
-    console.log('----- $html ----');
-    console.log($html);
-
-    // var $html = $('<li class="list-group-item inner" data-name="'  
-    // + directory.fullName()
-    // + '">'
-    // + '<a data-toggle="collapse" data-parent="#all-list" href="#'
-    // + '<a data-toggle="collapse" data-parent="#all-table" href="#'
-    // + directory.uniqID()
-    // + '">'
-    // + directory.getCollapseIconHTML()
-    // + directory.getIconHTML() + directory.name
-    // + '</a>'
-    // + '</li>'
-    // + '</tr>');
+    console.log('----- allTableTree_1 ----');
+    console.log(allTableTree);
 
     if (directory.children.length === 0) {
-      console.log('----- $html ----');
-      console.log($html);
-      return $html;
+      return allTableTree;
     } else {
-      var div_root = $(''
-        + directory.getIconHTML2()
-        + '">'
-        + '<td class="data_1" data-name="'
-        + directory.fullName()
-        + '">'
-        + directory.uniqID()
-        + '</td>'
-        + '<td class="data_2">'
-        + directory.status.message
-        + '</td>'
-        + '</tr>');
-      console.log('----- div_root ----');
-      console.log(div_root);
       for (var j = 0; j < open_ids.length; j++) {
         if (open_ids[j].toString() === directory.uniqID().toString()) {
-          // div_root.addClass('in');
+          // div_root.addClass('inner');
           break;
         }
       }
-      // var div_root = $('<ul class="list-group-item-content collapse no-transition" id="'
-      //   + directory.uniqID()
-      //   + '"></ul>');
-      // for (var j = 0; j < open_ids.length; j++) {
-      //   if (open_ids[j].toString() === directory.uniqID().toString()) {
-      //     //div_root.find('.collapse').addClass('in');
-      //     div_root.addClass('in');
-      //     break;
-      //   }
-      // }
-
+      indent++;
       for (var i = 0; i < directory.children.length; i++) {
         var the_child = directory.children[i];
-        var the_result = rec(the_child);
-        div_root.append(the_result);
-        console.log('----- div_root ----');
-        console.log(div_root);
+        var the_result = rec(the_child, indent);
+        allTableTree.after(the_result);
       }
-      console.log('----- $html ----');
-      console.log($html);
-      $html.append(div_root);
-
-      return $html;
+      console.log('----- allTableTree ----');
+      console.log(allTableTree);
+      // allTableTree.append(div_root);
+      return allTableTree;
     }
   };
 
   for (var i = 0; i < this.history.root.children.length; i++) {
-    var $html = rec(this.history.root.children[i]);
-    console.log('----- $html ----');
-    console.log($html);
-    $('#all-table').append($html);
+    var allTable = rec(this.history.root.children[i], 0);
+    console.log('----- allTable ----');
+    console.log(allTable);
+    $('#all-table').append(allTable);
   }
+};
+
+// TODO delete
+/**
+ * update all list view
+ */
+ROSLIB.RWTRobotMonitor.prototype.updateAllList = function () {
+  // check opened list first
+  var open_ids = [];
+  $('#all-list .in, #all-list .collapsing').each(function () {
+    open_ids.push($(this).attr('id'));
+  });
+  console.log('----- open_ids ----');
+  console.log(open_ids);
+  $('#all-list li').remove();
+
+  // return jquery object
+  var rec = function (directory) {
+    console.log('----- directory ----');
+    console.log(directory);
+    var $html = $('<li class="list-group-item inner" data-name="'
+      + directory.fullName() + '">'
+      + '<a data-toggle="collapse" data-parent="#all-list" href="#'
+      + directory.uniqID() + '">'
+      + directory.getCollapseIconHTML()
+      + directory.getIconHTML() + directory.name + '</a>'
+      + '</li>');
+    if (directory.children.length === 0) {
+      console.log('----- All list $html ----');
+      console.log($html);
+      return $html;
+    }
+    else {
+      var div_root = $('<ul class="list-group-item-content collapse no-transition" id="'
+        + directory.uniqID()
+        + '"></ul>');
+      for (var j = 0; j < open_ids.length; j++) {
+        if (open_ids[j].toString() === directory.uniqID().toString()) {
+          div_root.addClass('in');
+          break;
+        }
+      }
+      for (var i = 0; i < directory.children.length; i++) {
+        var the_child = directory.children[i];
+        var the_result = rec(the_child);
+        div_root.append(the_result);
+      }
+      $html.append(div_root);
+      console.log('----- div_root ----');
+      console.log(div_root);
+      return $html;
+    }
+  };
+  for (var i = 0; i < this.history.root.children.length; i++) {
+    var $html = rec(this.history.root.children[i]);
+    $('#all-list').append($html);
+    console.log('----- All list Root $html ----');
+    console.log($html);
+  }
+};
+
+/**
+ * update warn list view
+ */
+ROSLIB.RWTRobotMonitor.prototype.updateWarnList = function () {
+  // TODO delete
+  var resultWarn = this.updateList('warn-list', ROSLIB.DiagnosticsStatus.LEVEL.WARN, 'glyphicon-exclamation-sign');
+  // TODO test 
+  var resultWarn1 = this.updateTable('warn-table', 'warn', ROSLIB.DiagnosticsStatus.LEVEL.WARN);
+
+  return resultWarn;
+};
+
+/**
+ * update error list view
+ */
+ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
+  // TODO delete
+  var resultError = this.updateList('error-list', ROSLIB.DiagnosticsStatus.LEVEL.ERROR, 'glyphicon-minus-sign');
+  // TODO test 
+  var resultError1 = this.updateTable('error-table', 'error', ROSLIB.DiagnosticsStatus.LEVEL.ERROR);
+
+  return resultError;
 };
 
 /**
@@ -399,276 +399,52 @@ ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultW
   }
 };
 
-// TODO delete
-/**
- * update all list view
- */
-ROSLIB.RWTRobotMonitor.prototype.updateAllList = function () {
-  // check opened list first
-  var open_ids = [];
-  $('#all-list .in, #all-list .collapsing').each(function () {
-    open_ids.push($(this).attr('id'));
-  });
-  $('#all-list li').remove();
-  // return jquery object
-  var rec = function (directory) {
-    var $html = $('<li class="list-group-item inner" data-name="' + directory.fullName() + '">'
-      + '<a data-toggle="collapse" data-parent="#all-list" href="#' + directory.uniqID() + '">'
-      + directory.getCollapseIconHTML()
-      + directory.getIconHTML() + directory.name + '</a>'
-      + '</li>');
-    if (directory.children.length === 0) {
-      return $html;
-    }
-    else {
-      var div_root = $('<ul class="list-group-item-content collapse no-transition" id="' + directory.uniqID() + '"></ul>');
-      for (var j = 0; j < open_ids.length; j++) {
-        if (open_ids[j].toString() === directory.uniqID().toString()) {
-          div_root.addClass('in');
-          break;
-        }
-      }
-      for (var i = 0; i < directory.children.length; i++) {
-        var the_child = directory.children[i];
-        var the_result = rec(the_child);
-        div_root.append(the_result);
-      }
-      $html.append(div_root);
-      return $html;
-    }
-  };
-  for (var i = 0; i < this.history.root.children.length; i++) {
-    var $html = rec(this.history.root.children[i]);
-    $('#all-list').append($html);
-  }
-};
-
-/**
- * update warn list view
- */
-ROSLIB.RWTRobotMonitor.prototype.updateWarnList = function () {
-  // TODO delete
-  var resultWarn = this.updateList('warn-list', ROSLIB.DiagnosticsStatus.LEVEL.WARN, 'glyphicon-exclamation-sign');
-  // TODO test 
-  var resultWarn1 = this.updateTable('warn-table', 'warn', ROSLIB.DiagnosticsStatus.LEVEL.WARN);
-
-  return resultWarn;
-};
-
-/**
- * update error list view
- */
-ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
-  // TODO delete
-  var resultError = this.updateList('error-list', ROSLIB.DiagnosticsStatus.LEVEL.ERROR, 'glyphicon-minus-sign');
-  // TODO test 
-  var resultError1 = this.updateTable('error-table', 'error', ROSLIB.DiagnosticsStatus.LEVEL.ERROR);
-
-  return resultError;
-};
-
 /**
  * registering callbacks for clicking the view lists
  */
 ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
   var root = this.history.root;
 
-  // TODO test
   $('.data_1').on('dblclick', function () {
-    // var dialog = document.getElementById('dialog');
-
     var the_directory = root.findByName($(this).attr('data-name'));
 
-    var dialogHeader =
-      // '<div class="dialog" id="dialog">'
-      '<div id="dialogBackground"></div>'
-      + '<div id="dialogContent">'
-      + '<div class="dialog_wrap">'
-      + '<div class="dialog_header"><h4>'
-      // title
-      + the_directory.fullName()
-      + '</h4></div>'
-      + '<div class="dialog_body">'
-      + '<div class="dialog_box_1">'
-      + '<table class="table-type-3"><tbody>'
-      + '<tr><th>Full name</th><td>'
-      // full name
-      + the_directory.fullName()
-      + '</td></tr>'
-      + '<tr><th>Component</th><td>'
-      // component
-      + the_directory.status.name
-      + '</td></tr>'
-      + '<tr><th>Hardware ID</th><td>'
-      // hardware id
-      + the_directory.status.hardware_id
-      + '</td></tr>'
-      + '<tr><th>Level</th><td>'
-      // level
-      + the_directory.status.levelString()
-      + '</td></tr>'
-      + '<tr><th>Message</th><td>'
-      // message
-      + the_directory.status.message
-      + '</td></tr></tbody></table></div>';
+    // dialog_box_1
+    $('#dialog_header_title').text(the_directory.fullName());
+    $('#dialog_full_name').text(the_directory.fullName());
+    $('#dialog_component').text(the_directory.status.name);
+    $('#dialog_hardware').text(the_directory.status.hardware_id);
+    $('#dialog_level').text(the_directory.status.levelString());
+    $('#dialog_message').text(the_directory.status.message);
 
-    var dialogList = '<div class="dialog_box_2">'
-      + '<table class="table-type-4">'
-      + '<tbody>';
-
-    for (var second_key in the_directory.status.values) {
-      // $second_body_html.append('<dt>' + second_key + ':</dt>' + '<dd>' + the_directory.status.values[second_key] + '</dd>');
-      dialogList = dialogList
-        + '<tr><th>'
-        + second_key
-        + '</th><td>'
-        + the_directory.status.values[second_key]
-        + '</td></tr>';
+    // dialog_box_
+    for (var key in the_directory.status.values) {
+      $('#table-type-4').append('<tr><th>' + key + '</th><td>' + the_directory.status.values[key] + '</td></tr>');
     }
-
-    var dialogFooter = '</tbody></table></div></div>'
-      + '<div class="dialog_footer">'
-      + '<button id="close">OK</button>'
-      + '</div></div>'
-      + '</div>';
-    // </div > ';
-
-    var dialogBox = dialogHeader
-      + dialogList
-      + dialogFooter;
-
-    console.log(dialogBox);
-    document.getElementById('dialog').innerHTML = dialogBox;
-    var dialog = document.getElementById('dialog');
-    dialog.style.display = 'block';
-
-    // dialog close
-    $('#close').on('click', function () {
-      var dialog = document.getElementById('dialog');
-      dialog.style.display = 'none';
-    });
-
+    $('#status-dialog').show();
   });
 
-  // // dialog close
-  // $('#close').on('click', function () {
-  //   var dialog = document.getElementById('dialog');
-  //   dialog.style.display = 'none';
+  // dialog close
+  $('#close').on('click', function () {
+    $('#status-dialog').hide();
+    $('#table-type-4').empty();
+  });
+
+  // tree open close
+  // $('.data_1').on('click', function () {
+  //   console.log('tggle');
+  //   $(this).next().slideToggle(200);
   // });
 
-  // TODO delete
-  $('.list-group-item').on('dblclick', function () {
-    if ($(this).find('.in').length !== 0) {
-      return;                   // skip
-    }
-    var html = '<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">'
-      + '<div class="modal-dialog">'
-      + '<div class="modal-content">'
-      + '<div class="modal-header">'
-      + '<button type="button" class="close dismiss-button" aria-hidden="true">&times;</button>'
-      + '<h4 class="modal-title" id="myModalLabel">Modal title</h4>'
-      + '</div>'
-      + '<div class="modal-body">'
-      + '</div>'
-      + '<div class="modal-footer">'
-      + '<button type="button" class="btn btn-primary dismiss-button">Close</button>'
-      + '</div>'
-      + '</div><!-- /.modal-content -->'
-      + '</div><!-- /.modal-dialog -->'
-      + ' </div><!-- /.modal -->';
-    var the_directory = root.findByName($(this).attr('data-name'));
-    var $html = $(html);
-    var $first_body_html = $('<dl></dl>');
-    var first_dict = {
-      'Full name': the_directory.fullName(),
-      'Component': the_directory.status.name,
-      'Hardware ID': the_directory.status.hardware_id,
-      'Level': the_directory.status.levelString(),
-      'Message': the_directory.status.message
-    };
-    for (var first_key in first_dict) {
-      $first_body_html.append('<dt>' + first_key + ':</dt>' + '<dd>' + first_dict[first_key] + '</dd>');
-    }
-    $html.find('.modal-body').append($first_body_html);
-    var $second_body_html = $('<dl></dl>');
-    for (var second_key in the_directory.status.values) {
-      $second_body_html.append('<dt>' + second_key + ':</dt>' + '<dd>' + the_directory.status.values[second_key] + '</dd>');
-    }
-    $html.find('.modal-title').html(the_directory.fullName());
+  $('.expand').on('click', function () {
+    console.log('tggle');
+    // $(this).next().slideToggle(200);
+    $(this).nextAll().slideToggle(200);
 
-    $html.find('.modal-body').append($second_body_html);
-    $html.find('.dismiss-button').click(function () {
-      $html.on('hidden.bs.modal', function () {
-        $('#modal').remove();
-      });
-      $html.modal('hide');
-    });
-    $('.container').append($html);
-    $('#modal').modal();
+    $(this).toggleClass('collapse');
+    // $(this).next("panel-head").slideToggle();  
+
   });
 };
-
-$('#pause-button').on('click', function (e) {
-  e.preventDefault();
-  ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
-  $('#pause-button').hide();
-  $('#start-button').show();
-});
-
-$('#start-button').on('click', function (e) {
-  e.preventDefault();
-  ROSLIB.RWTRobotMonitor.prototype.is_paused = false;
-  $('#pause-button').show();
-  $('#start-button').hide();
-});
-
-// time list click event
-var timeListClick = function (event) {
-
-  // monitor pause
-  ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
-  $('#pause-button').hide();
-  $('#start-button').show();
-
-  var num = event.data.name.substr(3);
-  var data = {};
-  data = arrData[Math.abs(parseInt(num, 10) - (arrData.length - 1))];
-
-  var msg = data[0];
-  ROSLIB.RWTRobotMonitor.prototype.showHistory(msg);
-};
-
-// time list botton click 
-$('#btn0').on('click', { name: 'btn0' }, timeListClick);
-$('#btn1').on('click', { name: 'btn1' }, timeListClick);
-$('#btn2').on('click', { name: 'btn2' }, timeListClick);
-$('#btn3').on('click', { name: 'btn3' }, timeListClick);
-$('#btn4').on('click', { name: 'btn4' }, timeListClick);
-$('#btn5').on('click', { name: 'btn5' }, timeListClick);
-$('#btn6').on('click', { name: 'btn6' }, timeListClick);
-$('#btn7').on('click', { name: 'btn7' }, timeListClick);
-$('#btn8').on('click', { name: 'btn8' }, timeListClick);
-$('#btn9').on('click', { name: 'btn9' }, timeListClick);
-$('#btn10').on('click', { name: 'btn10' }, timeListClick);
-$('#btn11').on('click', { name: 'btn11' }, timeListClick);
-$('#btn12').on('click', { name: 'btn12' }, timeListClick);
-$('#btn13').on('click', { name: 'btn13' }, timeListClick);
-$('#btn14').on('click', { name: 'btn14' }, timeListClick);
-$('#btn15').on('click', { name: 'btn15' }, timeListClick);
-$('#btn16').on('click', { name: 'btn16' }, timeListClick);
-$('#btn17').on('click', { name: 'btn17' }, timeListClick);
-$('#btn18').on('click', { name: 'btn18' }, timeListClick);
-$('#btn19').on('click', { name: 'btn19' }, timeListClick);
-$('#btn20').on('click', { name: 'btn20' }, timeListClick);
-$('#btn21').on('click', { name: 'btn21' }, timeListClick);
-$('#btn22').on('click', { name: 'btn22' }, timeListClick);
-$('#btn23').on('click', { name: 'btn23' }, timeListClick);
-$('#btn24').on('click', { name: 'btn24' }, timeListClick);
-$('#btn25').on('click', { name: 'btn25' }, timeListClick);
-$('#btn27').on('click', { name: 'btn26' }, timeListClick);
-$('#btn27').on('click', { name: 'btn27' }, timeListClick);
-$('#btn28').on('click', { name: 'btn28' }, timeListClick);
-$('#btn29').on('click', { name: 'btn29' }, timeListClick);
 
 ROSLIB.RWTRobotMonitor.prototype.clearData = function () {
   this.data = new ROSLIB.RingBuffer({ bufferCount: this.maxData });
@@ -742,3 +518,76 @@ ROSLIB.RingBuffer.prototype.toArray = function () {
 ROSLIB.RingBuffer.prototype.length = function () {
   return Math.min(this.bufferCount, this.count);
 };
+
+// time list click event
+var timeListClick = function (event) {
+
+  // monitor pause
+  ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
+  $('#pause-button').hide();
+  $('#start-button').show();
+
+  var num = event.data.name.substr(3);
+  var data = {};
+  data = arrData[Math.abs(parseInt(num, 10) - (arrData.length - 1))];
+
+  var msg = data[0];
+  ROSLIB.RWTRobotMonitor.prototype.showHistory(msg);
+};
+
+$('#pause-button').on('click', function (e) {
+  e.preventDefault();
+  ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
+  $('#pause-button').hide();
+  $('#start-button').show();
+});
+
+$('#start-button').on('click', function (e) {
+  e.preventDefault();
+  ROSLIB.RWTRobotMonitor.prototype.is_paused = false;
+  $('#pause-button').show();
+  $('#start-button').hide();
+});
+
+// time list botton click 
+$('#btn0').on('click', { name: 'btn0' }, timeListClick);
+$('#btn1').on('click', { name: 'btn1' }, timeListClick);
+$('#btn2').on('click', { name: 'btn2' }, timeListClick);
+$('#btn3').on('click', { name: 'btn3' }, timeListClick);
+$('#btn4').on('click', { name: 'btn4' }, timeListClick);
+$('#btn5').on('click', { name: 'btn5' }, timeListClick);
+$('#btn6').on('click', { name: 'btn6' }, timeListClick);
+$('#btn7').on('click', { name: 'btn7' }, timeListClick);
+$('#btn8').on('click', { name: 'btn8' }, timeListClick);
+$('#btn9').on('click', { name: 'btn9' }, timeListClick);
+$('#btn10').on('click', { name: 'btn10' }, timeListClick);
+$('#btn11').on('click', { name: 'btn11' }, timeListClick);
+$('#btn12').on('click', { name: 'btn12' }, timeListClick);
+$('#btn13').on('click', { name: 'btn13' }, timeListClick);
+$('#btn14').on('click', { name: 'btn14' }, timeListClick);
+$('#btn15').on('click', { name: 'btn15' }, timeListClick);
+$('#btn16').on('click', { name: 'btn16' }, timeListClick);
+$('#btn17').on('click', { name: 'btn17' }, timeListClick);
+$('#btn18').on('click', { name: 'btn18' }, timeListClick);
+$('#btn19').on('click', { name: 'btn19' }, timeListClick);
+$('#btn20').on('click', { name: 'btn20' }, timeListClick);
+$('#btn21').on('click', { name: 'btn21' }, timeListClick);
+$('#btn22').on('click', { name: 'btn22' }, timeListClick);
+$('#btn23').on('click', { name: 'btn23' }, timeListClick);
+$('#btn24').on('click', { name: 'btn24' }, timeListClick);
+$('#btn25').on('click', { name: 'btn25' }, timeListClick);
+$('#btn27').on('click', { name: 'btn26' }, timeListClick);
+$('#btn27').on('click', { name: 'btn27' }, timeListClick);
+$('#btn28').on('click', { name: 'btn28' }, timeListClick);
+$('#btn29').on('click', { name: 'btn29' }, timeListClick);
+
+// // tree open close
+// // $('.expand').on('click', function () {
+// $('.data_1').on('click', function () {
+//   console.log('tggle');
+//   $(this).next().slideToggle(200);
+// });
+// $('.expand').on('click', function () {
+//   console.log('tggle');
+//   $(this).next().slideToggle(200);
+// });
