@@ -53,7 +53,7 @@
 
       <div class="contents_body">
 
-        <div class="contents-box message">Displaying <span class="num">78</span> messages</div>
+        <div class="contents-box message">Displaying <span id="message-number" class="num">0</span> messages</div>
 
         <!-- <table width="100%">
           <tr>
@@ -78,19 +78,24 @@
                 <option value="2">2</option>
                 <option value="3">3</option> -->
               </select>
-              <button class="icon"><i class="material-icons">add</i></button>
+              <button id='add-button' class="icon"><i class="material-icons">add</i></button>
             </div>
-            <div class="parts-set radio"><input type="radio" name="exclude_input" value="" checked><label
-                for="">AND</label>
+            <div class="parts-set radio"><input type="radio" id="exclude_or" name="exclude_input" value="OR"
+                checked><label for="exclude_or">New
+                Group(OR)</label>
             </div>
-            <div class="parts-set radio"><input type="radio" name="exclude_input" value=""><label for="">OR</label>
+            <div class="parts-set radio"><input type="radio" id="exclude_and" name="exclude_input" value="AND"><label
+                for="exclude_and">Append to
+                Group(AND)
+              </label>
             </div>
           </div>
 
+          <!-- filter set -->
           <div class="filter-box">
             <div class="filter-wrap">
-              <ul class="filter-list">
-                <li class="severities active">
+              <ul id='exclude' class="filter-list">
+                <!-- <li class="severities active">
                   <div class="column">
                     <div class="name">
                       <div class="parts-set checkbox"><input type="checkbox"><label for="">Severities</label></div>
@@ -108,8 +113,8 @@
                   <div class="delete">
                     <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
                   </div>
-                </li>
-                <li class="topics">
+                </li> -->
+                <!-- <li class="topics">
                   <div class="column">
                     <div class="name">
                       <div class="parts-set checkbox"><input type="checkbox"><label for="">Topics</label></div>
@@ -126,8 +131,8 @@
                   <div class="delete">
                     <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
                   </div>
-                </li>
-                <li class="message">
+                </li> -->
+                <!-- <li class="message">
                   <div class="column">
                     <div class="name">
                       <div class="parts-set checkbox"><input type="checkbox"><label for="">Message</label></div>
@@ -140,13 +145,12 @@
                   <div class="delete">
                     <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
                   </div>
-                </li>
+                </li> -->
               </ul>
             </div>
           </div>
 
         </div>
-
 
         <div class="parts-box">
           <h3>Highlight Messages</h3>
@@ -174,7 +178,7 @@
           <div class="filter-box">
             <div class="filter-wrap">
               <ul class="filter-list">
-                <li class="node">
+                <!-- <li class="node">
                   <div class="column">
                     <div class="name">
                       <div class="parts-set checkbox"><input type="checkbox"><label for="">Node</label></div>
@@ -191,8 +195,8 @@
                   <div class="delete">
                     <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
                   </div>
-                </li>
-
+                </li> -->
+                <!-- 
                 <li class="time">
                   <div class="column">
                     <div class="name">
@@ -218,8 +222,8 @@
                   <div class="delete">
                     <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
                   </div>
-                </li>
-
+                </li> -->
+                <!-- 
                 <li class="location">
                   <div class="column">
                     <div class="name">
@@ -233,8 +237,7 @@
                   <div class="delete">
                     <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
                   </div>
-                </li>
-
+                </li> -->
               </ul>
 
 
@@ -267,6 +270,8 @@
   <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
+
   <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
