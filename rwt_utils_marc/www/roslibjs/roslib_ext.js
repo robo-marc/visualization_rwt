@@ -133,7 +133,7 @@ ROSLIB.Ros.prototype.getTopicInfo = function (topicName, topicType, callback, fa
   var client = new ROSLIB.Service({
     ros: this,
     name: '/topic_hz_bw',
-    serviceType: 'rwt_rostopic_marc/TopicHzBw'
+    serviceType: 'rwt_topic_content_marc/TopicHzBw'
   });
 
   var request = new ROSLIB.ServiceRequest({
@@ -166,7 +166,7 @@ ROSLIB.Ros.prototype.startMonitoring = function (topicName, topicType, callback,
   var client = new ROSLIB.Service({
     ros: this,
     name: '/start_monitoring',
-    serviceType: 'rwt_rostopic_marc/StartMonitoring'
+    serviceType: 'rwt_topic_content_marc/StartMonitoring'
   });
 
   var request = new ROSLIB.ServiceRequest({
@@ -199,7 +199,7 @@ ROSLIB.Ros.prototype.stopMonitoring = function (topicName, topicType, callback, 
   var client = new ROSLIB.Service({
     ros: this,
     name: '/stop_monitoring',
-    serviceType: 'rwt_rostopic_marc/StopMonitoring'
+    serviceType: 'rwt_topic_content_marc/StopMonitoring'
   });
 
   var request = new ROSLIB.ServiceRequest({
@@ -230,7 +230,7 @@ ROSLIB.Ros.prototype.getMonitoringInfo = function (callback, failedCallback) {
   var client = new ROSLIB.Service({
     ros: this,
     name: '/get_monitoring_info',
-    serviceType: 'rwt_rostopic_marc/GetMonitoringInfo'
+    serviceType: 'rwt_topic_content_marc/GetMonitoringInfo'
   });
 
   var request = new ROSLIB.ServiceRequest(
