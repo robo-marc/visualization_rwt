@@ -23,5 +23,6 @@
   "trailing": true,
   "quotmark": "single",
   "proto": true,
-  "laxbreak": true
+  "laxbreak": true,
+  "evil": true
 }
