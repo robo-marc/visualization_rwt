@@ -309,6 +309,9 @@ $(function () {
   }
 
   function getMonitoringInfoByName(list, name) {
+    if (!list) {
+      return undefined;
+    }
     for (var i = 0; i < list.length; i++) {
       if (list[i].name === name) {
         return list[i];
@@ -341,11 +344,15 @@ $(function () {
       });
 
       $.when.apply(null, messageDetailPromises).done(function () {
-        // get list of bandwidth, hz
-        var promise = getMonitoringInfoAsync();
-        promise.done(function (monitoringInfoList) {
-          monitoringInfoDefer.resolve(monitoringInfoList);
-        });
+        if (Object.keys(subscribingMap).length > 0) {
+          // get list of bandwidth, hz
+          var promise = getMonitoringInfoAsync();
+          promise.done(function (monitoringInfoList) {
+            monitoringInfoDefer.resolve(monitoringInfoList);
+          });
+        } else {
+          monitoringInfoDefer.resolve();
+        }
       });
 
       monitoringInfoDefer.promise().done(function (monitoringInfoList) {
