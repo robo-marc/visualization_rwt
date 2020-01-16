@@ -163,7 +163,22 @@ $(function () {
   });
 
   $(window).on('resize', function () {
-    // TODO: ウィンドウサイズに追従してcanvasのサイズを変更する
+    // resize canvas
+    var $canvas = $('#canvas-area canvas');
+    if ($canvas.size() === 0) {
+      return;
+    }
+
+    var $canvasWrap = $('#canvas-area');
+    var divWidth = $canvasWrap.width();
+    var height = 480 * divWidth / 640.0;
+
+    $canvas.prop('width', divWidth);
+    $canvas.prop('height', height);
+    mjpegCanvas.width = divWidth;
+    mjpegCanvas.height = height;
+
+    $canvasWrap.css('height', height);
   });
 
   // obsolated
