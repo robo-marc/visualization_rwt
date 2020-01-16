@@ -74,12 +74,9 @@ ROSLIB.RWTRobotMonitor.prototype.diagnosticsCallback = function (msg) {
  * @param msg - message of /diagnostics_agg.
  */
 ROSLIB.RWTRobotMonitor.prototype.showHistory = function (msg) {
-  // this.last_diagnostics_update = ROSLIB.Time.now();
   var history = true;
   this.last_diagnostics_update = ROSLIB.Time.now();
-
   this.history = new ROSLIB.DiagnosticsHistory();
-
   var diagnostics_statuses
     = ROSLIB.DiagnosticsStatus.createFromArray(msg);
   var that = this;
@@ -112,53 +109,11 @@ ROSLIB.RWTRobotMonitor.prototype.updateLastTimeString = function () {
 ROSLIB.RWTRobotMonitor.prototype.updateView = function (history) {
   var resultError = this.updateErrorList();
   var resultWarn = this.updateWarnList();
-  // TODO delete
-  this.updateAllList();
+  this.updateAllTable();
   if (!(history)) {
     this.updateTimeList(resultError, resultWarn);
   }
-  // test -> updateAllList()
-  this.updateAllTable();
-
   this.registerBrowserCallback();
-};
-
-// TODO delete 
-ROSLIB.RWTRobotMonitor.prototype.updateList = function (list_id, level, icon) {
-
-  $('#' + list_id + ' li').remove();
-  var directories = this.history.root.getDirectories(level);
-  directories.sort(function (a, b) {
-    var apath = a.fullName();
-    var bpath = b.fullName();
-    if (apath > bpath) {
-      return 1;
-    } else if (bpath > apath) {
-      return -1;
-    } else {
-      return 0;
-    }
-  });
-
-  _.forEach(directories, function (dir) {
-    var html_pre = '<li class="list-group-item" data-name="'
-      + dir.fullName()
-      + '"><span class="glyphicon '
-      + icon + '"></span>';
-
-    var html_suf = '</li>';
-    $('#' + list_id).append(html_pre
-      + dir.fullName()
-      + ':'
-      + dir.status.message
-      + html_suf);
-  });
-
-  if (directories.length) {
-    return true;
-  } else {
-    return false;
-  }
 };
 
 ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, level) {
@@ -210,15 +165,14 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
   // check opened list first
   var open_ids = [];
 
+  // TODO test
+  console.log('----- #all-table ----');
+  console.log($('#all-table'));
   // Tree collapsing check
-  // $('#all-table .in, #all-table .collapsing').each(function () {
-  $('#all-table').each(function () {
+  $('#all-table .collapse').each(function () {
     open_ids.push($(this).attr('id'));
   });
-
   // TODO test
-  open_ids = ['robot', 'robot-dummy', 'robot-dummy2', 'joy'];
-
   console.log('----- allTable open_ids ----');
   console.log(open_ids);
 
@@ -227,18 +181,37 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
   $('#all-table tr:gt(0)').size();
 
   // return jquery object
-  var rec = function (directory, indent) {
-    // indent
-    var leaf = ' leaf leaf' + indent + ' expand';
+  var rec = function (directory, indent, parentId) {
 
-    var allTableTree = $(''
+    // indent
+    var leaf = ' leaf leaf' + indent;
+    // toggle
+    var toggle = '';
+
+    // TODO test 
+    if (directory.children.length === 0) {
+      // toggle = ' collapse';
+    } else {
+      toggle = ' expand';
+    }
+
+    if (parentId === '') {
+      // parentId = directory.uniqID();
+    }
+
+    var allTableTree = $('<tr '
+      + 'id="'
+      + directory.uniqID()
+      + '" class="'
+      + parentId
+      + ' '
       + directory.getIconHTML2()
       + leaf
-      + '">'
-      + '<td class="data_1" data-name="'
+      + toggle
+      + '"><td class="data_1" data-name="'
       + directory.fullName()
       + '"><span>'
-      + directory.uniqID()
+      + directory.name
       + '</span></td>'
       + '<td class="data_2">'
       + directory.status.message
@@ -248,20 +221,22 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
     console.log(allTableTree);
 
     if (directory.children.length === 0) {
+      // last child
       return allTableTree;
     } else {
       for (var j = 0; j < open_ids.length; j++) {
-        if (open_ids[j].toString() === directory.uniqID().toString()) {
-          // div_root.addClass('inner');
-          break;
-        }
+        // if (open_ids[j].toString() === directory.uniqID().toString()) {
+        // div_root.addClass('inner');
+        // break;
+        // }
       }
       indent++;
       for (var i = 0; i < directory.children.length; i++) {
         var the_child = directory.children[i];
-        var the_result = rec(the_child, indent);
+        var the_result = rec(the_child, indent, directory.uniqID());
         allTableTree.after(the_result);
       }
+      // TODO test
       console.log('----- allTableTree ----');
       console.log(allTableTree);
       // allTableTree.append(div_root);
@@ -270,10 +245,22 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
   };
 
   for (var i = 0; i < this.history.root.children.length; i++) {
-    var allTable = rec(this.history.root.children[i], 0);
+    var allTable = rec(this.history.root.children[i], 0, '');
+    // TODO test
     console.log('----- allTable ----');
     console.log(allTable);
     $('#all-table').append(allTable);
+  }
+
+  for (var j = 0; j < open_ids.length; j++) {
+    // if (open_ids[j].toString() === directory.uniqID().toString()) {
+    // div_root.addClass('inner');
+    // break;
+    // }
+    var parentId = '.' + open_ids[j];
+    console.log('----- parentId ----');
+    console.log(parentId);
+    $(parentId).slideToggle(1);
   }
 };
 
@@ -283,6 +270,10 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
  */
 ROSLIB.RWTRobotMonitor.prototype.updateAllList = function () {
   // check opened list first
+
+  console.log('----- #all-list ----');
+  console.log($('#all-list'));
+
   var open_ids = [];
   $('#all-list .in, #all-list .collapsing').each(function () {
     open_ids.push($(this).attr('id'));
@@ -340,11 +331,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllList = function () {
  * update warn list view
  */
 ROSLIB.RWTRobotMonitor.prototype.updateWarnList = function () {
-  // TODO delete
-  var resultWarn = this.updateList('warn-list', ROSLIB.DiagnosticsStatus.LEVEL.WARN, 'glyphicon-exclamation-sign');
-  // TODO test 
-  var resultWarn1 = this.updateTable('warn-table', 'warn', ROSLIB.DiagnosticsStatus.LEVEL.WARN);
-
+  var resultWarn = this.updateTable('warn-table', 'warn', ROSLIB.DiagnosticsStatus.LEVEL.WARN);
   return resultWarn;
 };
 
@@ -352,10 +339,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateWarnList = function () {
  * update error list view
  */
 ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
-  // TODO delete
-  var resultError = this.updateList('error-list', ROSLIB.DiagnosticsStatus.LEVEL.ERROR, 'glyphicon-minus-sign');
-  // TODO test 
-  var resultError1 = this.updateTable('error-table', 'error', ROSLIB.DiagnosticsStatus.LEVEL.ERROR);
+  var resultError = this.updateTable('error-table', 'error', ROSLIB.DiagnosticsStatus.LEVEL.ERROR);
 
   return resultError;
 };
@@ -429,20 +413,34 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
     $('#table-type-4').empty();
   });
 
-  // tree open close
-  // $('.data_1').on('click', function () {
-  //   console.log('tggle');
-  //   $(this).next().slideToggle(200);
-  // });
-
   $('.expand').on('click', function () {
-    console.log('tggle');
-    // $(this).next().slideToggle(200);
-    $(this).nextAll().slideToggle(200);
 
-    $(this).toggleClass('collapse');
-    // $(this).next("panel-head").slideToggle();  
+    var rec = function (parend) {
 
+      var parentId = '.' + $(parend).attr('id');
+      console.log('----- parentId ----');
+      console.log(parentId);
+      console.log('----- parent ----');
+      console.log(parent);
+
+      console.log('----- ($(parent) ----');
+      console.log($(parent));
+
+      $(parent).toggleClass('collapse');
+
+      // TODO recursive processing
+      $(parentId).slideToggle(1);
+      // $(this).removeClass('expand');
+      // $(this).addClass('collapse');
+      // $(this).toggleClass('collapse');
+    };
+
+    var result = rec(this);
+    console.log(result);
+  });
+
+  $('.collapse').on('click', function () {
+    // TODO 
   });
 };
 

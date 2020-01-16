@@ -268,15 +268,15 @@ ROSLIB.DiagnosticsDirectory.prototype.getIconHTML = function () {
 ROSLIB.DiagnosticsDirectory.prototype.getIconHTML2 = function () {
   if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.OK) {
     // return '<span class="glyphicon-ok glyphicon"></span>';
-    return '<tr class="ok';
+    return 'ok';
   }
   else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.WARN) {
     // return '<span class="glyphicon-exclamation-sign glyphicon"></span>';
-    return '<tr class="warn';
+    return 'warn';
   }
   else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.ERROR) {
     // return '<span class="glyphicon-minus-sign glyphicon"></span>';
-    return '<tr class="error';
+    return 'error';
   }
 };
 
@@ -448,500 +448,6 @@ ROSLIB.DiagnosticsStatus.prototype.levelString = function() {
   }
 };
 
-// // PlotInfo.js
-
-// /**
-//  * @fileOverview a file to define DiagnosticsPlotInfo class.
-//  * @author Ryohei Ueda
-//  */
-
-// /**
-//  * DiagnosticsPlotInfo is a class to manager plotting information
-//  * including PlotWindow and so on.
-//  * You need to create DiagnosticsPlotInfo for each plotting fields.
-//  */
-// ROSLIB.DiagnosticsPlotInfo = function(spec) {
-//   var self = this;
-
-//   self.clearInfo();
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.getDirectories = function() {
-//   var self = this;
-//   return _.filter(self.plotting_directories, function(dir) {
-//     if (dir.status.values.hasOwnProperty(self.plotting_field)) {
-//       return true;
-//     }
-//     else {
-//       return false;
-//     }
-//   });
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.clearInfo = function() {
-//   var self = this;
-//   self.plotting_field = null;
-//   self.plotting_directories = [];
-//   self.plot_windows_by_name = {};
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.registerDirectories = function(directories) {
-//   var self = this;
-//   self.plotting_directories = directories;
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.registerField = function(field) {
-//   var self = this;
-//   self.plotting_field = field;
-//   return self.plotting_field;
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.plotValues = function() {
-//   var self = this;
-//   var field = self.plotting_field;
-//   var values = {};
-//   _.forEach(self.plotting_directories, function(dir) {
-//     if (dir.status.values.hasOwnProperty(field)) {
-//       values[dir.fullName()] = dir.status.values[field];
-//     }
-//     else {
-//       values[dir.fullName()] = null;
-//     }
-//   });
-//   return {
-//     field: field,
-//     values: values
-//   };
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.plottable = function() {
-//   var self = this;
-//   return (self.plotting_field !== null &&
-//           self.plotting_directories.length !== 0);
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.plotFieldID = function() {
-//   var self = this;
-//   // generate random id if not set
-//   while (!self.plot_field_id) {
-//     var text = '';
-//     var possible = 'abcdefghijklmnopqrstuvwxyz';
-//     for( var i=0; i < 10; i++ ) {
-//       text += possible.charAt(Math.floor(Math.random() * possible.length));
-//     }
-//     if ($('#' + text).length === 0) {
-//       self.plot_field_id = text;
-//       break;
-//     }
-//   }
-//   return self.plot_field_id;
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.preparePlotWindows = function(name, plot_windows_id) {
-//   var self = this;
-//   self.name = name;
-//   _.forEach(self.plot_windows_by_name, function(win) {
-//     win.remove();
-//   });
-//   self.plot_windows_by_name = {};
-//   _.forEach(self.getDirectories(), function(dir) {
-//     var new_window = new ROSLIB.DiagnosticsPlotWindow({
-//       directory: dir
-//     });
-//     self.plot_windows_by_name[dir.fullName()] = new_window;
-//   });
-//   // adding root html
-//   self.$root_html = $('<div class="rwt-plot-info-container" id="' + self.plotFieldID() + '">'
-//                       + '<div class="plot-info container">'
-//                       +   '<form>'
-//                       +     '<div class="row">'
-//                       +       '<div class="col-xs-6">'
-//                       +          '<select class="form-control" disabled>'
-//                       +             '<option>' + name + '</option>'
-//                       +          '</select>'
-//                       +       '</div>'
-//                       +       '<div class=" col-xs-5">'
-//                       +          '<select class="form-control" disabled>'
-//                       +             '<option>'
-//                       +                self.plotting_field
-//                       +             '</option>'
-//                       +          '</select>'
-//                       +       '</div>'
-//                       +       '<div class=" col-xs-1">'
-//                       +       '<button class="btn btn-danger remove-info-button">remove</button>'
-//                       +       '</div>'
-//                       +     '</div>'
-//                       +   '</form>'
-//                       + '</div>'
-//                       + '<div class="windows-inner"></div>'
-//                       + '</div>');
-//   $('#' + plot_windows_id).prepend(self.$root_html);
-//   self.$root_html.find('.remove-info-button').click(function(e) {
-//     e.preventDefault();
-//     self.remove();
-//     return false;
-//   });
-//   self.rearrangePlotWindows(plot_windows_id);
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.rearrangePlotWindows = function(plot_windows_id) {
-//     var self = this;
-//   // first of all, find the removed window
-//   var removed_windows = _.remove(_.values(self.plot_windows_by_name), function(win) {
-//     return win.getHTMLObject() === null;
-//   });
-//   _.forEach(removed_windows, function(win) {
-//     delete self.plot_windows_by_name[win.getDirectory().fullName()];
-//   });
-
-//   var $plot_area = self.$root_html.find('.windows-inner');
-//   $plot_area.html('');
-//   var $row = null;
-//   var plot_windows = _.values(self.plot_windows_by_name);
-//   for (var j = 0; j < plot_windows.length; j++) {
-//     if (j % 6 === 0) {
-//       if ($row) {
-//         $plot_area.append($row);
-//       }
-//       $row = $('<div class="row"></div>');
-//     }
-//     plot_windows[j].initialize({
-//       index: j
-//     });
-//     $row.append(plot_windows[j].getHTMLObject());
-//   }
-//   if (plot_windows.length % 6 !== 0 || plot_windows.length === 6) {
-//     $plot_area.append($row);
-//   }
-//   for (var i = 0; i < plot_windows.length; i++) {
-//     plot_windows[i].initializePlotter();
-//   }
-//   $plot_area.find('.close').click(function() {
-//     self.rearrangePlotWindows(plot_windows_id);
-//   });
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.plot = function() {
-//   var self = this;
-//   var field_values = self.plotValues();
-//   for (var dir_name in field_values.values) {
-//     var val = field_values.values[dir_name];
-//     if (val && !isNaN(val)) {
-//       if (self.plot_windows_by_name.hasOwnProperty(dir_name)) {
-//         self.plot_windows_by_name[dir_name].update(val);
-//       }
-//     }
-//   }
-// };
-
-// ROSLIB.DiagnosticsPlotInfo.prototype.remove = function() {
-//   var self = this;
-//   _.forEach(self.plot_windows_by_name, function(win) {
-//     win.remove();
-//   });
-//   $('#' + self.plotFieldID()).remove();
-// };
-
-// // PlotWindow.js
-
-// /**
-//  * @fileOverview a file to define DiagnosticsPlotWindow class.
-//  * @author Ryohei Ueda
-//  */
-
-// ROSLIB.DiagnosticsPlotWindow = function(spec) {
-//   var self = this;
-//   self.directory = spec.directory;
-// };
-
-// ROSLIB.DiagnosticsPlotWindow.prototype.getDirectory = function() {
-//   var self = this;
-//   return self.directory;
-// };
-
-// ROSLIB.DiagnosticsPlotWindow.prototype.initializePlotter = function() {
-//   var self = this;
-//   self.plotter.initializePlot(self.$html.find('.plot-window-inner'), {
-//     margin: {
-//       left: 20,
-//       top: 2,
-//       bottom: 20,
-//       right: 2
-//     },
-//     yaxis: {
-//       auto_scale: true,
-//       auto_scale_margin: 0.2,
-//       min: 0.1,
-//       tick: 3
-//     }
-//   });
-//   self.plotter.clearData();
-// };
-
-
-// ROSLIB.DiagnosticsPlotWindow.prototype.initialize = function(spec) {
-//   var self = this;
-//   self.index = spec.index;
-//   self.plotter = new ROSLIB.RWTPlot({
-//     max_data: 10,
-//     timestamp: true
-//   });
-
-//   // creating html
-//   self.$html = $('<div class="rwt-diagnostics-plot-window col-xs-2"></div>');
-//   self.$html.data('index', self.index);
-//   self.$html.append('<div class="background"><p>' + self.directory.status.name +'</p></div>');
-//   self.$html.append('<div class="plot-window-inner" id="rwt-plot-window-' + self.index + '"></div>');
-//   self.$html.append('<button class="close-button-layer close" type="button">&times;</button>');
-//   self.$html.find('.close').click(function() {
-//     self.remove();
-//   });
-// };
-
-// ROSLIB.DiagnosticsPlotWindow.prototype.getHTMLObject = function() {
-//   var self = this;
-//   return self.$html;
-// };
-
-// ROSLIB.DiagnosticsPlotWindow.prototype.update = function(data) {
-//   var self = this;
-//   var now = ROSLIB.Time.now();
-//   self.plotter.addData(now, [Number(data)]);
-//   if (self.directory.status.isOK()) {
-//     self.plotter.setColor(d3.rgb('#5cb85c'));
-//   }
-//   else if (self.directory.status.isWARN()) {
-//     self.plotter.setColor(d3.rgb('#f0ad4e'));
-//   }
-//   else if (self.directory.status.isERROR()) {
-//     self.plotter.setColor(d3.rgb('#d9534f'));
-//   }
-// };
-
-// ROSLIB.DiagnosticsPlotWindow.prototype.remove = function() {
-//   var self = this;
-//   self.$html.remove();
-//   self.$html = null;
-// };
-
-
-// // Plotter.js
-
-// /**
-//  * @fileOverview a file to define RWTDiagnosticsPlotter class.
-//  * @author Ryohei Ueda
-//  */
-// ROSLIB.RWTDiagnosticsPlotter = function(spec) {
-//   var self = this;
-//   self.plotting_infos = [];
-//   self.previous_directory_names = [];
-//   var ros = spec.ros;
-//   self.history = new ROSLIB.DiagnosticsHistory(spec);
-//   self.name_select_id = spec.name_select_id || 'name-select';
-//   self.plot_field_select_id = spec.plot_field_select_id || 'plot-field-select';
-//   self.add_button_id = spec.add_button_id || 'add-button';
-//   self.plot_windows_id = spec.plot_windows_id || 'plot-windows-area';
-//   var diagnostics_agg_topic = spec.diagnostics_agg_topic || '/diagnostics_agg';
-
-//   self.registerNameSelectCallback();
-//   self.registerPlotFieldSelectCallback();
-//   self.registerAddCallback();
-//   self.diagnostics_agg_subscriber = new ROSLIB.Topic({
-//     ros: ros,
-//     name: diagnostics_agg_topic,
-//     messageType: 'diagnostic_msgs/DiagnosticArray'
-//   });
-
-//   self.diagnostics_agg_subscriber.subscribe(function(msg) {
-//     self.diagnosticsCallback(msg);
-//   });
-// };
-
-
-// ROSLIB.RWTDiagnosticsPlotter.prototype.registerAddCallback = function() {
-//   var self = this;
-//   $('#' + self.add_button_id).click(function(e) {
-//     var plotting_info = new ROSLIB.DiagnosticsPlotInfo();
-//     self.plotting_infos.push(plotting_info);
-//     plotting_info.clearInfo(); // clear it anyway
-//     var name = $('#' + self.name_select_id).val();
-//     var directory = self.history.root.findByName(name);
-//     var directories = [];
-//     if (directory.hasChildren()) {
-//       directories = directory.getAllDirectoriesWithoutRoot();
-//     }
-//     else {
-//       directories = [directory];
-//     }
-
-//     plotting_info.registerDirectories(directories);
-//     plotting_info.registerField($('#' + self.plot_field_select_id).val());
-//     plotting_info.preparePlotWindows(name, self.plot_windows_id);
-//     e.preventDefault();
-//     return false;
-//   });
-// };
-
-
-// ROSLIB.RWTDiagnosticsPlotter.prototype.registerPlotFieldSelectCallback = function() {
-//   var self = this;
-//   $('#' + self.plot_field_select_id).bind('change', function() {
-//   });
-// };
-
-// ROSLIB.RWTDiagnosticsPlotter.prototype.registerNameSelectCallback = function() {
-//   var self = this;
-//   $('#' + self.name_select_id).bind('change', function() {
-//     var name = $(this).attr('value');
-//     // get the directory
-//     var directory = self.history.root.findByName(name);
-//     var candidate_keys = [];
-//     $('#' + self.plot_field_select_id + ' option').remove();
-//     var invoke_error_message = false;
-//     if (directory.hasChildren()) {
-//       // get the children
-//       var children = directory.getAllDirectories();
-//       _.remove(children, function(dir) {
-//         return dir === directory;
-//       });
-//       var uniq_keys = _(children).map(function(dir) {
-//         var keys = [];
-//         for (var key in dir.status.values) {
-//           if (dir.status.values.hasOwnProperty(key)) {
-//             var value = dir.status.values[key];
-//             if (!isNaN(Number(value))) {
-//               keys.push(key);
-//             }
-//           }
-//         }
-//         return keys;
-//       }).flatten().uniq().value();
-//       uniq_keys.forEach(function(key) {
-//         var $option = $('<option>' + key + '</option>');
-//         $option.val(key);
-//         $('#' + self.plot_field_select_id).append($option);
-//       });
-//       if (uniq_keys.length === 0) {
-//         invoke_error_message = true;
-//       }
-//     }
-//     else {
-//       var counter = 0;
-//       for (var key in directory.status.values) {
-//         var $option = $('<option>' + key + '</option>');
-//         $option.val(key);
-//         var value = directory.status.values[key];
-//         var number_value = Number(value);
-
-//         if (!isNaN(number_value)) {
-//           $('#' + self.plot_field_select_id).append($option);
-//           counter = counter + 1;
-//         }
-//       }
-//       if (counter === 0) {
-//         invoke_error_message = true;
-//       }
-//     }
-//     if (invoke_error_message) {
-//       var $modal_html = $('<div class="modal fade" id="rwt-robot-plotter-warn-message">'
-//                           + '<div class="modal-dialog">'
-//                           + '<div class="modal-content">'
-//                           + '<div class="modal-header">'
-//                           + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
-//                           + '<h4 class="modal-title">Error</h4>'
-//                           + '</div>'
-//                           + '<div class="modal-body">'
-//                           + '<p><span class="label label-warning">'
-//                           + name
-//                           + '</span> does not have values which can be plotted</p>'
-//                           + '</div>'
-//                           + '<div class="modal-footer">'
-//                           + '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
-//                           + '</div>'
-//                           + '</div>'
-//                           + '</div>'
-//                           + '</div>');
-//       $('body').append($modal_html);
-//       // registering function to remove the html
-//       $modal_html.on('hidden.bs.modal', function() {
-//         $('#rwt-robot-plotter-warn-message').remove();
-//       });
-//       $('#rwt-robot-plotter-warn-message').modal();
-//     }
-//   });
-
-// };
-
-// ROSLIB.RWTDiagnosticsPlotter.prototype.diagnosticsCallback = function(msg) {
-//   var diagnostics_statuses
-//     = ROSLIB.DiagnosticsStatus.createFromArray(msg);
-//   var self = this;
-//   _.forEach(diagnostics_statuses, function(status) {
-//     self.history.registerStatus(status);
-//   });
-
-//   // sort the history
-//   var directories = self.history.root.getAllDirectoriesWithoutRoot();
-//   // sort self directories
-//   directories = _.sortBy(directories, function(dir) {
-//     return dir.fullName();
-//   });
-//   //var name_options = [];
-
-//   var need_to_update_options = false;
-//   if (self.previous_directory_names.length === 0) {
-//     need_to_update_options = true;
-//   }
-//   else if (self.previous_directory_names.length !== directories.length) {
-//     need_to_update_options = true;
-//   }
-//   else {
-//     for (var i = 0; i < self.previous_directory_names.length; i++) {
-//       if (self.previous_directory_names[i].toString() !==
-//           directories[i].fullName().toString()) {
-//         need_to_update_options = true;
-//         break;
-//       }
-//     }
-//   }
-
-//   if (need_to_update_options) {
-//     var has_field_before = true;
-//     if ($('#' + self.plot_field_select_id + ' option').length === 0) {
-//       has_field_before = false;
-//     }
-
-//     $('#' + self.name_select_id + ' option').remove();
-//     self.previous_directory_names = [];
-//     _.forEach(directories, function(dir) {
-//       var name = dir.fullName();
-//       //name_options.push('<option>' + dir.fullName() + '</option>');
-//       var $option = null;
-//       if (dir.hasChildren()) {
-//         var children = dir.getAllDirectories();
-//         $option = $('<option>' + name + '/* (' + (children.length - 1) +')</option>');
-
-//       }
-//       else {
-//         $option = $('<option>' + name + '</option>');
-//       }
-//       $option.attr('value', dir.fullName());
-//       $('#name-select').append($option);
-//       self.previous_directory_names.push(name);
-//     });
-
-//     if (!has_field_before) {
-//       // force to update field options
-//       $('#' + self.name_select_id).trigger('change');
-//     }
-//   }
-//   _.forEach(self.plotting_infos, function(plotting_info) {
-//     if (plotting_info.plottable()) {
-//       plotting_info.plot();
-//     }
-//   });
-// };
-
 // RobotMonitor.js
 
 /**
@@ -1018,12 +524,9 @@ ROSLIB.RWTRobotMonitor.prototype.diagnosticsCallback = function (msg) {
  * @param msg - message of /diagnostics_agg.
  */
 ROSLIB.RWTRobotMonitor.prototype.showHistory = function (msg) {
-  // this.last_diagnostics_update = ROSLIB.Time.now();
   var history = true;
   this.last_diagnostics_update = ROSLIB.Time.now();
-
   this.history = new ROSLIB.DiagnosticsHistory();
-
   var diagnostics_statuses
     = ROSLIB.DiagnosticsStatus.createFromArray(msg);
   var that = this;
@@ -1056,53 +559,11 @@ ROSLIB.RWTRobotMonitor.prototype.updateLastTimeString = function () {
 ROSLIB.RWTRobotMonitor.prototype.updateView = function (history) {
   var resultError = this.updateErrorList();
   var resultWarn = this.updateWarnList();
-  // TODO delete
-  this.updateAllList();
+  this.updateAllTable();
   if (!(history)) {
     this.updateTimeList(resultError, resultWarn);
   }
-  // test -> updateAllList()
-  this.updateAllTable();
-
   this.registerBrowserCallback();
-};
-
-// TODO delete 
-ROSLIB.RWTRobotMonitor.prototype.updateList = function (list_id, level, icon) {
-
-  $('#' + list_id + ' li').remove();
-  var directories = this.history.root.getDirectories(level);
-  directories.sort(function (a, b) {
-    var apath = a.fullName();
-    var bpath = b.fullName();
-    if (apath > bpath) {
-      return 1;
-    } else if (bpath > apath) {
-      return -1;
-    } else {
-      return 0;
-    }
-  });
-
-  _.forEach(directories, function (dir) {
-    var html_pre = '<li class="list-group-item" data-name="'
-      + dir.fullName()
-      + '"><span class="glyphicon '
-      + icon + '"></span>';
-
-    var html_suf = '</li>';
-    $('#' + list_id).append(html_pre
-      + dir.fullName()
-      + ':'
-      + dir.status.message
-      + html_suf);
-  });
-
-  if (directories.length) {
-    return true;
-  } else {
-    return false;
-  }
 };
 
 ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, level) {
@@ -1154,15 +615,14 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
   // check opened list first
   var open_ids = [];
 
+  // TODO test
+  console.log('----- #all-table ----');
+  console.log($('#all-table'));
   // Tree collapsing check
-  // $('#all-table .in, #all-table .collapsing').each(function () {
-  $('#all-table').each(function () {
+  $('#all-table .collapse').each(function () {
     open_ids.push($(this).attr('id'));
   });
-
   // TODO test
-  open_ids = ['robot', 'robot-dummy', 'robot-dummy2', 'joy'];
-
   console.log('----- allTable open_ids ----');
   console.log(open_ids);
 
@@ -1171,18 +631,37 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
   $('#all-table tr:gt(0)').size();
 
   // return jquery object
-  var rec = function (directory, indent) {
-    // indent
-    var leaf = ' leaf leaf' + indent + ' expand';
+  var rec = function (directory, indent, parentId) {
 
-    var allTableTree = $(''
+    // indent
+    var leaf = ' leaf leaf' + indent;
+    // toggle
+    var toggle = '';
+
+    // TODO test 
+    if (directory.children.length === 0) {
+      // toggle = ' collapse';
+    } else {
+      toggle = ' expand';
+    }
+
+    if (parentId === '') {
+      // parentId = directory.uniqID();
+    }
+
+    var allTableTree = $('<tr '
+      + 'id="'
+      + directory.uniqID()
+      + '" class="'
+      + parentId
+      + ' '
       + directory.getIconHTML2()
       + leaf
-      + '">'
-      + '<td class="data_1" data-name="'
+      + toggle
+      + '"><td class="data_1" data-name="'
       + directory.fullName()
       + '"><span>'
-      + directory.uniqID()
+      + directory.name
       + '</span></td>'
       + '<td class="data_2">'
       + directory.status.message
@@ -1192,20 +671,22 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
     console.log(allTableTree);
 
     if (directory.children.length === 0) {
+      // last child
       return allTableTree;
     } else {
       for (var j = 0; j < open_ids.length; j++) {
-        if (open_ids[j].toString() === directory.uniqID().toString()) {
-          // div_root.addClass('inner');
-          break;
-        }
+        // if (open_ids[j].toString() === directory.uniqID().toString()) {
+        // div_root.addClass('inner');
+        // break;
+        // }
       }
       indent++;
       for (var i = 0; i < directory.children.length; i++) {
         var the_child = directory.children[i];
-        var the_result = rec(the_child, indent);
+        var the_result = rec(the_child, indent, directory.uniqID());
         allTableTree.after(the_result);
       }
+      // TODO test
       console.log('----- allTableTree ----');
       console.log(allTableTree);
       // allTableTree.append(div_root);
@@ -1214,10 +695,22 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
   };
 
   for (var i = 0; i < this.history.root.children.length; i++) {
-    var allTable = rec(this.history.root.children[i], 0);
+    var allTable = rec(this.history.root.children[i], 0, '');
+    // TODO test
     console.log('----- allTable ----');
     console.log(allTable);
     $('#all-table').append(allTable);
+  }
+
+  for (var j = 0; j < open_ids.length; j++) {
+    // if (open_ids[j].toString() === directory.uniqID().toString()) {
+    // div_root.addClass('inner');
+    // break;
+    // }
+    var parentId = '.' + open_ids[j];
+    console.log('----- parentId ----');
+    console.log(parentId);
+    $(parentId).slideToggle(1);
   }
 };
 
@@ -1227,6 +720,10 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
  */
 ROSLIB.RWTRobotMonitor.prototype.updateAllList = function () {
   // check opened list first
+
+  console.log('----- #all-list ----');
+  console.log($('#all-list'));
+
   var open_ids = [];
   $('#all-list .in, #all-list .collapsing').each(function () {
     open_ids.push($(this).attr('id'));
@@ -1284,11 +781,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllList = function () {
  * update warn list view
  */
 ROSLIB.RWTRobotMonitor.prototype.updateWarnList = function () {
-  // TODO delete
-  var resultWarn = this.updateList('warn-list', ROSLIB.DiagnosticsStatus.LEVEL.WARN, 'glyphicon-exclamation-sign');
-  // TODO test 
-  var resultWarn1 = this.updateTable('warn-table', 'warn', ROSLIB.DiagnosticsStatus.LEVEL.WARN);
-
+  var resultWarn = this.updateTable('warn-table', 'warn', ROSLIB.DiagnosticsStatus.LEVEL.WARN);
   return resultWarn;
 };
 
@@ -1296,10 +789,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateWarnList = function () {
  * update error list view
  */
 ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
-  // TODO delete
-  var resultError = this.updateList('error-list', ROSLIB.DiagnosticsStatus.LEVEL.ERROR, 'glyphicon-minus-sign');
-  // TODO test 
-  var resultError1 = this.updateTable('error-table', 'error', ROSLIB.DiagnosticsStatus.LEVEL.ERROR);
+  var resultError = this.updateTable('error-table', 'error', ROSLIB.DiagnosticsStatus.LEVEL.ERROR);
 
   return resultError;
 };
@@ -1373,20 +863,34 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
     $('#table-type-4').empty();
   });
 
-  // tree open close
-  // $('.data_1').on('click', function () {
-  //   console.log('tggle');
-  //   $(this).next().slideToggle(200);
-  // });
-
   $('.expand').on('click', function () {
-    console.log('tggle');
-    // $(this).next().slideToggle(200);
-    $(this).nextAll().slideToggle(200);
 
-    $(this).toggleClass('collapse');
-    // $(this).next("panel-head").slideToggle();  
+    var rec = function (parend) {
 
+      var parentId = '.' + $(parend).attr('id');
+      console.log('----- parentId ----');
+      console.log(parentId);
+      console.log('----- parent ----');
+      console.log(parent);
+
+      console.log('----- ($(parent) ----');
+      console.log($(parent));
+
+      $(parent).toggleClass('collapse');
+
+      // TODO recursive processing
+      $(parentId).slideToggle(1);
+      // $(this).removeClass('expand');
+      // $(this).addClass('collapse');
+      // $(this).toggleClass('collapse');
+    };
+
+    var result = rec(this);
+    console.log(result);
+  });
+
+  $('.collapse').on('click', function () {
+    // TODO 
   });
 };
 

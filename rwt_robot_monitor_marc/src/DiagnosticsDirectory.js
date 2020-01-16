@@ -268,15 +268,15 @@ ROSLIB.DiagnosticsDirectory.prototype.getIconHTML = function () {
 ROSLIB.DiagnosticsDirectory.prototype.getIconHTML2 = function () {
   if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.OK) {
     // return '<span class="glyphicon-ok glyphicon"></span>';
-    return '<tr class="ok';
+    return 'ok';
   }
   else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.WARN) {
     // return '<span class="glyphicon-exclamation-sign glyphicon"></span>';
-    return '<tr class="warn';
+    return 'warn';
   }
   else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.ERROR) {
     // return '<span class="glyphicon-minus-sign glyphicon"></span>';
-    return '<tr class="error';
+    return 'error';
   }
 };
 
