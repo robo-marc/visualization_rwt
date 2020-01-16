@@ -1,11 +1,13 @@
 /* css */
 .ui-widget {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
+
 .hidden {
     display: none !important;
     visibility: hidden !important;
 }
+
 .cell-title {
     font-weight: bold;
 }
@@ -14,16 +16,12 @@
     text-align: center;
 }
 
-.toggle {
-    height: 9px;
-    width: 9px;
+span.label.and {
+    color: #fff;
+    font-size: 0.5625rem;
+    padding: 1px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
     display: inline-block;
-}
-
-.toggle.expand {
-    background: url(../images/expand.gif) no-repeat center center;
-}
-
-.toggle.collapse {
-    background: url(../images/collapse.gif) no-repeat center center;
+    background-color: #74CFD6;
 }
