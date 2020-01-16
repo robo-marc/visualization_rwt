@@ -1,0 +1,3 @@
+function createGetTopicList() {
+    return undefined;
+}

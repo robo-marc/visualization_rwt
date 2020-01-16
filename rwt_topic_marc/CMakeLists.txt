@@ -7,22 +7,10 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   rwt_utils_3rdparty
   rwt_utils_marc
+  rwt_topic_content_marc
   std_msgs
   message_generation  
   roswww
-)
-
-add_message_files(
-  FILES
-  MonitoringInfo.msg
-)
-
-add_service_files(
-   FILES
-   TopicHzBw.srv
-   StartMonitoring.srv
-   StopMonitoring.srv
-   GetMonitoringInfo.srv
 )
 
 generate_messages(
