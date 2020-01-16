@@ -1,2 +1,11 @@
 /* css */
 
+#topic {
+    border: 0 none #ffffff;
+    width: 100%;
+    height: 100%;
+}
+
+.moveit .box_2 .tree-wrap {
+    height: 400px;
+}

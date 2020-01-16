@@ -7,7 +7,7 @@ module.exports = function (grunt) {
           paths: ['../less/']
         },
         files: {
-          '../www/css/rwt_moveit_monitor_marc.css': '../less/rwt_moveit_monitor_marc.less'
+          '../www/css/rwt_topic_content_marc.css': '../less/rwt_topic_content_marc.less'
         }
       },
       production: {
@@ -15,14 +15,14 @@ module.exports = function (grunt) {
           paths: ['../less/']
         },
         files: {
-          '../www/css/rwt_moveit_monitor_marc.css': '../less/rwt_moveit_monitor_marc.less'
+          '../www/css/rwt_topic_content_marc.css': '../less/rwt_topic_content_marc.less'
         }
       },
     },
     concat: {
       build: {
         src: ['../src/*.js'],
-        dest: '../www/js/rwt_moveit_monitor_marc.js'
+        dest: '../www/js/rwt_topic_content_marc.js'
       }
     },
     uglify: {
@@ -30,8 +30,8 @@ module.exports = function (grunt) {
         report: 'min'
       },
       build: {
-        src: '../www/js/rwt_moveit_monitor_marc.js',
-        dest: '../www/js/rwt_moveit_monitor_marc.min.js'
+        src: '../www/js/rwt_topic_content_marc.js',
+        dest: '../www/js/rwt_topic_content_marc.min.js'
       }
     },
     jshint: {
@@ -41,12 +41,11 @@ module.exports = function (grunt) {
       files: [
         'Gruntfile.js',
         '../src/*.js',
-        '../www/js/config.js',
-        '../www/js/rwt_moveit_monitor_marc_main.js'
+        '../www/js/rwt_topic_content_marc_main.js'
       ]
     },
     watch: {
-      files: ['../src/*.js', 'Gruntfile.js', '.jshintrc', '../less/rwt_moveit_monitor_marc.less'],
+      files: ['../src/*.js', 'Gruntfile.js', '.jshintrc', '../less/rwt_topic_content_marc.less'],
       tasks: ['build', 'less', 'doc']
     },
     jsdoc: {

@@ -8,12 +8,35 @@ function requiredFieldValidator(value) {
 
 $(function () {
 
-  // subscribe topic
+  ////////////////////////////////////////
+  // constants
+
+  var FILTER_OPTION_LIST = [
+    'Filter Selected',
+    'Message',
+    'Severity',
+    'Node',
+    'Stamp',
+    'Topics',
+    'Location',
+  ];
+
+
+  ////////////////////////////////////////
+  // variables
+
   var ros = new ROSLIB.Ros();
 
-  var dataView;
-  var grid;
-  var data = [];
+  // config
+  var maxCount = 20000;
+
+  // status
+  var isPaused = false;
+  var rowNumber = 1;
+  var sortCol;
+  var isAsc = false;
+
+  // for grid
   var columns = [
     { id: '#', name: '#', field: '#', sortable: true },
     { id: 'Message', name: 'Message', width: 240, field: 'Message', sortable: true },
@@ -24,87 +47,67 @@ $(function () {
     { id: 'Location', name: 'Location', field: 'Location', width: 240, sortable: true },
     { id: 'Number', name: 'Number', field: 'Number', width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
   ];
-
   var options = {
     editable: true,
     enableAddRow: false,
     enableCellNavigation: true,
     asyncEditorLoading: false
   };
+  var dataView = new Slick.Data.DataView({ inlineFilters: true });
+  var grid = new Slick.Grid('#myGrid', dataView, columns, options);
+  var list = [];
 
-  var FilterOptionList = [
-    'Filter Selected',
-    'Message',
-    'Severity',
-    'Node',
-    'Stamp',
-    'Topics',
-    'Location',
-  ];
-
-  var nodeFilter = [];
-  var topicFilter = [];
+  // for filter
   var filterScript = 'function init() {return true; } init();';
-  console.log(nodeFilter);
-  console.log(topicFilter);
+
+
+  ////////////////////////////////////////
+  // functions
+
   function initScreen() {
     // common
     ros.autoConnect();
-    // for dropdown
+
     $('#pause-button').show();
     $('#resume-button').hide();
-
-    setDropdownList('#exclude-select', FilterOptionList);
-    setDropdownList('#highlight-select', FilterOptionList);
     $('#open_sub_button').click();
 
-    startDrawing();
-    setInterval(refresh, 500);
+    // for dropdown
+    setDropdownList('#exclude-select', FILTER_OPTION_LIST);
+    setDropdownList('#highlight-select', FILTER_OPTION_LIST);
 
-    // clear list
+    // for grid
+    dataView.beginUpdate();
+    dataView.setItems([]);
+    dataView.setFilterArgs({
+      filterScript: filterScript,
+    });
+    dataView.setFilter(myFilter);
+    dataView.endUpdate();
+
+    // start
+    startSubscribing();
+    setInterval(renderList, 500);
   }
 
-  function setDropdownList(select, list) {
-    $(select).append(list.map(function (value) {
+  function setDropdownList(selectId, valueList) {
+    $(selectId).append(valueList.map(function (value) {
       return '<option value="' + value + '">' + value + '</option>';
     }).join('\n'));
-    $(select).change();
+    $(selectId).change();
   }
 
-  function myFilter(item, args) {
-    console.log(eval(args.filterScript));
-
-    return eval(args.filterScript);
-
+  // render grid
+  function renderList() {
+    if (isPaused) {
+      return;
+    }
+    dataView.setItems(list);
+    // grid.invalidate();
   }
 
-  function percentCompleteSort(a, b) {
-    return a['percentComplete'] - b['percentComplete'];
-  }
-
-  dataView = new Slick.Data.DataView({ inlineFilters: true });
-  grid = new Slick.Grid('#myGrid', dataView, columns, options);
-  var list = [];
-  var isSubscribe = 1;
-  var count = 1;
-  var isAsc = false;
-
-  // $(function () {
-  // // subscribe topic
-  // var ros = new ROSLIB.Ros();
-  // ros.autoConnect();
-
-  // dataView.setItems(data);
-  dataView.beginUpdate();
-  // dataView.setItems(list);
-  dataView.setFilterArgs({
-    filterScript: filterScript,
-  });
-  dataView.setFilter(myFilter);
-  dataView.endUpdate();
-
-  // display start
-  function startDrawing() {
+  // start subscribing
+  function startSubscribing() {
     var sub = null;
     sub = new ROSLIB.Topic({
       ros: ros,
@@ -112,57 +115,55 @@ $(function () {
       messageType: 'rosgraph_msgs/Log'
     });
     sub.subscribe(function (msg) {
-      if (isSubscribe === 1) {
-        var mes = msg.msg;
-        var severityNumber = msg.level;
-        var severity = getErrorLevel(msg.level);
-        var node = msg.name;
-        var time = getTimestamp(msg.header.stamp.secs, msg.header.stamp.nsecs);
-        var regular = ('0000000000' + msg.header.stamp.nsecs).slice(-9);
-        var stamp = time;
-        var topics = msg.topics.join(',');
-        var location = msg.file + ':' + msg.function + ':' + msg.line;
-
-        var associationItem = {
-          id: count,
-          indent: 0,
-          '#': '#' + count,
-          Message: mes,
-          SeverityNumber: severityNumber,
-          Severity: severity,
-          Node: node,
-          Stamp: stamp,
-          RawTime: msg.header.stamp.secs + '.' + regular,
-          Topics: topics,
-          Location: location,
-          // Number: count
-        };
-
-        if (count >= 20001) {
-          dataView.deleteItem(count - 20000);
-        }
-
-        // list.push(associationItem);
-
-        if (isAsc === false) {
-          list.unshift(associationItem);
-          // dataView.insertItem(0, associationItem);
-          // grid.invalidate();
-        }
-
-        if (isAsc === true) {
-          list.push(associationItem);
-          // dataView.insertItem(count, associationItem);
-          // grid.invalidate();
-        }
-
-        var txt = list.length;
-        // var txt = count;
-        // document.getElementById('message-number').innerHTML = txt;
-        $('#message-number').text(txt);
-        count++;
+      if (isPaused) {
+        return;
       }
+      var mes = msg.msg;
+      var severityNumber = msg.level;
+      var severity = getErrorLevel(msg.level);
+      var node = msg.name;
+      var time = formatTime(msg.header.stamp.secs, msg.header.stamp.nsecs);
+      var regular = ('0000000000' + msg.header.stamp.nsecs).slice(-9);
+      var stamp = time;
+      var topics = msg.topics.join(',');
+      var location = msg.file + ':' + msg.function + ':' + msg.line;
+
+      var associationItem = {
+        id: rowNumber,
+        indent: 0,
+        '#': '#' + rowNumber,
+        Message: mes,
+        SeverityNumber: severityNumber,
+        Severity: severity,
+        Node: node,
+        Stamp: stamp,
+        RawTime: msg.header.stamp.secs + '.' + regular,
+        Topics: topics,
+        Location: location,
+        // Number: count
+      };
+
+      if (isAsc === false) {
+        list.unshift(associationItem);
+        if (list.length > maxCount) {
+          list.pop();
+        }
+      } else {
+        list.push(associationItem);
+        if (list.length > maxCount) {
+          list.shift();
+        }
+      }
+      rowNumber++;
+
+      $('#message-number').text(list.length);
     });
+  }
+
+  function myFilter(item, args) {
+    // console.log(eval(args.filterScript));
+    // return eval(args.filterScript);
+    return true; // for development(no filter)
   }
 
   function updateFilter() {
@@ -196,8 +197,8 @@ $(function () {
     return severity;
   }
 
-  // get timestamp
-  function getTimestamp(secs, nsecs) {
+  // format time
+  function formatTime(secs, nsecs) {
     var intTime = secs;
     var d = new Date(intTime * 1000);
     var year = d.getFullYear();
@@ -211,27 +212,8 @@ $(function () {
     return timestamp;
   }
 
-  // clear list
-  function clearList() {
-    list.length = 0;
-    data = [];
-    count = 1;
-    dataView.setItems(data);
-    // dataView.setFilter(myFilter);
-    grid.invalidate();
-    // document.getElementById('message-number').innerHTML = '0';
-    $('#message-number').text('0');
-
-  }
-
-  // clear list
-  $('#clear-button').click(function (e) {
-    e.preventDefault();
-    clearList();
-  });
-
   // CSV download
-  $('#download-button').click(function (e) {
+  $('#download-button').on('click', function (e) {
     // do not preventDefault.
 
     var arr = [];
@@ -266,10 +248,7 @@ $(function () {
     if (window.navigator.msSaveBlob) {
       window.navigator.msSaveBlob(blob, 'rwt_console_marc.csv');
       window.navigator.msSaveOrOpenBlob(blob, 'rwt_console_marc.csv');
-      console.log('aaa');
     } else {
-      console.log(blob);
-      // document.getElementById('download').href = window.URL.createObjectURL(blob);
       $('#download-button').attr('href', window.URL.createObjectURL(blob));
     }
   });
@@ -278,59 +257,46 @@ $(function () {
   // file change
   $('#load-button').on('click', function (e) {
     e.preventDefault();
-    var item = dataView.getItems();
-    console.log(item);
-    if (item.length === 0 && isSubscribe === 0) {
-      $('#load').click();
-    }
+
+    $('#fileSelector').click();
   });
 
-  // $('#load').on('change', function (evt) {
-  //   $load = $(this);
-  //   var file = $load.val();
-  // });
-
-  var fileObj = document.getElementById('load');
-  fileObj.addEventListener('change', function (evt) {
-    var test = [];
-    // dataView.setItems(test);
+  $('#fileSelector').on('change', function (evt) {
     var file = evt.target.files[0];
-    console.log(file);
+    // console.log(file);
+    if (!file) {
+      return;
+    }
 
-    // TODO CSV file only
-    // if (!file.name.match('.csv$')) {
+    // should check extension?
+    // if (!file.name.match('\.csv$')) {
     //   alert('.csv file only');
     //   return;
     // }
+
+    $('#pause-button').click();
 
     // read text
     var reader = new FileReader();
     reader.readAsText(file);
 
     reader.onload = function () {
-      // reader.result.replace('"', '');
-      // reader.result = reader.result.replace(/"/g, '');
-      console.log(reader.result);
-      var cols = reader.result.split('\n');
-      console.log(cols);
+      var rows = reader.result.split('\n');
       var data = [];
-      var keep;
-      for (var i = 0; i < cols.length; i++) {
-        // keep = cols[i].substring();
-        keep = cols[i].substr(1, cols[i].length - 2);
-        data[i] = keep.split('";"');
+      var tmp;
+      for (var i = 0; i < rows.length; i++) {
+        tmp = rows[i].substr(1, rows[i].length - 2); // remove heading and trailing double-quotation
+        data[i] = tmp.split('";"'); // split and remove double-quotation
       }
-      console.log('---- data ----');
-      console.log(data);
-      gridList(data);
+
+      addDataToGrid(data);
     };
   });
 
-  // grid List
-  function gridList(dataList) {
-
+  function addDataToGrid(dataList) {
     dataList = dataList.slice().reverse();
-    var number = 1;
+
+    // ignore header row and trailing empty row
     for (var i = 1; i < dataList.length - 1; i++) {
       if (dataList[i]) {
         var time = dataList[i][3].split('.');
@@ -338,91 +304,135 @@ $(function () {
         var nsecs = time[1];
 
         var associationItem = {
-          id: i,
+          id: rowNumber,
           indent: 0,
-          '#': '#' + i,
+          '#': '#' + rowNumber,
           Message: dataList[i][0],
           SeverityNumber: dataList[i][1],
           Severity: getErrorLevel(parseInt(dataList[i][1], 10)),
           Node: dataList[i][2],
-          Stamp: getTimestamp(secs, nsecs),
+          Stamp: formatTime(secs, nsecs),
           // RawTime: msg.header.stamp.secs + '.' + regular,
           Topics: dataList[i][4],
           Location: dataList[i][5],
           // Number: dataList[i][6]
         };
-        number++;
         // console.log(associationItem);
 
-        if (count >= 20001) {
-          dataView.deleteItem(count - 20000);
+        if (isAsc === false) {
+          list.unshift(associationItem);
+          if (list.length > maxCount) {
+            list.pop();
+          }
+        } else {
+          list.push(associationItem);
+          if (list.length > maxCount) {
+            list.shift();
+          }
         }
-
-        list.push(associationItem);
-
-        var view = list.slice().reverse();
-        dataView.setItems(view);
+        rowNumber++;
       }
-      count++;
     }
 
+    var view = list.slice().reverse();
+    dataView.setItems(view);
+    grid.invalidate();
 
-    var txt = list.length;
-    $('#message-number').text(txt);
-
+    $('#message-number').text(list.length);
   }
 
   // pause
-  $('#pause-button').click(function (e) {
+  $('#pause-button').on('click', function (e) {
     e.preventDefault();
-    isSubscribe = 0;
+    isPaused = true;
     $('#pause-button').hide();
     $('#resume-button').show();
   });
 
-  // start
-  $('#resume-button').click(function (e) {
+  // resume
+  $('#resume-button').on('click', function (e) {
     e.preventDefault();
-    isSubscribe = 1;
+    isPaused = false;
     $('#pause-button').show();
     $('#resume-button').hide();
   });
 
+  // clear list
+  $('#clear-button').on('click', function (e) {
+    e.preventDefault();
+
+    list.length = 0; // clear list
+    rowNumber = 1;
+    dataView.setItems(list);
+    grid.invalidate();
+    $('#message-number').text('0');
+  });
+
+  $('#open_sub_button').on('click', function (e) {
+    e.preventDefault();
+    $('#contents_sub').slideDown('normal');
+    $('#close_sub_button').show();
+    $('#open_sub_button').hide();
+  });
+
+  $('#close_sub_button').on('click', function (e) {
+    e.preventDefault();
+    $('#contents_sub').slideUp('normal');
+    $('#close_sub_button').hide();
+    $('#open_sub_button').show();
+  });
+
+
   // sort
-  var sortcol;
   grid.onSort.subscribe(function (e, args) {
-    sortcol = args.sortCol.field;
+    sortCol = args.sortCol.field;
+    isAsc = args.sortAsc;
 
-    if (sortcol === '#') {
-      sortcol = 'Stamp';
+    if (sortCol === '#') {
+      sortCol = 'Stamp';
     }
-    if (sortcol === 'Stamp') {
-      isAsc = args.sortAsc;
+    if (sortCol === 'Stamp') {
       dataView.sort(comparer, isAsc);
-      grid.invalidateAllRows();
-      grid.render();
-    }
-
-    if (sortcol !== 'Stamp') {
-      isAsc = args.sortAsc;
+    } else if (sortCol !== 'Stamp') {
       dataView.sort(comparer, isAsc);
       dataView.sort(comparer2, isAsc);
-      grid.invalidateAllRows();
-      grid.render();
     }
+
+    grid.invalidateAllRows();
+    grid.render();
   });
 
   function comparer(a, b) {
-    var x = a[sortcol], y = b[sortcol];
+    var x = a[sortCol], y = b[sortCol];
     return (x === y ? 0 : (x > y ? 1 : -1));
   }
 
   function comparer2(a, b) {
-    var x = a[sortcol], y = b[sortcol];
+    var x = a[sortCol], y = b[sortCol];
     var z = a['Stamp'], w = b['Stamp'];
     return (x === y ? (z > w ? 1 : -1) : 0);
   }
 
+
+  dataView.onRowCountChanged.subscribe(function (e, args) {
+    grid.updateRowCount();
+    grid.render();
+    grid.resizeCanvas();
+    grid.autosizeColumns();
+  });
+
+  dataView.onRowsChanged.subscribe(function (e, args) {
+    grid.invalidateRows(args.rows);
+    grid.render();
+  });
+
+  $(window).on('load resize', function () {
+    grid.resizeCanvas();
+    grid.autosizeColumns();
+
+    // prevent the delete button from being hidden when switching screens vertically
+    grid.resizeCanvas();
+  });
 
 
 
@@ -882,46 +892,9 @@ $(function () {
 
   });
 
-  $('#open_sub_button').on('click', function (e) {
-    e.preventDefault();
-    $('#contents_sub').slideDown('normal');
-    $('#close_sub_button').show();
-    $('#open_sub_button').hide();
-  });
 
-  $('#close_sub_button').on('click', function (e) {
-    e.preventDefault();
-    $('#contents_sub').slideUp('normal');
-    $('#close_sub_button').hide();
-    $('#open_sub_button').show();
-  });
-
-
-  dataView.onRowCountChanged.subscribe(function (e, args) {
-    grid.updateRowCount();
-    grid.render();
-    grid.resizeCanvas();
-    grid.autosizeColumns();
-  });
-
-  dataView.onRowsChanged.subscribe(function (e, args) {
-    grid.invalidateRows(args.rows);
-    grid.render();
-  });
-
-  $(window).on('load resize', function () {
-    grid.resizeCanvas();
-    grid.autosizeColumns();
-
-    // prevent the delete button from being hidden when switching screens vertically
-    grid.resizeCanvas();
-  });
-
-  //grid refresh
-  function refresh() {
-    dataView.setItems(list);
-    // grid.invalidate();
-  }
+  ////////////////////////////////////////
+  // start screen
 
   initScreen();
 });
