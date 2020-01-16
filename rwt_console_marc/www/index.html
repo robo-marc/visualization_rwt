@@ -20,22 +20,20 @@
     <header>
       <div class="column">
         <h2>rwt_console_marc</h2>
-        <a href="http://wiki.ros.org/rqt_console" target="_blank" class="icon"><i
+        <a href="http://wiki.ros.org/rwt_console_marc" target="_blank" class="icon"><i
             class="material-icons">help_outline</i></a>
       </div>
     </header>
-
     <div class="contents console">
 
       <div class="contents_header">
-        <!-- <div> -->
         <nav>
           <ul>
             <li><a id="load-button" href class="icon"><i class="material-icons">folder</i><span class="md_none">Load
                   File
                   (csv)</span></a></li>
             <li><a id="download-button" href class="icon" download="rwt_console_marc.csv"><i
-                  class="material-icons">save_alt</i><span class="md_none">Save
+                  class="material-icons">get_app</i><span class="md_none">Save
                   File
                   (csv)</span></a></li>
             <li><a id="pause-button" href class="icon"><i class="material-icons">pause</i><span
@@ -55,16 +53,13 @@
 
         <div class="contents-box message">Displaying <span id="message-number" class="num">0</span> messages</div>
 
-        <!-- <table width="100%">
-          <tr>
-            <td valign="top" width="50%"> -->
         <div class="myGrid" id="myGrid"></div>
-        <!-- <div id="myGrid"></div> -->
-        <!-- <div id="myGrid" style="width:1200px;height:500px;"></div> -->
-        <!-- </td>
-          </tr>
-        </table> -->
+
+
       </div>
+
+
+
 
       <div id="contents_sub" class="contents_sub console_sub">
 
@@ -78,7 +73,7 @@
                 <option value="2">2</option>
                 <option value="3">3</option> -->
               </select>
-              <button id='add-button' class="icon"><i class="material-icons">add</i></button>
+              <button id='add-exclude-button' class="icon"><i class="material-icons">add</i></button>
             </div>
             <div class="parts-set radio"><input type="radio" id="exclude_or" name="exclude_input" value="OR"
                 checked><label for="exclude_or">New
@@ -151,6 +146,7 @@
           </div>
 
         </div>
+
 
         <div class="parts-box">
           <h3>Highlight Messages</h3>
@@ -248,8 +244,6 @@
 
 
       <div class="contents_footer">
-        <!-- <a href="" class="footer_btn open"><i class="material-icons">expand_more</i>Topic/Type ADD, Setting</a>
-        <a href="" class="footer_btn close active"><i class="material-icons">expand_less</i>Close</a> -->
         <a id="open_sub_button" href class="footer_btn open active"><i class="material-icons">expand_more</i>Filter</a>
         <a id="close_sub_button" href class="footer_btn close active"><i class="material-icons">expand_less</i>Close</a>
       </div>
@@ -259,23 +253,21 @@
   </div>
 
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/firebugx.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.12.4.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.11.2.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui-1.11.3.min.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery.event.drag-2.3.0.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.core.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.formatters.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.editors.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.grid.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.dataview.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
+
   <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
-
-  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
+
   <script type="text/javascript" src="js/rwt_console_marc_main.js"></script>
 </body>
 

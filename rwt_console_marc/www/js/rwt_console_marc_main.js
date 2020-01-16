@@ -59,6 +59,7 @@ $(function () {
     $('#open_sub_button').click();
 
     startDrawing();
+    setInterval(refresh, 500);
 
     // clear list
   }
@@ -666,7 +667,7 @@ $(function () {
 
 
   //addボタン押下時の処理
-  $('#add-button').on('click', function () {
+  $('#add-exclude-button').on('click', function () {
     var filterText = '';
     var items;
     var radiobuttonStatus = $('input[name="exclude_input"]:checked').val();
@@ -922,7 +923,5 @@ $(function () {
     // grid.invalidate();
   }
 
-  setInterval(refresh, 500);
   initScreen();
-
 });
