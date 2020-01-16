@@ -3,6 +3,9 @@
 
 var dataView = new Slick.Data.DataView({ inlineFilters: true });
 
+function createGetTopicList() {
+  return undefined;
+}
 
 $(function () {
 
@@ -54,7 +57,6 @@ $(function () {
     setInterval(refreshTopics, 1000);
     // refreshTopics();
   }
-
 
   function checkboxCustomFormatter(row, cell, value, columnDef, dataContext) {
     var idx = dataView.getIdxById(dataContext.id);
@@ -568,6 +570,7 @@ $(function () {
   });
 
   $(window).on('load', function () {
+    // If not an iframe, parent equals to myself
     topicList = window.parent.createGetTopicList();
   });
 
