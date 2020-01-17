@@ -3,7 +3,7 @@
 
 var dataView = new Slick.Data.DataView({ inlineFilters: true });
 
-function createGetTopicList() {
+function getTargetTopicData() {
   return undefined;
 }
 
@@ -106,7 +106,6 @@ $(function () {
 
     ros.getMessageDetails(message,
       function (result) {
-        // console.log('getMessageDetailsAsync success');
         callback(result);
         defer.resolve();
       },
@@ -119,29 +118,11 @@ $(function () {
     return defer.promise();
   }
 
-  function getTopicsForTypeAsync(type) {
-    var defer = $.Deferred();
-
-    ros.getTopicsForType(type,
-      function (result) {
-        // console.log('getTopicsForTypeAsync success');
-        defer.resolve(result);
-      },
-      function (message) {
-        console.log('getTopicsForTypeAsync failed: ' + message);
-        defer.resolve([]);
-      }
-    );
-
-    return defer.promise();
-  }
-
   function startMonitoringAsync(topicName, topicType) {
     var defer = $.Deferred();
 
     ros.startMonitoring(topicName, topicType,
       function (result) {
-        // console.log('startMonitoring success: ' + topicName);
         defer.resolve();
       },
       function (message) {
@@ -157,7 +138,6 @@ $(function () {
 
     ros.stopMonitoring(topicName, topicType,
       function (result) {
-        // console.log('stopMonitoring success: ' + topicName);
         defer.resolve();
       },
       function (message) {
@@ -173,7 +153,6 @@ $(function () {
 
     ros.getMonitoringInfo(
       function (result) {
-        // console.log('getMonitoringInfo success');
         defer.resolve(result.info);
       },
       function (message) {
@@ -284,7 +263,6 @@ $(function () {
                   arrItem.indent = arrItem.indent + 1;
                   arrItem.value = result.value;
 
-                  // console.log(arrItem);
                   typeList.push(arrItem);
                 }
               }
@@ -345,14 +323,12 @@ $(function () {
     var monitoringInfoDefer = $.Deferred();
     if (topicList === undefined) {
       ros.getTopics(function (topicInfo) {
-        // console.log(topicInfo);
         _.each(topicInfo.topics, function (topicName, index) {
           var topicType = topicInfo.types[index];
 
           var promise = getMessageDetailsAsync(
             topicType,
             function (result) {
-              // console.log(result);
               topicDetailMap[topicName] = {
                 topicType: topicType,
                 detail: result
@@ -365,7 +341,6 @@ $(function () {
     } else {
       ros.getTopics(function (comparisonItem) {
         var topicInfo = _.cloneDeep(topicList);
-        // console.log(topicInfo);
 
         var keepInfo = { topics: [], types: [] };
 
@@ -383,7 +358,6 @@ $(function () {
           var promise = getMessageDetailsAsync(
             topicType,
             function (result) {
-              // console.log(result);
               topicDetailMap[topicName] = {
                 topicType: topicType,
                 detail: result
@@ -521,7 +495,6 @@ $(function () {
         subscribingMap[item.topic] = sub;
         sub.subscribe(function (msg) {
           subscribingValueMap[item.topic] = msg;
-          // console.log(subscribingValueMap);
         });
 
       } else {
@@ -576,7 +549,7 @@ $(function () {
 
   $(window).on('load', function () {
     // If not an iframe, parent equals to myself
-    topicList = window.parent.createGetTopicList();
+    topicList = window.parent.getTargetTopicData();
   });
 
   ////////////////////////////////////////
