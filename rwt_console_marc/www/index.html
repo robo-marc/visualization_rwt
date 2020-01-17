@@ -65,88 +65,28 @@
 
         <div class="parts-box">
           <h3>Exclude Messages</h3>
+
           <div class="column clearfix">
             <div class="parts-set select-btn">
               <select type="select" id="exclude-select">
-                <!-- <option value="0">Filter Selected</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option> -->
               </select>
               <button id='add-exclude-button' class="icon"><i class="material-icons">add</i></button>
             </div>
             <div class="parts-set radio"><input type="radio" id="exclude_or" name="exclude_input" value="OR"
-                checked><label for="exclude_or">New
-                Group(OR)</label>
+                checked><label for="exclude_or">New Group(OR)</label>
             </div>
             <div class="parts-set radio"><input type="radio" id="exclude_and" name="exclude_input" value="AND"><label
-                for="exclude_and">Append to
-                Group(AND)
-              </label>
+                id="exclude_and_label" for="exclude_and">Append to Group(AND)</label>
             </div>
           </div>
 
-          <!-- filter set -->
           <div class="filter-box">
             <div class="filter-wrap">
-              <ul id='exclude' class="filter-list">
-                <!-- <li class="severities active">
-                  <div class="column">
-                    <div class="name">
-                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Severities</label></div>
-                    </div>
-                    <div class="data">
-                      <ul class="chips">
-                        <li><a href="#" class="active">Debug</a></li>
-                        <li><a href="#">Info</a></li>
-                        <li><a href="#">Warn</a></li>
-                        <li><a href="#" class="active">Error</a></li>
-                        <li><a href="#">Fatal</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div class="delete">
-                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                  </div>
-                </li> -->
-                <!-- <li class="topics">
-                  <div class="column">
-                    <div class="name">
-                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Topics</label></div>
-                    </div>
-                    <div class="data">
-                      <select type="select">
-                        <option value="0">Topic Selected</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="delete">
-                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                  </div>
-                </li> -->
-                <!-- <li class="message">
-                  <div class="column">
-                    <div class="name">
-                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Message</label></div>
-                    </div>
-                    <div class="data">
-                      <div class="parts-set textbox"><input type="text" placeholder="Message Text"></div>
-                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>
-                    </div>
-                  </div>
-                  <div class="delete">
-                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                  </div>
-                </li> -->
+              <ul class="filter-list" id='exclude'>
               </ul>
             </div>
           </div>
-
         </div>
-
 
         <div class="parts-box">
           <h3>Highlight Messages</h3>
@@ -154,92 +94,28 @@
           <div class="column clearfix">
             <div class="parts-set select-btn">
               <select type="select" id="highlight-select">
-                <!-- <option value="0">Filter Selected</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option> -->
               </select>
-              <button class="icon"><i class="material-icons">add</i></button>
+              <button id='add-highlight-button' class="icon"><i class="material-icons">add</i></button>
             </div>
-            <div class="parts-set radio"><input type="radio" name="highlight_input" value="" checked><label
-                for="">AND</label>
+            <div class="parts-set radio"><input type="radio" id="highlight_or" name="highlight_input" value="OR"
+                checked><label for="highlight_or">New Group(OR)</label>
             </div>
-            <div class="parts-set radio"><input type="radio" name="highlight_input" value=""><label for="">OR</label>
+            <div class="parts-set radio"><input type="radio" id="highlight_and" name="highlight_input"
+                value="AND"><label id="highlight_and_label" for="highlight_and">Append to Group(AND)</label>
             </div>
-            <div class="parts-set checkbox"><input type="checkbox"><label for="">Show only highlighted rows</label>
+            <div class="parts-set checkbox"><input type="checkbox" id="show-only-highlighted"><label
+                for="show-only-highlighted">Show only highlighted rows</label>
             </div>
           </div>
-
 
           <div class="filter-box">
             <div class="filter-wrap">
-              <ul class="filter-list">
-                <!-- <li class="node">
-                  <div class="column">
-                    <div class="name">
-                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Node</label></div>
-                    </div>
-                    <div class="data">
-                      <select type="select">
-                        <option value="0">Node Selected</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="delete">
-                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                  </div>
-                </li> -->
-                <!-- 
-                <li class="time">
-                  <div class="column">
-                    <div class="name">
-                      <div class="parts-set checkbox"><input type="checkbox"><label for="">from time range</label>
-                      </div>
-                    </div>
-                    <div class="data">
-                      <select type="select">
-                        <option value="0">Time Selected</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                      </select>
-                      <input type="checkbox">
-                      <select type="select" disabled>
-                        <option value="0">Time Selected</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="delete">
-                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                  </div>
-                </li> -->
-                <!-- 
-                <li class="location">
-                  <div class="column">
-                    <div class="name">
-                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Location</label></div>
-                    </div>
-                    <div class="data">
-                      <div class="parts-set textbox"><input type="text" placeholder="Location Text"></div>
-                      <div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>
-                    </div>
-                  </div>
-                  <div class="delete">
-                    <a href="" class="icon"><i class="material-icons">remove_circle</i></a>
-                  </div>
-                </li> -->
+              <ul class="filter-list" id='highlight'>
               </ul>
-
-
             </div>
           </div>
         </div>
+
       </div>
 
 
@@ -268,6 +144,7 @@
   <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
 
+  <script type="text/javascript" src="js/filter_utils.js"></script>
   <script type="text/javascript" src="js/rwt_console_marc_main.js"></script>
 </body>
 

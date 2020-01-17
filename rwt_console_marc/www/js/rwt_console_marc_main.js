@@ -11,14 +11,20 @@ $(function () {
   ////////////////////////////////////////
   // constants
 
-  var FILTER_OPTION_LIST = [
-    'Filter Selected',
-    'Message',
-    'Severity',
-    'Node',
-    'Stamp',
-    'Topics',
-    'Location',
+  var FILTER_TYPE_MESSAGE = 'Message';
+  var FILTER_TYPE_SEVERITY = 'Severity';
+  var FILTER_TYPE_NODE = 'Node';
+  var FILTER_TYPE_STAMP = 'Stamp';
+  var FILTER_TYPE_TOPICS = 'Topics';
+  var FILTER_TYPE_LOCATION = 'Location';
+
+  var FILTER_TYPE_LIST = [
+    FILTER_TYPE_MESSAGE,
+    FILTER_TYPE_SEVERITY,
+    FILTER_TYPE_NODE,
+    FILTER_TYPE_STAMP,
+    FILTER_TYPE_TOPICS,
+    FILTER_TYPE_LOCATION,
   ];
 
 
@@ -74,8 +80,8 @@ $(function () {
     $('#open_sub_button').click();
 
     // for dropdown
-    setDropdownList('#exclude-select', FILTER_OPTION_LIST);
-    setDropdownList('#highlight-select', FILTER_OPTION_LIST);
+    setDropdownList('#exclude-select', FILTER_TYPE_LIST);
+    setDropdownList('#highlight-select', FILTER_TYPE_LIST);
 
     // for grid
     dataView.beginUpdate();
@@ -85,6 +91,10 @@ $(function () {
     });
     dataView.setFilter(myFilter);
     dataView.endUpdate();
+
+    // for filter
+    setAndConditionCanSelect('exclude');
+    setAndConditionCanSelect('highlight');
 
     // start
     startSubscribing();
@@ -105,6 +115,9 @@ $(function () {
     }
     dataView.setItems(list);
     // grid.invalidate();
+
+    //TODO: フィルタ条件の Node と Topic のドロップダウンに候補を追加する
+
   }
 
   // start subscribing
@@ -445,248 +458,229 @@ $(function () {
 
 
   ////////////////////////////////////////
-  // add exclude filter
+  // add filter
 
-  //addボタン押下時の処理
   $('#add-exclude-button').on('click', function () {
-    var filterText = '';
-    var items;
-    var radiobuttonStatus = $('input[name="exclude_input"]:checked').val();
-    console.log(radiobuttonStatus);
-    var filterStatus = $('#exclude-select').val();
-    console.log(filterStatus);
-    var conditions;
-    if (radiobuttonStatus === 'AND') {
-      //andを表すものを追加
-      // console.log($('#exclude li').length);
-      if ($('#exclude li').length === 0) {
-        // return alert('NewGroup is not defined');
+    addFilter('exclude');
+  });
+
+  $('#add-highlight-button').on('click', function () {
+    addFilter('highlight');
+  });
+
+  function addFilter(parentId) {
+    // validate input
+    var conditionType = $('input[name="' + parentId + '_input"]:checked').val();
+    if (conditionType === 'AND') {
+      if ($('#' + parentId + ' > li').length === 0) {
+        // return alert('No groups to add.');
         return;
       }
-      // conditions = '<button>' + radiobuttonStatus + '</button>';
-      conditions = '<span class="label and">AND</span>';
+    }
+
+    // build html
+    var html;
+    var filterType = $('#' + parentId + '-select').val();
+    switch (filterType) {
+      case FILTER_TYPE_MESSAGE:
+        html = FilterUtils.getMessageFilterHtml(conditionType);
+        break;
+      case FILTER_TYPE_SEVERITY:
+        html = FilterUtils.getSeverityFilterHtml(conditionType);
+        break;
+      case FILTER_TYPE_NODE:
+        var nodeList = getNodeList(list);
+        html = FilterUtils.getNodesFilterHtml(conditionType, nodeList);
+        break;
+      case FILTER_TYPE_STAMP:
+        html = FilterUtils.getStampFilterHtml(conditionType);
+        break;
+      case FILTER_TYPE_TOPICS:
+        var topicList = getTopicList(list);
+        html = FilterUtils.getTopicsFilterHtml(conditionType, topicList);
+        break;
+      case FILTER_TYPE_LOCATION:
+        html = FilterUtils.getLocationFilterHtml(conditionType);
+        break;
+      default:
+        return;
+    }
+
+    // insert below active item, or append to last
+    var $activeElm = $('#' + parentId + ' > .active');
+    if ($activeElm.length > 0) {
+      $activeElm.after(html);
     } else {
-      //orを表すものを追加?
-      conditions = '';
+      $('#' + parentId).append(html);
     }
 
+    setAndConditionCanSelect(parentId);
+    setFirstItemCanDelete(parentId);
 
-    if (filterStatus === 'Message') {
-      $('#exclude').append(function () {
-        return '<li class="message" name="filter">'
-          + '<div class="column">'
-          + conditions
-          + '<div class="name">'
-          // + conditions
-          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Message</label></div>'
-          + '</div>'
-          + '<div class="data">'
-          + '<div class="parts-set textbox"><input type="text" class="message-value"placeholder="Message Text"></div>'
-          + '<div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>'
-          + '</div>'
-          + '</div>'
-          + '<div class="delete">'
-          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-          + '</div>'
-          + '</li>';
-      });
+    $('#' + parentId).trigger('change');
+  }
+
+  function getNodeList(dataViewItems) {
+    // item.Node may be a comma separated string
+    var tmpStr = '';
+    _.each(dataViewItems, function (item, index) {
+      tmpStr += item.Node + ',';
+    });
+    tmpStr = tmpStr.substr(0, tmpStr.length - 1);
+
+    var tmpList = tmpStr.split(',');
+
+    // distinct
+    var nodeList = tmpList.filter(function (item, idx, self) {
+      return self.indexOf(item) === idx;
+    });
+
+    nodeList.sort();
+
+    return nodeList;
+  }
+
+  function getTopicList(dataViewItems) {
+    // item.Topics may be a comma separated string
+    var tmpStr = '';
+    _.each(dataViewItems, function (item, index) {
+      tmpStr += item.Topics + ',';
+    });
+    tmpStr = tmpStr.substr(0, tmpStr.length - 1);
+
+    var tmpList = tmpStr.split(',');
+
+    // distinct
+    var topicList = tmpList.filter(function (item, idx, self) {
+      return self.indexOf(item) === idx;
+    });
+
+    topicList.sort();
+
+    return topicList;
+  }
+
+  function setAndConditionCanSelect(parentId) {
+    var canSelect = true;
+
+    var items = $('#' + parentId + ' > .filter');
+    if (items.length <= 0) {
+      canSelect = false;
     }
 
+    var $orBtn = $('#' + parentId + '_or');
+    var $andBtn = $('#' + parentId + '_and');
+    var $andLabel = $('#' + parentId + '_and_label');
+    if (canSelect) {
+      $andBtn.prop('disabled', false);
+      $andLabel.removeClass('disabled');
+    } else {
+      $orBtn.prop('checked', true);
+      $andBtn.prop('disabled', true);
+      $andLabel.addClass('disabled');
+    }
+  }
 
-    if (filterStatus === 'Severity') {
-      $('#exclude').append(function () {
-        return '<li class="severities" name="filter">'
-          + '<div class="column">'
-          + conditions
-          + '<div class="name">'
-          // + conditions
-          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Severities</label></div>'
-          + '</div>'
-          + '<div class="data">'
-          + '<ul class="chips">'
-          + '<li><a href="#" class="severities-select-button" data-value="Debug">Debug</a></li>'
-          + '<li><a href="#" class="severities-select-button" data-value="Info">Info</a></li>'
-          + '<li><a href="#" class="severities-select-button" data-value="Warn">Warn</a></li>'
-          + '<li><a href="#" class="severities-select-button" data-value="Error">Error</a></li>'
-          + '<li><a href="#" class="severities-select-button" data-value="Fatal">Fatal</a></li>'
-          + '</ul>'
-          + '</div>'
-          + '</div>'
-          + '<div class="delete">'
-          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-          + '</div>'
-          + '</li>';
-      });
+  function setFirstItemCanDelete(parentId) {
+    var canDelete = true;
+
+    var items = $('#' + parentId + ' > .filter');
+    if (items.length >= 2) {
+      var $andElm = $('#' + parentId + ' > li.filter:nth-child(2) .label.and');
+      if ($andElm.length !== 0) {
+        canDelete = false;
+      }
     }
 
-    //TODO: 中身を更新する処理
-    if (filterStatus === 'Node') {
-      items = dataView.getItems();
-      console.log(items);
-      var nodeList = '';
-      filterText = '';
-      _.each(items, function (item, index) {
-        nodeList = nodeList.concat(item.Node);
-        nodeList = nodeList + ',';
-      });
-      nodeList = nodeList.substr(0, nodeList.length - 1);
-      nodeList = nodeList.split(',');
-      nodeList = nodeList.filter(function (node, idx, self) {
-        return self.indexOf(node) === idx;
-      });
-      console.log(nodeList);
-      filterText = '<li class="node" name="filter">'
-        + '<div class="column">'
-        + conditions
-        + '<div class="name">'
-        + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Node</label></div>'
-        + '</div>'
-        + '<div class="data">'
-        + '<select class="node-value" type="select">';
-
-      _.each(nodeList, function (node, index) {
-        filterText = filterText + '<option value="' + node + '">' + node + '</option>';
-      });
-
-      filterText = filterText + '</select >'
-        + '</div >'
-        + '</div >'
-        + '<div class="delete">'
-        + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-        + '</div>'
-        + '</li >';
-
-      $('#exclude').append(function () {
-        return filterText;
-      });
+    var $deleteBtn = $('#' + parentId + ' > li.filter:first-child .delete-button');
+    if (canDelete) {
+      $deleteBtn.show();
+    } else {
+      $deleteBtn.hide();
     }
-
-
-    if (filterStatus === 'Stamp') {
-      $('#exclude').append(function () {
-        return '<li class="time" name="filter">'
-          + '<div class="column">'
-          + conditions
-          + '<div class="name">'
-          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">from time range</label>'
-          + '</div>'
-          + '</div>'
-          + '<div class="data">'
-          + '<select type="select">'
-          + '<option value="0">Time Selected</option>'
-          + '<option value="1">1</option>'
-          + '<option value="2">2</option>'
-          + '<option value="3">3</option>'
-          + '</select>'
-          // + '<input type="date" name="stamp">'
-          // + '<input type="time" name="stamp" step="0.01">'
-          + '<input type="checkbox">'
-          + '<select type="select" disabled>'
-          + '<option value="0">Time Selected</option>'
-          + '<option value="1">1</option>'
-          + '<option value="2">2</option>'
-          + '<option value="3">3</option>'
-          + '</select>'
-          + '</div>'
-          + '</div>'
-          + '<div class="delete">'
-          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-          + '</div>'
-          + '</li>';
-      });
-    }
-
-
-    //TODO: 中身を更新する処理
-    if (filterStatus === 'Topics') {
-      items = dataView.getItems();
-      var topicList = '';
-      filterText = '';
-      _.each(items, function (item, index) {
-        topicList = topicList.concat(item.Topics);
-        topicList = topicList + ',';
-      });
-      topicList = topicList.substr(0, topicList.length - 1);
-      topicList = topicList.split(',');
-
-      topicList = topicList.filter(function (topic, idx, self) {
-        return self.indexOf(topic) === idx;
-      });
-      console.log(topicList);
-      filterText = '<li class="topics" name="filter">'
-        + '<div class="column">'
-        + conditions
-        + '<div class="name">'
-        // + conditions
-        + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Topics</label></div>'
-        + '</div >'
-        + '<div class="data">'
-        + '<select class="topic-value" type="select">';
-
-      _.each(topicList, function (topic, index) {
-        filterText = filterText + '<option value="' + topic + '">' + topic + '</option>';
-      });
-
-      filterText = filterText + '</select>'
-        + '</div>'
-        + '</div>'
-        + '<div class="delete">'
-        + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-        + '</div>'
-        + '</li >';
-
-      $('#exclude').append(function () {
-        return filterText;
-      });
-    }
-
-
-    if (filterStatus === 'Location') {
-      $('#exclude').append(function () {
-        return '<li class="location" name="filter">'
-          + '<div class="column">'
-          + conditions
-          + '<div class="name">'
-          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Location</label></div>'
-          + '</div>'
-          + '<div class="data">'
-          + '<div class="parts-set textbox"><input type="text" class="location-value" placeholder="Location Text"></div>'
-          + '<div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>'
-          + '</div>'
-          + '</div>'
-          + '<div class="delete">'
-          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-          + '</div>'
-          + '</li>';
-      });
-    }
-
-  });
-
-  //除外条件のアクティブクラス書き換え
-  $('#exclude').on('click', 'input[name = "filter"]', function (e) {
-    // e.preventDefault();
-    var className = this.getAttribute('class');
-    this.setAttribute('class', className + ' active');
-
-    // $('#exclude').trigger('change');
-  });
+  }
 
 
   ////////////////////////////////////////
-  // change exclude filter
+  // delete filter
 
-  //Severityのクラス書き換え
+  $('#exclude').on('click', '.delete-button', function (e) {
+    e.preventDefault();
+    deleteFilter('exclude', this);
+  });
+
+  $('#highlight').on('click', '.delete-button', function (e) {
+    e.preventDefault();
+    deleteFilter('highlight', this);
+  });
+
+  function deleteFilter(parentId, selectedItem) {
+    $(selectedItem).parentsUntil('.filter').parent().remove();
+    setAndConditionCanSelect(parentId);
+    setFirstItemCanDelete(parentId);
+    $('#' + parentId).trigger('change');
+  }
+
+
+  ////////////////////////////////////////
+  // set active filter
+
+  $('#exclude').on('click', '.filter', function () {
+    setActiveFilterItem('exclude', this);
+  });
+
+  $('#highlight').on('click', '.filter', function () {
+    setActiveFilterItem('highlight', this);
+  });
+
+  function setActiveFilterItem(parentId, selectedItem) {
+    var $elm = $(selectedItem);
+    if ($elm.hasClass('active')) {
+      return;
+    }
+    $('#' + parentId).children().each(function (index, element) {
+      $(element).removeClass('active');
+    });
+    $elm.addClass('active');
+  }
+
+
+  ////////////////////////////////////////
+  // filter input
+
+  // toggle severity on/off
   $('#exclude').on('click', '.severities-select-button', function (e) {
     e.preventDefault();
-    var className = this.getAttribute('class');
-    if (className === 'severities-select-button') {
-      this.setAttribute('class', 'severities-select-button active');
-    } else {
-      this.setAttribute('class', 'severities-select-button');
-    }
+    $(this).toggleClass('active');
     $('#exclude').trigger('change');
   });
+
+  $('#highlight').on('click', '.severities-select-button', function (e) {
+    e.preventDefault();
+    $(this).toggleClass('active');
+    $('#highlight').trigger('change');
+  });
+
+  // stamp checkbox on/off
+  $('#exclude').on('change', '.use-end-stamp', function () {
+    setUseEndStampState(this);
+  });
+
+  $('#highlight').on('change', '.use-end-stamp', function () {
+    setUseEndStampState(this);
+  });
+
+  function setUseEndStampState(selectedItem) {
+    var $elm = $(selectedItem);
+    var isChecked = $elm.prop('checked');
+    $elm.next().find('input.end').each(function (index, element) {
+      $(element).prop('disabled', !isChecked);
+    });
+  }
+
+
+  ////////////////////////////////////////
+  // when filter changed
 
   function getElementName(element) {
     var elementName = element.attr('class');

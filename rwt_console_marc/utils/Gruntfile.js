@@ -41,6 +41,7 @@ module.exports = function (grunt) {
       files: [
         'Gruntfile.js',
         '../src/*.js',
+        '../www/js/filter_utils.js',
         '../www/js/rwt_console_marc_main.js'
       ]
     },
@@ -65,7 +66,7 @@ module.exports = function (grunt) {
     }
   }
 
-//  grunt.registerTask('build', ['concat', 'jshint', 'uglify', 'less']);
+  //  grunt.registerTask('build', ['concat', 'jshint', 'uglify', 'less']);
   grunt.registerTask('build', ['jshint', 'less']);
   grunt.registerTask('default', ['build']);
   grunt.registerTask('doc', ['jsdoc']);
