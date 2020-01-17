@@ -224,18 +224,18 @@ $(function () {
                     parentPath: path + '.' + actionId
                   });
                   actionId++;
-                } // loop end of i4
+                }
                 excludeTypeList.push(parentInfo.typeName);
               }
 
-            } // loop end of i3
+            }
             excludeTypeList.length = 0; // clear array
 
-          } // loop end of i2
+          }
           parentInfoList = _.cloneDeep(keepParentData);
           keepParentData.length = 0; // clear array
 
-        } // loop end of i
+        }
 
         requestDefer.resolve({ key: 'ActionRoot', value: dataList });
       },
@@ -246,15 +246,14 @@ $(function () {
     );
 
     $.when.apply(null, promises).done(function () {
-      // 非同期処理が全部終わったときの処理
 
       var actionData;
-      for (var i = 0; i < arguments.length; i++) { // arguments は forEach() 使えない
+      for (var i = 0; i < arguments.length; i++) {
         var key = arguments[i].key;
         var value = arguments[i].value;
 
         if (key === 'ActionRoot') {
-          actionData = value; // dataList
+          actionData = value;
         } else {
           actionData = '';
         }
