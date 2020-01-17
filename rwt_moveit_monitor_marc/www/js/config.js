@@ -7,9 +7,5 @@ function createGetTopicList() {
         types: types
     };
 
-    var topicList = {
-        topicInfo: topicInfo,
-        type: 'rosgraph_msgs/Log',
-    };
-    return topicList;
+    return topicInfo;
 }
