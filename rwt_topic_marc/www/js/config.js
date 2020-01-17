@@ -1,3 +1,3 @@
-function createGetTopicList() {
+function getTargetTopicData() {
     return undefined;
 }
