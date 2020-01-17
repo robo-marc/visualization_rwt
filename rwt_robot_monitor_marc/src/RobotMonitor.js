@@ -37,10 +37,10 @@ ROSLIB.RWTRobotMonitor = function (spec) {
   });
   var that = this;
   this.diagnostics_agg_subscriber.subscribe(function (msg) {
-    // paused
-    if (ROSLIB.RWTRobotMonitor.prototype.is_paused) {
-      return;
-    }
+    // // paused
+    // if (ROSLIB.RWTRobotMonitor.prototype.is_paused) {
+    //   return;
+    // }
     that.diagnosticsCallback(msg);
     that.addData(msg);
   });
@@ -59,6 +59,10 @@ ROSLIB.RWTRobotMonitor = function (spec) {
  */
 ROSLIB.RWTRobotMonitor.prototype.diagnosticsCallback = function (msg) {
   this.last_diagnostics_update = ROSLIB.Time.now();
+  // paused
+  if (ROSLIB.RWTRobotMonitor.prototype.is_paused) {
+    return;
+  }
   var diagnostics_statuses
     = ROSLIB.DiagnosticsStatus.createFromArray(msg);
   var that = this;
@@ -208,11 +212,14 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
       + directory.getIconHTML2()
       + leaf
       + toggle
-      + '"><td class="data_1" data-name="'
+      + '">'
+      + '<td class="data_1" data-name="'
       + directory.fullName()
-      + '"><span>'
+      + '">'
+      + '<span>'
       + directory.name
-      + '</span></td>'
+      + '</span>'
+      + '</td>'
       + '<td class="data_2">'
       + directory.status.message
       + '</td>'
@@ -262,6 +269,13 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
     console.log(parentId);
     $(parentId).slideToggle(1);
   }
+
+  // TODO test collapse all
+  $('.robot-joy').slideToggle(1);
+  $('.robot-dummy2').slideToggle(1);
+  $('.robot-dummy').slideToggle(1);
+  $('.robot').slideToggle(1);
+
 };
 
 // TODO delete
@@ -395,7 +409,7 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
     // dialog_box_1
     $('#dialog_header_title').text(the_directory.fullName());
     $('#dialog_full_name').text(the_directory.fullName());
-    $('#dialog_component').text(the_directory.status.name);
+    $('#dialog_component').text(the_directory.name);
     $('#dialog_hardware').text(the_directory.status.hardware_id);
     $('#dialog_level').text(the_directory.status.levelString());
     $('#dialog_message').text(the_directory.status.message);
@@ -415,9 +429,9 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
 
   $('.expand').on('click', function () {
 
-    var rec = function (parend) {
+    var rec = function (parent) {
 
-      var parentId = '.' + $(parend).attr('id');
+      var parentId = '.' + $(parent).attr('id');
       console.log('----- parentId ----');
       console.log(parentId);
       console.log('----- parent ----');
@@ -449,6 +463,10 @@ ROSLIB.RWTRobotMonitor.prototype.clearData = function () {
 };
 
 ROSLIB.RWTRobotMonitor.prototype.addData = function (data) {
+  // paused
+  if (ROSLIB.RWTRobotMonitor.prototype.is_paused) {
+    return;
+  }
   // check the dimension
   var dataDimension = _.isArray(data) ? data.length : 0;
   if (dataDimension === 0) {
@@ -578,14 +596,3 @@ $('#btn27').on('click', { name: 'btn26' }, timeListClick);
 $('#btn27').on('click', { name: 'btn27' }, timeListClick);
 $('#btn28').on('click', { name: 'btn28' }, timeListClick);
 $('#btn29').on('click', { name: 'btn29' }, timeListClick);
-
-// // tree open close
-// // $('.expand').on('click', function () {
-// $('.data_1').on('click', function () {
-//   console.log('tggle');
-//   $(this).next().slideToggle(200);
-// });
-// $('.expand').on('click', function () {
-//   console.log('tggle');
-//   $(this).next().slideToggle(200);
-// });
