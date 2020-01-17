@@ -6,13 +6,7 @@ $(function () {
   var ros = new ROSLIB.Ros();
 
   var mjpegCanvas = null;
-  var currentImageTopic = null;
-
   var currentAngle = 0;
-
-  // unused
-  var isInRecording = false;
-
   var isRefreshing = false;
 
 
@@ -29,7 +23,6 @@ $(function () {
 
     ros.getTopicsForType(type,
       function (result) {
-        // console.log('getTopicsForTypeAsync success');
         defer.resolve(result);
       },
       function (message) {
@@ -132,7 +125,6 @@ $(function () {
     var topic = $('#topic-select').val();
     // first of all, subscribe the topic and detect the width/height
     var divWidth = $('#canvas-area').width();
-    currentImageTopic = topic;
     var topicAndType = splitTopicAndType(topic);
     mjpegCanvas = new MJPEGCANVAS.Viewer({
       divID: 'canvas-area',
@@ -190,61 +182,6 @@ $(function () {
     e.preventDefault();
     resizeCanvas();
   });
-
-  // $(window).on('resize', function () {
-  //   resizeCanvas();
-  // });
-
-  // obsolated
-  // $('#record-button').on('click', function (e) {
-  //   e.preventDefault();
-  //   var $button = $(this);
-  //   if (currentImageTopic) {
-  //     if (!isInRecording) {
-  //       var rosbagStartClient = new ROSLIB.Service({
-  //         ros: ros,
-  //         name: '/rosbag_record',
-  //         serviceType: 'rwt_image_view/RosbagRecordRequest'
-  //       });
-  //       var topicRequest = new ROSLIB.ServiceRequest({
-  //         topics: [currentImageTopic]
-  //       });
-  //       rosbagStartClient.callService(topicRequest,
-  //         function (result) {
-  //           isInRecording = true;
-  //           $button.removeClass('btn-success')
-  //             .addClass('btn-danger')
-  //             .html('stop recording');
-  //           // download
-  //
-  //         }
-  //       );
-  //     } else {
-  //       isInRecording = false;
-  //       var rosbagStopClient = new ROSLIB.Service({
-  //         ros: ros,
-  //         name: '/rosbag_record_stop',
-  //         serviceType: 'std_srvs/Empty'
-  //       });
-  //       var emptyRequest = new ROSLIB.ServiceRequest({});
-  //       rosbagStopClient.callService(emptyRequest,
-  //         function (result) {
-  //           // download here
-  //           var html = '<div class="alert alert-info alert-dismissable" id="download-alert">'
-  //             + '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'
-  //             + '<a class="alert-link" href="/rwt_image_view/tmp.bag">download the bagfile from here via right-click</a>'
-  //             + '</div>';
-  //           //$button.html('<a href="/rwt_image_view/tmp.bag">download</a>');
-  //           $('#topic-area').before(html);
-  //           $button.removeClass('btn-danger')
-  //             .addClass('btn-success')
-  //             .html('record');
-  //         }
-  //       );
-  //     }
-  //   }
-  // });
-
 
   ////////////////////////////////////////
   // ros events
