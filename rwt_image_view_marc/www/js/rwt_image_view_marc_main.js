@@ -74,6 +74,30 @@ $(function () {
       ;
   }
 
+  function resizeCanvas() {
+    // resize canvas
+    var $canvas = $('#canvas-area canvas');
+    if ($canvas.size() === 0) {
+      return;
+    }
+
+    var $canvasWrap = $('#canvas-area');
+    var width = $canvasWrap.width();
+    var height = 480 * width / 640.0;
+
+    $canvas.prop('width', width);
+    $canvas.prop('height', height);
+    mjpegCanvas.width = width;
+    mjpegCanvas.height = height;
+
+    if (currentAngle % 180 === 0) { // when 0 or 180 degree
+      $canvasWrap.css('height', height);
+    } else { // when 90 or 270 degree
+      $canvasWrap.css('height', width);
+      rotateCanvas(0); // adjust position
+    }
+  }
+
   function splitTopicAndType(topic) {
     var index = -1;
 
@@ -162,24 +186,14 @@ $(function () {
     rotateCanvas(90);
   });
 
-  $(window).on('resize', function () {
-    // resize canvas
-    var $canvas = $('#canvas-area canvas');
-    if ($canvas.size() === 0) {
-      return;
-    }
-
-    var $canvasWrap = $('#canvas-area');
-    var divWidth = $canvasWrap.width();
-    var height = 480 * divWidth / 640.0;
-
-    $canvas.prop('width', divWidth);
-    $canvas.prop('height', height);
-    mjpegCanvas.width = divWidth;
-    mjpegCanvas.height = height;
-
-    $canvasWrap.css('height', height);
+  $('#fit-button').on('click', function (e) {
+    e.preventDefault();
+    resizeCanvas();
   });
+
+  // $(window).on('resize', function () {
+  //   resizeCanvas();
+  // });
 
   // obsolated
   // $('#record-button').on('click', function (e) {
