@@ -205,7 +205,7 @@ $(function () {
             break;
           }
         } else {
-          // name missmatch
+          // name missmatchget
           value = undefined;
         }
       }
@@ -363,15 +363,19 @@ $(function () {
         });
       });
     } else {
-      var topicInfo = topicList.topicInfo;
-      // console.log(topicList.type);
-      ros.getTopicsForType(topicList.type, function (result) {
-        // ros.getTopicsForType(type,
+      ros.getTopics(function (comparisonItem) {
+        var topicInfo = _.cloneDeep(topicList);
+        // console.log(topicInfo);
 
-        for (var i = 0; i < result.length; i++) {
-          topicInfo.topics.push(result[i]);
-          topicInfo.types.push('rosgraph_msgs/Log');
+        var keepInfo = { topics: [], types: [] };
+
+        for (var j = 0; j < topicInfo.topics.length; j++) {
+          if (comparisonItem.topics.indexOf(topicInfo.topics[j]) >= 0) {
+            keepInfo.topics.push(topicInfo.topics[j]);
+            keepInfo.types.push(topicInfo.types[j]);
+          }
         }
+        topicInfo = _.cloneDeep(keepInfo);
 
         _.each(topicInfo.topics, function (topicName, index) {
           var topicType = topicInfo.types[index];
@@ -388,6 +392,7 @@ $(function () {
           );
           messageDetailPromises.push(promise);
         });
+
       });
     }
 
