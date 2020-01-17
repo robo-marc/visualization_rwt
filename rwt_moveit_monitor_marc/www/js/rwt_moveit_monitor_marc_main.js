@@ -28,8 +28,6 @@ $(function () {
   // get node
   function getNode() {
     ros.getNodes(function (nodesData) {
-      console.log('---- node Data ---');
-      console.log(nodesData);
       if (nodesData.includes('/move_group')) {
         $('.status').text('Running');
       } else {
