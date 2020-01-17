@@ -38,13 +38,14 @@ $(function () {
 
   // for grid
   var columns = [
-    { id: '#', name: '#', field: '#', sortable: true },
-    { id: 'Message', name: 'Message', width: 240, field: 'Message', sortable: true },
-    { id: 'Severity', name: 'Severity', field: 'Severity', sortable: true },
-    { id: 'Node', name: 'Node', field: 'Node', sortable: true },
-    { id: 'Stamp', name: 'Stamp', field: 'Stamp', width: 240, sortable: true },
-    { id: 'Topics', name: 'Topics', field: 'Topics', width: 240, sortable: true },
-    { id: 'Location', name: 'Location', field: 'Location', width: 240, sortable: true },
+    { id: '#', name: '#', field: '#', width: 80, sortable: true },
+    { id: 'Message', name: 'Message', field: 'Message', width: 300, sortable: true },
+    { id: 'Severity', name: 'Severity', field: 'Severity', width: 70, sortable: true, formatter: severityFormatter },
+    // { id: 'Severity', name: 'Severity', field: 'Severity', width: 70, sortable: true },
+    { id: 'Node', name: 'Node', field: 'Node', width: 100, sortable: true },
+    { id: 'Stamp', name: 'Stamp', field: 'Stamp', width: 100, sortable: true },
+    { id: 'Topics', name: 'Topics', field: 'Topics', width: 100, sortable: true },
+    { id: 'Location', name: 'Location', field: 'Location', width: 100, sortable: true },
     { id: 'Number', name: 'Number', field: 'Number', width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
   ];
   var options = {
@@ -160,6 +161,11 @@ $(function () {
     });
   }
 
+  function severityFormatter(row, cell, value, columnDef, dataContext) {
+    if (value === null || value === undefined || dataContext === undefined) { return ''; }
+    return '<span class="severity ' + value + '">' + value + '</span>';
+  }
+
   function myFilter(item, args) {
     // console.log(eval(args.filterScript));
     // return eval(args.filterScript);
@@ -212,6 +218,10 @@ $(function () {
     return timestamp;
   }
 
+
+  ////////////////////////////////////////
+  // button events
+
   // CSV download
   $('#download-button').on('click', function (e) {
     // do not preventDefault.
@@ -254,13 +264,11 @@ $(function () {
   });
 
   // CSV load
-  // file change
   $('#load-button').on('click', function (e) {
     e.preventDefault();
 
     $('#fileSelector').click();
   });
-
   $('#fileSelector').on('change', function (evt) {
     var file = evt.target.files[0];
     // console.log(file);
@@ -303,13 +311,14 @@ $(function () {
         var secs = time[0];
         var nsecs = time[1];
 
+        var severityNumber = parseInt(dataList[i][1], 10);
         var associationItem = {
           id: rowNumber,
           indent: 0,
           '#': '#' + rowNumber,
           Message: dataList[i][0],
-          SeverityNumber: dataList[i][1],
-          Severity: getErrorLevel(parseInt(dataList[i][1], 10)),
+          SeverityNumber: severityNumber,
+          Severity: getErrorLevel(severityNumber),
           Node: dataList[i][2],
           Stamp: formatTime(secs, nsecs),
           // RawTime: msg.header.stamp.secs + '.' + regular,
@@ -383,6 +392,9 @@ $(function () {
   });
 
 
+  ////////////////////////////////////////
+  // grid events
+
   // sort
   grid.onSort.subscribe(function (e, args) {
     sortCol = args.sortCol.field;
@@ -401,18 +413,15 @@ $(function () {
     grid.invalidateAllRows();
     grid.render();
   });
-
   function comparer(a, b) {
     var x = a[sortCol], y = b[sortCol];
     return (x === y ? 0 : (x > y ? 1 : -1));
   }
-
   function comparer2(a, b) {
     var x = a[sortCol], y = b[sortCol];
     var z = a['Stamp'], w = b['Stamp'];
     return (x === y ? (z > w ? 1 : -1) : 0);
   }
-
 
   dataView.onRowCountChanged.subscribe(function (e, args) {
     grid.updateRowCount();
@@ -435,6 +444,237 @@ $(function () {
   });
 
 
+  ////////////////////////////////////////
+  // add exclude filter
+
+  //addボタン押下時の処理
+  $('#add-exclude-button').on('click', function () {
+    var filterText = '';
+    var items;
+    var radiobuttonStatus = $('input[name="exclude_input"]:checked').val();
+    console.log(radiobuttonStatus);
+    var filterStatus = $('#exclude-select').val();
+    console.log(filterStatus);
+    var conditions;
+    if (radiobuttonStatus === 'AND') {
+      //andを表すものを追加
+      // console.log($('#exclude li').length);
+      if ($('#exclude li').length === 0) {
+        // return alert('NewGroup is not defined');
+        return;
+      }
+      // conditions = '<button>' + radiobuttonStatus + '</button>';
+      conditions = '<span class="label and">AND</span>';
+    } else {
+      //orを表すものを追加?
+      conditions = '';
+    }
+
+
+    if (filterStatus === 'Message') {
+      $('#exclude').append(function () {
+        return '<li class="message" name="filter">'
+          + '<div class="column">'
+          + conditions
+          + '<div class="name">'
+          // + conditions
+          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Message</label></div>'
+          + '</div>'
+          + '<div class="data">'
+          + '<div class="parts-set textbox"><input type="text" class="message-value"placeholder="Message Text"></div>'
+          + '<div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>'
+          + '</div>'
+          + '</div>'
+          + '<div class="delete">'
+          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
+          + '</div>'
+          + '</li>';
+      });
+    }
+
+
+    if (filterStatus === 'Severity') {
+      $('#exclude').append(function () {
+        return '<li class="severities" name="filter">'
+          + '<div class="column">'
+          + conditions
+          + '<div class="name">'
+          // + conditions
+          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Severities</label></div>'
+          + '</div>'
+          + '<div class="data">'
+          + '<ul class="chips">'
+          + '<li><a href="#" class="severities-select-button" data-value="Debug">Debug</a></li>'
+          + '<li><a href="#" class="severities-select-button" data-value="Info">Info</a></li>'
+          + '<li><a href="#" class="severities-select-button" data-value="Warn">Warn</a></li>'
+          + '<li><a href="#" class="severities-select-button" data-value="Error">Error</a></li>'
+          + '<li><a href="#" class="severities-select-button" data-value="Fatal">Fatal</a></li>'
+          + '</ul>'
+          + '</div>'
+          + '</div>'
+          + '<div class="delete">'
+          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
+          + '</div>'
+          + '</li>';
+      });
+    }
+
+    //TODO: 中身を更新する処理
+    if (filterStatus === 'Node') {
+      items = dataView.getItems();
+      console.log(items);
+      var nodeList = '';
+      filterText = '';
+      _.each(items, function (item, index) {
+        nodeList = nodeList.concat(item.Node);
+        nodeList = nodeList + ',';
+      });
+      nodeList = nodeList.substr(0, nodeList.length - 1);
+      nodeList = nodeList.split(',');
+      nodeList = nodeList.filter(function (node, idx, self) {
+        return self.indexOf(node) === idx;
+      });
+      console.log(nodeList);
+      filterText = '<li class="node" name="filter">'
+        + '<div class="column">'
+        + conditions
+        + '<div class="name">'
+        + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Node</label></div>'
+        + '</div>'
+        + '<div class="data">'
+        + '<select class="node-value" type="select">';
+
+      _.each(nodeList, function (node, index) {
+        filterText = filterText + '<option value="' + node + '">' + node + '</option>';
+      });
+
+      filterText = filterText + '</select >'
+        + '</div >'
+        + '</div >'
+        + '<div class="delete">'
+        + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
+        + '</div>'
+        + '</li >';
+
+      $('#exclude').append(function () {
+        return filterText;
+      });
+    }
+
+
+    if (filterStatus === 'Stamp') {
+      $('#exclude').append(function () {
+        return '<li class="time" name="filter">'
+          + '<div class="column">'
+          + conditions
+          + '<div class="name">'
+          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">from time range</label>'
+          + '</div>'
+          + '</div>'
+          + '<div class="data">'
+          + '<select type="select">'
+          + '<option value="0">Time Selected</option>'
+          + '<option value="1">1</option>'
+          + '<option value="2">2</option>'
+          + '<option value="3">3</option>'
+          + '</select>'
+          // + '<input type="date" name="stamp">'
+          // + '<input type="time" name="stamp" step="0.01">'
+          + '<input type="checkbox">'
+          + '<select type="select" disabled>'
+          + '<option value="0">Time Selected</option>'
+          + '<option value="1">1</option>'
+          + '<option value="2">2</option>'
+          + '<option value="3">3</option>'
+          + '</select>'
+          + '</div>'
+          + '</div>'
+          + '<div class="delete">'
+          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
+          + '</div>'
+          + '</li>';
+      });
+    }
+
+
+    //TODO: 中身を更新する処理
+    if (filterStatus === 'Topics') {
+      items = dataView.getItems();
+      var topicList = '';
+      filterText = '';
+      _.each(items, function (item, index) {
+        topicList = topicList.concat(item.Topics);
+        topicList = topicList + ',';
+      });
+      topicList = topicList.substr(0, topicList.length - 1);
+      topicList = topicList.split(',');
+
+      topicList = topicList.filter(function (topic, idx, self) {
+        return self.indexOf(topic) === idx;
+      });
+      console.log(topicList);
+      filterText = '<li class="topics" name="filter">'
+        + '<div class="column">'
+        + conditions
+        + '<div class="name">'
+        // + conditions
+        + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Topics</label></div>'
+        + '</div >'
+        + '<div class="data">'
+        + '<select class="topic-value" type="select">';
+
+      _.each(topicList, function (topic, index) {
+        filterText = filterText + '<option value="' + topic + '">' + topic + '</option>';
+      });
+
+      filterText = filterText + '</select>'
+        + '</div>'
+        + '</div>'
+        + '<div class="delete">'
+        + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
+        + '</div>'
+        + '</li >';
+
+      $('#exclude').append(function () {
+        return filterText;
+      });
+    }
+
+
+    if (filterStatus === 'Location') {
+      $('#exclude').append(function () {
+        return '<li class="location" name="filter">'
+          + '<div class="column">'
+          + conditions
+          + '<div class="name">'
+          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Location</label></div>'
+          + '</div>'
+          + '<div class="data">'
+          + '<div class="parts-set textbox"><input type="text" class="location-value" placeholder="Location Text"></div>'
+          + '<div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>'
+          + '</div>'
+          + '</div>'
+          + '<div class="delete">'
+          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
+          + '</div>'
+          + '</li>';
+      });
+    }
+
+  });
+
+  //除外条件のアクティブクラス書き換え
+  $('#exclude').on('click', 'input[name = "filter"]', function (e) {
+    // e.preventDefault();
+    var className = this.getAttribute('class');
+    this.setAttribute('class', className + ' active');
+
+    // $('#exclude').trigger('change');
+  });
+
+
+  ////////////////////////////////////////
+  // change exclude filter
 
   //Severityのクラス書き換え
   $('#exclude').on('click', '.severities-select-button', function (e) {
@@ -447,16 +687,6 @@ $(function () {
     }
     $('#exclude').trigger('change');
   });
-
-  //除外条件のアクティブクラス書き換え
-  $('#exclude').on('click', 'input[name = "filter"]', function (e) {
-    // e.preventDefault();
-    var className = this.getAttribute('class');
-    this.setAttribute('class', className + ' active');
-
-    // $('#exclude').trigger('change');
-  });
-
 
   function getElementName(element) {
     var elementName = element.attr('class');
@@ -673,223 +903,6 @@ $(function () {
     filterScript = headScript + excludeScript;
     console.log(filterScript);
     updateFilter();
-  });
-
-
-  //addボタン押下時の処理
-  $('#add-exclude-button').on('click', function () {
-    var filterText = '';
-    var items;
-    var radiobuttonStatus = $('input[name="exclude_input"]:checked').val();
-    console.log(radiobuttonStatus);
-    var filterStatus = $('#exclude-select').val();
-    console.log(filterStatus);
-    var conditions;
-    if (radiobuttonStatus === 'AND') {
-      //andを表すものを追加
-      // console.log($('#exclude li').length);
-      if ($('#exclude li').length === 0) {
-        // return alert('NewGroup is not defined');
-        return;
-      }
-      // conditions = '<button>' + radiobuttonStatus + '</button>';
-      conditions = '<span class="label and">AND</span>';
-    } else {
-      //orを表すものを追加?
-      conditions = '';
-    }
-
-
-    if (filterStatus === 'Message') {
-      $('#exclude').append(function () {
-        return '<li class="message" name="filter">'
-          + '<div class="column">'
-          + conditions
-          + '<div class="name">'
-          // + conditions
-          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Message</label></div>'
-          + '</div>'
-          + '<div class="data">'
-          + '<div class="parts-set textbox"><input type="text" class="message-value"placeholder="Message Text"></div>'
-          + '<div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>'
-          + '</div>'
-          + '</div>'
-          + '<div class="delete">'
-          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-          + '</div>'
-          + '</li>';
-      });
-    }
-
-
-    if (filterStatus === 'Severity') {
-      $('#exclude').append(function () {
-        return '<li class="severities" name="filter">'
-          + '<div class="column">'
-          + conditions
-          + '<div class="name">'
-          // + conditions
-          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Severities</label></div>'
-          + '</div>'
-          + '<div class="data">'
-          + '<ul class="chips">'
-          + '<li><a href="#" class="severities-select-button" data-value="Debug">Debug</a></li>'
-          + '<li><a href="#" class="severities-select-button" data-value="Info">Info</a></li>'
-          + '<li><a href="#" class="severities-select-button" data-value="Warn">Warn</a></li>'
-          + '<li><a href="#" class="severities-select-button" data-value="Error">Error</a></li>'
-          + '<li><a href="#" class="severities-select-button" data-value="Fatal">Fatal</a></li>'
-          + '</ul>'
-          + '</div>'
-          + '</div>'
-          + '<div class="delete">'
-          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-          + '</div>'
-          + '</li>';
-      });
-    }
-
-    //TODO: 中身を更新する処理
-    if (filterStatus === 'Node') {
-      items = dataView.getItems();
-      console.log(items);
-      var nodeList = '';
-      filterText = '';
-      _.each(items, function (item, index) {
-        nodeList = nodeList.concat(item.Node);
-        nodeList = nodeList + ',';
-      });
-      nodeList = nodeList.substr(0, nodeList.length - 1);
-      nodeList = nodeList.split(',');
-      nodeList = nodeList.filter(function (node, idx, self) {
-        return self.indexOf(node) === idx;
-      });
-      console.log(nodeList);
-      filterText = '<li class="node" name="filter">'
-        + '<div class="column">'
-        + conditions
-        + '<div class="name">'
-        + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Node</label></div>'
-        + '</div>'
-        + '<div class="data">'
-        + '<select class="node-value" type="select">';
-
-      _.each(nodeList, function (node, index) {
-        filterText = filterText + '<option value="' + node + '">' + node + '</option>';
-      });
-
-      filterText = filterText + '</select >'
-        + '</div >'
-        + '</div >'
-        + '<div class="delete">'
-        + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-        + '</div>'
-        + '</li >';
-
-      $('#exclude').append(function () {
-        return filterText;
-      });
-    }
-
-
-    if (filterStatus === 'Stamp') {
-      $('#exclude').append(function () {
-        return '<li class="time" name="filter">'
-          + '<div class="column">'
-          + conditions
-          + '<div class="name">'
-          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">from time range</label>'
-          + '</div>'
-          + '</div>'
-          + '<div class="data">'
-          + '<select type="select">'
-          + '<option value="0">Time Selected</option>'
-          + '<option value="1">1</option>'
-          + '<option value="2">2</option>'
-          + '<option value="3">3</option>'
-          + '</select>'
-          // + '<input type="date" name="stamp">'
-          // + '<input type="time" name="stamp" step="0.01">'
-          + '<input type="checkbox">'
-          + '<select type="select" disabled>'
-          + '<option value="0">Time Selected</option>'
-          + '<option value="1">1</option>'
-          + '<option value="2">2</option>'
-          + '<option value="3">3</option>'
-          + '</select>'
-          + '</div>'
-          + '</div>'
-          + '<div class="delete">'
-          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-          + '</div>'
-          + '</li>';
-      });
-    }
-
-
-    //TODO: 中身を更新する処理
-    if (filterStatus === 'Topics') {
-      items = dataView.getItems();
-      var topicList = '';
-      filterText = '';
-      _.each(items, function (item, index) {
-        topicList = topicList.concat(item.Topics);
-        topicList = topicList + ',';
-      });
-      topicList = topicList.substr(0, topicList.length - 1);
-      topicList = topicList.split(',');
-
-      topicList = topicList.filter(function (topic, idx, self) {
-        return self.indexOf(topic) === idx;
-      });
-      console.log(topicList);
-      filterText = '<li class="topics" name="filter">'
-        + '<div class="column">'
-        + conditions
-        + '<div class="name">'
-        // + conditions
-        + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Topics</label></div>'
-        + '</div >'
-        + '<div class="data">'
-        + '<select class="topic-value" type="select">';
-
-      _.each(topicList, function (topic, index) {
-        filterText = filterText + '<option value="' + topic + '">' + topic + '</option>';
-      });
-
-      filterText = filterText + '</select>'
-        + '</div>'
-        + '</div>'
-        + '<div class="delete">'
-        + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-        + '</div>'
-        + '</li >';
-
-      $('#exclude').append(function () {
-        return filterText;
-      });
-    }
-
-
-    if (filterStatus === 'Location') {
-      $('#exclude').append(function () {
-        return '<li class="location" name="filter">'
-          + '<div class="column">'
-          + conditions
-          + '<div class="name">'
-          + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective"><label for="">Location</label></div>'
-          + '</div>'
-          + '<div class="data">'
-          + '<div class="parts-set textbox"><input type="text" class="location-value" placeholder="Location Text"></div>'
-          + '<div class="parts-set checkbox"><input type="checkbox"><label for="">Regax</label></div>'
-          + '</div>'
-          + '</div>'
-          + '<div class="delete">'
-          + '<a href="" class="icon"><i class="material-icons">remove_circle</i></a>'
-          + '</div>'
-          + '</li>';
-      });
-    }
-
   });
 
 

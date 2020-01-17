@@ -16,6 +16,41 @@
     text-align: center;
 }
 
+.slick-cell.r2 {
+    padding-left: 16px;
+}
+
+span.severity {
+    color: #fff;
+    font-size: 0.5625rem;
+    padding: 1px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    width: 2.2rem;
+    text-align: center;
+}
+
+span.severity.Debug {
+    background-color: rgb(177, 170, 171);
+}
+
+span.severity.Info {
+    background-color: rgb(105, 189, 245);
+}
+
+span.severity.Warn {
+    background-color: rgb(87, 209, 16);
+}
+
+span.severity.Error {
+    background-color: rgb(255, 157, 29);
+}
+
+span.severity.Fatal {
+    background-color: #EC5363;
+}
+
 span.label.and {
     color: #fff;
     font-size: 0.5625rem;
