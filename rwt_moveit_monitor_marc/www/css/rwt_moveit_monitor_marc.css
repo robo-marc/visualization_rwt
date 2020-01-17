@@ -9,3 +9,7 @@
 .moveit .box_2 .tree-wrap {
     height: 400px;
 }
+
+.moveit .box_2 .tree-box {
+    margin: 0;
+}
