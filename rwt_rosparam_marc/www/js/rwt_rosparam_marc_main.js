@@ -263,7 +263,6 @@ $(function () {
               name: rosparamArg1,
             });
             paramSet.set(rosparamArg, function (result) {
-              console.log(result);
             },
               function (message) {
                 setMessage(message);
@@ -314,7 +313,6 @@ $(function () {
         if (rosparamArg2) {
           if (fileData) {
             ros.loadParams(fileData, function (result) {
-              console.log(result);
             },
               function (message) {
                 setMessage(message);
@@ -358,7 +356,6 @@ $(function () {
             name: rosparamArg1,
           });
           paramDel.delete(function (result) {
-            console.log(result);
           });
         }
         else {
