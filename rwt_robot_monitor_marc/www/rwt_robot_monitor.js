@@ -456,7 +456,6 @@ ROSLIB.DiagnosticsStatus.prototype.levelString = function () {
  */
 
 // previous data
-// var previousData = [];
 var arrData = [];
 var maxData = 30;
 
@@ -487,10 +486,6 @@ ROSLIB.RWTRobotMonitor = function (spec) {
   });
   var that = this;
   this.diagnostics_agg_subscriber.subscribe(function (msg) {
-    // // paused
-    // if (ROSLIB.RWTRobotMonitor.prototype.is_paused) {
-    //   return;
-    // }
     that.diagnosticsCallback(msg);
     that.addData(msg);
   });
@@ -570,6 +565,9 @@ ROSLIB.RWTRobotMonitor.prototype.updateView = function (history) {
   this.registerBrowserCallback();
 };
 
+/**
+ * update table view  error warn
+ */
 ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, level) {
 
   //delete table
@@ -577,6 +575,8 @@ ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, leve
   $('#' + list_id + ' tr:gt(0)').size();
 
   var directories = this.history.root.getDirectories(level);
+
+  // sort
   directories.sort(function (a, b) {
     var apath = a.fullName();
     var bpath = b.fullName();
@@ -612,48 +612,61 @@ ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, leve
   }
 };
 
+
 /**
- * update all table view
+ * update table view all
  */
 ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
-  // check opened list first
-  var open_ids = [];
+  // check collapsed list from last time
+  var collapseIdList = [];
 
-  // TODO test
-  console.log('----- #all-table ----');
-  console.log($('#all-table'));
-  // Tree collapsing check
   $('#all-table .collapse').each(function () {
-    open_ids.push($(this).attr('id'));
+    collapseIdList.push($(this).attr('id'));
   });
   // TODO test
-  console.log('----- allTable open_ids ----');
-  console.log(open_ids);
+  console.log('----- allTable collapseIdList ----');
+  console.log(collapseIdList);
 
   //delete table
   $('#all-table tr:gt(0)').remove();
   $('#all-table tr:gt(0)').size();
 
   // return jquery object
-  var rec = function (directory, indent, parentId) {
+  var rec = function (directory, indent, parentId, toggleParent, displayParent) {
+
+    console.log('----- directory ----');
+    console.log(directory);
 
     // indent
     var leaf = ' leaf leaf' + indent;
-    // toggle
+    // toggle (expand/collapse)
     var toggle = '';
+    // display
+    var display = '';
 
-    // TODO test 
-    if (directory.children.length === 0) {
-      // toggle = ' collapse';
-    } else {
-      toggle = ' expand';
+    // toggle check 
+    if (directory.children.length !== 0) {
+      for (var k = 0; k < collapseIdList.length; k++) {
+        if (collapseIdList[k].toString() === directory.uniqID().toString()) {
+          toggle = ' collapse';
+          break;
+        }
+      }
+      if (toggle === '') {
+        toggle = ' expand';
+      }
     }
 
-    if (parentId === '') {
-      // parentId = directory.uniqID();
+    // display check
+    if (parentId && toggleParent === ' collapse') {
+      display = ' collapsed';
+    }
+    if (parentId && displayParent === ' collapsed') {
+      display = ' collapsed';
     }
 
-    var allTableTree = $('<tr '
+    var allTableTree = $(''
+      + '<tr '
       + 'id="'
       + directory.uniqID()
       + '" class="'
@@ -662,6 +675,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
       + directory.getIconHTML2()
       + leaf
       + toggle
+      + display
       + '">'
       + '<td class="data_1" data-name="'
       + directory.fullName()
@@ -674,29 +688,22 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
       + directory.status.message
       + '</td>'
       + '</tr>');
-    console.log('----- allTableTree_1 ----');
-    console.log(allTableTree);
 
     if (directory.children.length === 0) {
       // last child
+      console.log('----- allTableTree_child ----');
+      console.log(allTableTree);
       return allTableTree;
     } else {
-      for (var j = 0; j < open_ids.length; j++) {
-        // if (open_ids[j].toString() === directory.uniqID().toString()) {
-        // div_root.addClass('inner');
-        // break;
-        // }
-      }
       indent++;
       for (var i = 0; i < directory.children.length; i++) {
         var the_child = directory.children[i];
-        var the_result = rec(the_child, indent, directory.uniqID());
+        var the_result = rec(the_child, indent, directory.uniqID(), toggle, display);
         allTableTree.after(the_result);
       }
       // TODO test
-      console.log('----- allTableTree ----');
+      console.log('----- allTableTree_parent ----');
       console.log(allTableTree);
-      // allTableTree.append(div_root);
       return allTableTree;
     }
   };
@@ -707,87 +714,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
     console.log('----- allTable ----');
     console.log(allTable);
     $('#all-table').append(allTable);
-  }
-
-  for (var j = 0; j < open_ids.length; j++) {
-    // if (open_ids[j].toString() === directory.uniqID().toString()) {
-    // div_root.addClass('inner');
-    // break;
-    // }
-    var parentId = '.' + open_ids[j];
-    console.log('----- parentId ----');
-    console.log(parentId);
-    $(parentId).slideToggle(1);
-  }
-
-  // TODO test collapse all
-  $('.robot-joy').slideToggle(1);
-  $('.robot-dummy2').slideToggle(1);
-  $('.robot-dummy').slideToggle(1);
-  $('.robot').slideToggle(1);
-
-};
-
-// TODO delete
-/**
- * update all list view
- */
-ROSLIB.RWTRobotMonitor.prototype.updateAllList = function () {
-  // check opened list first
-
-  console.log('----- #all-list ----');
-  console.log($('#all-list'));
-
-  var open_ids = [];
-  $('#all-list .in, #all-list .collapsing').each(function () {
-    open_ids.push($(this).attr('id'));
-  });
-  console.log('----- open_ids ----');
-  console.log(open_ids);
-  $('#all-list li').remove();
-
-  // return jquery object
-  var rec = function (directory) {
-    console.log('----- directory ----');
-    console.log(directory);
-    var $html = $('<li class="list-group-item inner" data-name="'
-      + directory.fullName() + '">'
-      + '<a data-toggle="collapse" data-parent="#all-list" href="#'
-      + directory.uniqID() + '">'
-      + directory.getCollapseIconHTML()
-      + directory.getIconHTML() + directory.name + '</a>'
-      + '</li>');
-    if (directory.children.length === 0) {
-      console.log('----- All list $html ----');
-      console.log($html);
-      return $html;
-    }
-    else {
-      var div_root = $('<ul class="list-group-item-content collapse no-transition" id="'
-        + directory.uniqID()
-        + '"></ul>');
-      for (var j = 0; j < open_ids.length; j++) {
-        if (open_ids[j].toString() === directory.uniqID().toString()) {
-          div_root.addClass('in');
-          break;
-        }
-      }
-      for (var i = 0; i < directory.children.length; i++) {
-        var the_child = directory.children[i];
-        var the_result = rec(the_child);
-        div_root.append(the_result);
-      }
-      $html.append(div_root);
-      console.log('----- div_root ----');
-      console.log(div_root);
-      return $html;
-    }
-  };
-  for (var i = 0; i < this.history.root.children.length; i++) {
-    var $html = rec(this.history.root.children[i]);
-    $('#all-list').append($html);
-    console.log('----- All list Root $html ----');
-    console.log($html);
   }
 };
 
@@ -804,7 +730,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateWarnList = function () {
  */
 ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
   var resultError = this.updateTable('error-table', 'error', ROSLIB.DiagnosticsStatus.LEVEL.ERROR);
-
   return resultError;
 };
 
@@ -813,7 +738,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
  */
 ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultWarn) {
 
-  var history = [];
+  // var history = [];
   var btn = document.getElementById('btn0');
   var nextNum = 0;
 
@@ -877,35 +802,57 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
     $('#table-type-4').empty();
   });
 
-  $('.expand').on('click', function () {
+  $('tr.expand').on('click', function () {
 
-    var rec = function (parent) {
+    console.log('---- toggle result collapse ----');
+    console.log('---- $(this) ----');
+    console.log($(this));
 
-      var parentId = '.' + $(parent).attr('id');
-      console.log('----- parentId ----');
-      console.log(parentId);
-      console.log('----- parent ----');
-      console.log(parent);
+    toggleAllList(this);
+  });
 
-      console.log('----- ($(parent) ----');
-      console.log($(parent));
+  $('tr.collapse').on('click', function () {
 
-      $(parent).toggleClass('collapse');
+    console.log('---- toggle result expand ----');
+    console.log('---- $(this) ----');
+    console.log($(this));
 
-      // TODO recursive processing
-      $(parentId).slideToggle(1);
-      // $(this).removeClass('expand');
-      // $(this).addClass('collapse');
-      // $(this).toggleClass('collapse');
+    toggleAllList(this);
+  });
+
+  // toggle all list (expand/collapse)
+  function toggleAllList(parent) {
+
+    var rec = function (parentId, collapse) {
+      var parentClass = '.' + parentId;
+
+      if (collapse) {
+        $(parentClass).addClass('collapsed');
+      } else {
+        $(parentClass).toggleClass('collapsed');
+      }
+
+      var child = document.getElementsByClassName(parentId);
+      for (var i = 0; i < child.length; i++) {
+        var the_child = child[i];
+        if ($(the_child).hasClass('collapse')) {
+          collapse = 'collapse';
+        } else {
+          collapse = '';
+        }
+        var result = rec($(the_child).attr('id'), collapse);
+      }
     };
 
-    var result = rec(this);
-    console.log(result);
-  });
+    $(parent).toggleClass('collapse');
+    $(parent).toggleClass('expand');
+    var collapse = '';
+    if ($(parent).hasClass('collapse')) {
+      collapse = 'collapse';
+    }
+    var result = rec($(parent).attr('id'), collapse);
+  }
 
-  $('.collapse').on('click', function () {
-    // TODO 
-  });
 };
 
 ROSLIB.RWTRobotMonitor.prototype.clearData = function () {
