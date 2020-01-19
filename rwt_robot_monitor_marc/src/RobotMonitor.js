@@ -7,10 +7,15 @@
 
 // previous data
 var arrData = [];
+// time list
 var maxData = 30;
+// dialog 
+var dialogDataName = '';
+// all device init
+var allTableInit = true;
 
 // dialog hidden
-$('#status-dialog').hide();
+$('#status-dialog').addClass('dialog_hidden');
 
 /**
  * a class to visualize diagnostics messages
@@ -116,7 +121,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateView = function (history) {
 };
 
 /**
- * update table view  error warn
+ * update table view  error/warn device
  */
 ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, level) {
 
@@ -164,7 +169,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, leve
 
 
 /**
- * update table view all
+ * update table view all device
  */
 ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
   // check collapsed list from last time
@@ -173,9 +178,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
   $('#all-table .collapse').each(function () {
     collapseIdList.push($(this).attr('id'));
   });
-  // TODO test
-  console.log('----- allTable collapseIdList ----');
-  console.log(collapseIdList);
 
   //delete table
   $('#all-table tr:gt(0)').remove();
@@ -183,10 +185,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
 
   // return jquery object
   var rec = function (directory, indent, parentId, toggleParent, displayParent) {
-
-    console.log('----- directory ----');
-    console.log(directory);
-
     // indent
     var leaf = ' leaf leaf' + indent;
     // toggle (expand/collapse)
@@ -196,10 +194,14 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
 
     // toggle check 
     if (directory.children.length !== 0) {
-      for (var k = 0; k < collapseIdList.length; k++) {
-        if (collapseIdList[k].toString() === directory.uniqID().toString()) {
-          toggle = ' collapse';
-          break;
+      if (allTableInit) {
+        toggle = ' collapse';
+      } else {
+        for (var k = 0; k < collapseIdList.length; k++) {
+          if (collapseIdList[k].toString() === directory.uniqID().toString()) {
+            toggle = ' collapse';
+            break;
+          }
         }
       }
       if (toggle === '') {
@@ -239,10 +241,8 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
       + '</td>'
       + '</tr>');
 
+    // last child
     if (directory.children.length === 0) {
-      // last child
-      console.log('----- allTableTree_child ----');
-      console.log(allTableTree);
       return allTableTree;
     } else {
       indent++;
@@ -251,20 +251,15 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
         var the_result = rec(the_child, indent, directory.uniqID(), toggle, display);
         allTableTree.after(the_result);
       }
-      // TODO test
-      console.log('----- allTableTree_parent ----');
-      console.log(allTableTree);
       return allTableTree;
     }
   };
 
   for (var i = 0; i < this.history.root.children.length; i++) {
     var allTable = rec(this.history.root.children[i], 0, '');
-    // TODO test
-    console.log('----- allTable ----');
-    console.log(allTable);
     $('#all-table').append(allTable);
   }
+  allTableInit = false;
 };
 
 /**
@@ -288,7 +283,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
  */
 ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultWarn) {
 
-  // var history = [];
   var btn = document.getElementById('btn0');
   var nextNum = 0;
 
@@ -328,9 +322,28 @@ ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultW
 ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
   var root = this.history.root;
 
+  // dialog_box
   $('.data_1').on('dblclick', function () {
-    var the_directory = root.findByName($(this).attr('data-name'));
+    dialogDataName = $(this).attr('data-name');
+    var the_directory = root.findByName(dialogDataName);
+    dialogDisplay(the_directory);
+  });
 
+  // dialog close
+  $('#close').on('click', function () {
+    $('#status-dialog').addClass('dialog_hidden');
+    $('#table-type-4').empty();
+  });
+
+  // dialog update
+  if (!($('#status-dialog').hasClass('dialog_hidden'))) {
+    $('#table-type-4').empty();
+    var the_directory = root.findByName(dialogDataName);
+    dialogDisplay(the_directory);
+  }
+
+  // dialog
+  function dialogDisplay(the_directory) {
     // dialog_box_1
     $('#dialog_header_title').text(the_directory.fullName());
     $('#dialog_full_name').text(the_directory.fullName());
@@ -339,39 +352,28 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
     $('#dialog_level').text(the_directory.status.levelString());
     $('#dialog_message').text(the_directory.status.message);
 
-    // dialog_box_
+    // dialog_box_2
     for (var key in the_directory.status.values) {
-      $('#table-type-4').append('<tr><th>' + key + '</th><td>' + the_directory.status.values[key] + '</td></tr>');
+      $('#table-type-4').append('<tr><th>'
+        + key + '</th><td>'
+        + the_directory.status.values[key]
+        + '</td></tr>');
     }
-    $('#status-dialog').show();
-  });
+    $('#status-dialog').removeClass('dialog_hidden');
+  }
 
-  // dialog close
-  $('#close').on('click', function () {
-    $('#status-dialog').hide();
-    $('#table-type-4').empty();
-  });
-
+  // all device tree tggle
   $('tr.expand').on('click', function () {
-
-    console.log('---- toggle result collapse ----');
-    console.log('---- $(this) ----');
-    console.log($(this));
-
-    toggleAllList(this);
+    toggleAllTable(this);
   });
 
+  // all device tree tggle
   $('tr.collapse').on('click', function () {
-
-    console.log('---- toggle result expand ----');
-    console.log('---- $(this) ----');
-    console.log($(this));
-
-    toggleAllList(this);
+    toggleAllTable(this);
   });
 
-  // toggle all list (expand/collapse)
-  function toggleAllList(parent) {
+  // toggle (expand/collapse)
+  function toggleAllTable(parent) {
 
     var rec = function (parentId, collapse) {
       var parentClass = '.' + parentId;
@@ -390,7 +392,7 @@ ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
         } else {
           collapse = '';
         }
-        var result = rec($(the_child).attr('id'), collapse);
+        rec($(the_child).attr('id'), collapse);
       }
     };
 
@@ -482,22 +484,6 @@ ROSLIB.RingBuffer.prototype.length = function () {
   return Math.min(this.bufferCount, this.count);
 };
 
-// time list click event
-var timeListClick = function (event) {
-
-  // monitor pause
-  ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
-  $('#pause-button').hide();
-  $('#start-button').show();
-
-  var num = event.data.name.substr(3);
-  var data = {};
-  data = arrData[Math.abs(parseInt(num, 10) - (arrData.length - 1))];
-
-  var msg = data[0];
-  ROSLIB.RWTRobotMonitor.prototype.showHistory(msg);
-};
-
 $('#pause-button').on('click', function (e) {
   e.preventDefault();
   ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
@@ -513,33 +499,16 @@ $('#start-button').on('click', function (e) {
 });
 
 // time list botton click 
-$('#btn0').on('click', { name: 'btn0' }, timeListClick);
-$('#btn1').on('click', { name: 'btn1' }, timeListClick);
-$('#btn2').on('click', { name: 'btn2' }, timeListClick);
-$('#btn3').on('click', { name: 'btn3' }, timeListClick);
-$('#btn4').on('click', { name: 'btn4' }, timeListClick);
-$('#btn5').on('click', { name: 'btn5' }, timeListClick);
-$('#btn6').on('click', { name: 'btn6' }, timeListClick);
-$('#btn7').on('click', { name: 'btn7' }, timeListClick);
-$('#btn8').on('click', { name: 'btn8' }, timeListClick);
-$('#btn9').on('click', { name: 'btn9' }, timeListClick);
-$('#btn10').on('click', { name: 'btn10' }, timeListClick);
-$('#btn11').on('click', { name: 'btn11' }, timeListClick);
-$('#btn12').on('click', { name: 'btn12' }, timeListClick);
-$('#btn13').on('click', { name: 'btn13' }, timeListClick);
-$('#btn14').on('click', { name: 'btn14' }, timeListClick);
-$('#btn15').on('click', { name: 'btn15' }, timeListClick);
-$('#btn16').on('click', { name: 'btn16' }, timeListClick);
-$('#btn17').on('click', { name: 'btn17' }, timeListClick);
-$('#btn18').on('click', { name: 'btn18' }, timeListClick);
-$('#btn19').on('click', { name: 'btn19' }, timeListClick);
-$('#btn20').on('click', { name: 'btn20' }, timeListClick);
-$('#btn21').on('click', { name: 'btn21' }, timeListClick);
-$('#btn22').on('click', { name: 'btn22' }, timeListClick);
-$('#btn23').on('click', { name: 'btn23' }, timeListClick);
-$('#btn24').on('click', { name: 'btn24' }, timeListClick);
-$('#btn25').on('click', { name: 'btn25' }, timeListClick);
-$('#btn27').on('click', { name: 'btn26' }, timeListClick);
-$('#btn27').on('click', { name: 'btn27' }, timeListClick);
-$('#btn28').on('click', { name: 'btn28' }, timeListClick);
-$('#btn29').on('click', { name: 'btn29' }, timeListClick);
+$('.time-list').on('click', 'li', function () {
+  // monitor pause
+  ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
+  $('#pause-button').hide();
+  $('#start-button').show();
+
+  var num = $(this).attr('id').substr(3);
+  var data = {};
+  data = arrData[Math.abs(parseInt(num, 10) - (arrData.length - 1))];
+
+  var msg = data[0];
+  ROSLIB.RWTRobotMonitor.prototype.showHistory(msg);
+});
