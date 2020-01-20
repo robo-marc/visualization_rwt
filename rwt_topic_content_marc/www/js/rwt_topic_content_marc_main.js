@@ -55,7 +55,6 @@ $(function () {
 
     // start
     setInterval(refreshTopics, 1000);
-    // refreshTopics();
   }
 
   function checkboxCustomFormatter(row, cell, value, columnDef, dataContext) {
@@ -321,25 +320,10 @@ $(function () {
 
     var messageDetailPromises = [];
     var monitoringInfoDefer = $.Deferred();
-    if (topicList === undefined) {
-      ros.getTopics(function (topicInfo) {
-        _.each(topicInfo.topics, function (topicName, index) {
-          var topicType = topicInfo.types[index];
 
-          var promise = getMessageDetailsAsync(
-            topicType,
-            function (result) {
-              topicDetailMap[topicName] = {
-                topicType: topicType,
-                detail: result
-              };
-            }
-          );
-          messageDetailPromises.push(promise);
-        });
-      });
-    } else {
-      ros.getTopics(function (topicInfo) {
+    ros.getTopics(function (topicInfo) {
+      if (topicList !== undefined) {
+        // moveit only
         var comparisonItem = _.cloneDeep(topicList);
         var keepInfo = { topics: [], types: [] };
 
@@ -350,111 +334,110 @@ $(function () {
           }
         }
         topicInfo = _.cloneDeep(keepInfo);
-
-        _.each(topicInfo.topics, function (topicName, index) {
-          var topicType = topicInfo.types[index];
-
-          var promise = getMessageDetailsAsync(
-            topicType,
-            function (result) {
-              topicDetailMap[topicName] = {
-                topicType: topicType,
-                detail: result
-              };
-            }
-          );
-          messageDetailPromises.push(promise);
-        });
-
-      });
-    }
-
-    $.when.apply(null, messageDetailPromises).done(function () {
-      if (Object.keys(subscribingMap).length > 0) {
-        // get list of bandwidth, hz
-        var promise = getMonitoringInfoAsync();
-        promise.done(function (monitoringInfoList) {
-          monitoringInfoDefer.resolve(monitoringInfoList);
-        });
-      } else {
-        monitoringInfoDefer.resolve();
       }
-    });
+      // topic and moveit common
+      _.each(topicInfo.topics, function (topicName, index) {
+        var topicType = topicInfo.types[index];
 
-    monitoringInfoDefer.promise().done(function (monitoringInfoList) {
-      // format type information
-      var fieldList = [];
-
-      _.each(topicDetailMap, function (details, topicName) {
-        var parent = {
-          id: topicName,
-          topic: topicName,
-          type: details.topicType,
-          bandwidth: undefined,
-          hz: undefined,
-          value: 'not monitored',
-          parent: null,
-          indent: 0,
-          root: topicName,
-          subType: true,
-          _collapsed: true,
-          _checked: false,
-        };
-
-        fieldList.push(parent);
-
-        var decoded = decodeTypeDefs(details.detail, parent);
-        fieldList = fieldList.concat(decoded);
-
+        var promise = getMessageDetailsAsync(
+          topicType,
+          function (result) {
+            topicDetailMap[topicName] = {
+              topicType: topicType,
+              detail: result
+            };
+          }
+        );
+        messageDetailPromises.push(promise);
       });
 
-      if (data.length > 0) {
-        var isRootCheckOff = false;
-        for (var i = 0; i < fieldList.length; i++) {
-          // Inherit data status from previous data
-          // (tree OPEN/CLOSE, check ON/OFF, value )
-          var newItem = fieldList[i];
-          var oldItem = dataView.getItemById(newItem.id);
-          if (oldItem) {
-            newItem._collapsed = oldItem._collapsed;
-            newItem._checked = oldItem._checked;
-            if (newItem.parent === null) {
-              isRootCheckOff = !newItem._checked;
+      $.when.apply(null, messageDetailPromises).done(function () {
+        if (Object.keys(subscribingMap).length > 0) {
+          // get list of bandwidth, hz
+          var promise = getMonitoringInfoAsync();
+          promise.done(function (monitoringInfoList) {
+            monitoringInfoDefer.resolve(monitoringInfoList);
+          });
+        } else {
+          monitoringInfoDefer.resolve();
+        }
+      });
+
+      monitoringInfoDefer.promise().done(function (monitoringInfoList) {
+        // format type information
+        var fieldList = [];
+
+        _.each(topicDetailMap, function (details, topicName) {
+          var parent = {
+            id: topicName,
+            topic: topicName,
+            type: details.topicType,
+            bandwidth: undefined,
+            hz: undefined,
+            value: 'not monitored',
+            parent: null,
+            indent: 0,
+            root: topicName,
+            subType: true,
+            _collapsed: true,
+            _checked: false,
+          };
+
+          fieldList.push(parent);
+
+          var decoded = decodeTypeDefs(details.detail, parent);
+          fieldList = fieldList.concat(decoded);
+
+        });
+
+        if (data.length > 0) {
+          var isRootCheckOff = false;
+          for (var i = 0; i < fieldList.length; i++) {
+            // Inherit data status from previous data
+            // (tree OPEN/CLOSE, check ON/OFF, value )
+            var newItem = fieldList[i];
+            var oldItem = dataView.getItemById(newItem.id);
+            if (oldItem) {
+              newItem._collapsed = oldItem._collapsed;
+              newItem._checked = oldItem._checked;
+              if (newItem.parent === null) {
+                isRootCheckOff = !newItem._checked;
+              }
+              if (newItem.parent === null && newItem._checked) {
+                newItem.value = undefined; // hide 'not monitored'
+              } else if (newItem.parent !== null && isRootCheckOff) {
+                newItem.value = oldItem.value; // keep last value
+              }
+            } else {
+              // Do nothing because old items are not found
             }
+
+            // get bandwidth, hz
             if (newItem.parent === null && newItem._checked) {
-              newItem.value = undefined; // hide 'not monitored'
-            } else if (newItem.parent !== null && isRootCheckOff) {
-              newItem.value = oldItem.value; // keep last value
-            }
-          } else {
-            // Do nothing because old items are not found
-          }
-
-          // get bandwidth, hz
-          if (newItem.parent === null && newItem._checked) {
-            var info = getMonitoringInfoByName(monitoringInfoList, newItem.topic);
-            if (info) {
-              newItem.bandwidth = info.bw;
-              newItem.hz = info.hz;
+              var info = getMonitoringInfoByName(monitoringInfoList, newItem.topic);
+              if (info) {
+                newItem.bandwidth = info.bw;
+                newItem.hz = info.hz;
+              }
             }
           }
         }
-      }
 
-      fieldList.sort(function (a, b) {
-        if (a.root < b.root) {
-          return -1;
-        } else if (a.root > b.root) {
-          return 1;
-        }
-        return 0;
+        fieldList.sort(function (a, b) {
+          if (a.root < b.root) {
+            return -1;
+          } else if (a.root > b.root) {
+            return 1;
+          }
+          return 0;
+        });
+
+        data = fieldList;
+
+        // draw grid
+        dataView.setItems(fieldList);
+        grid.invalidate();
       });
-
-      data = fieldList;
-
-      // draw grid
-      dataView.setItems(fieldList);
-      grid.invalidate();
     });
   }
 
