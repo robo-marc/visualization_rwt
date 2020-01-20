@@ -339,14 +339,14 @@ $(function () {
         });
       });
     } else {
-      ros.getTopics(function (comparisonItem) {
-        var topicInfo = _.cloneDeep(topicList);
+      ros.getTopics(function (topicInfo) {
+        var comparisonItem = _.cloneDeep(topicList);
         var keepInfo = { topics: [], types: [] };
 
-        for (var i = 0; i < comparisonItem.topics.length; i++) {
-          if (topicInfo.indexOf(comparisonItem.types[i]) >= 0) {
-            keepInfo.topics.push(comparisonItem.topics[i]);
-            keepInfo.types.push(comparisonItem.types[i]);
+        for (var i = 0; i < topicInfo.topics.length; i++) {
+          if (comparisonItem.indexOf(topicInfo.types[i]) >= 0) {
+            keepInfo.topics.push(topicInfo.topics[i]);
+            keepInfo.types.push(topicInfo.types[i]);
           }
         }
         topicInfo = _.cloneDeep(keepInfo);
