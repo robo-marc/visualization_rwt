@@ -280,6 +280,10 @@ ROSLIB.Time.prototype.toMillSec = function () {
   return this.secs * 1000 + this.nsecs / 1000000.0;
 };
 
+ROSLIB.Time.prototype.toNanoSec = function () {
+  return this.secs * 1000000000 + this.nsecs;
+};
+
 ROSLIB.Time.prototype.add = function (another) {
   var sec_added = this.secs + another.secs;
   var nsec_added = this.nsecs + another.nsecs;
