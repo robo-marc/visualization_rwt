@@ -34,7 +34,8 @@ ROSLIB.DiagnosticsStatus = function (spec) {
 ROSLIB.DiagnosticsStatus.LEVEL = {
   OK: 0,
   WARN: 1,
-  ERROR: 2
+  ERROR: 2,
+  STALE: 3
 };
 
 /**
@@ -59,6 +60,14 @@ ROSLIB.DiagnosticsStatus.prototype.isERROR = function () {
 };
 
 /**
+ * return true if the level is STALE
+ */
+ROSLIB.DiagnosticsStatus.prototype.isSTALE = function () {
+  return this.level === ROSLIB.DiagnosticsStatus.LEVEL.STALE;
+};
+
+
+/**
  * create DiagnosticsStatus instances from DiagnosticArray
  */
 ROSLIB.DiagnosticsStatus.createFromArray = function (msg) {
@@ -81,13 +90,13 @@ ROSLIB.DiagnosticsStatus.createFromArray = function (msg) {
  */
 
 ROSLIB.DiagnosticsStatus.prototype.levelString = function () {
-  if (this.isERROR()) {
+  if (this.isSTALE()) {
+    return 'STALE';
+  } else if (this.isERROR()) {
     return 'ERROR';
-  }
-  else if (this.isWARN()) {
+  } else if (this.isWARN()) {
     return 'WARNING';
-  }
-  else if (this.isOK()) {
+  } else if (this.isOK()) {
     return 'OK';
   }
 };

@@ -246,22 +246,6 @@ ROSLIB.DiagnosticsDirectory.prototype.findByName = function (name) {
   }
 };
 
-// TODO delete
-/**
- * return html to show icon suitable for error status of the directory
- */
-// ROSLIB.DiagnosticsDirectory.prototype.getIconHTML = function () {
-//   if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.OK) {
-//     return '<span class="glyphicon-ok glyphicon"></span>';
-//   }
-//   else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.WARN) {
-//     return '<span class="glyphicon-exclamation-sign glyphicon"></span>';
-//   }
-//   else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.ERROR) {
-//     return '<span class="glyphicon-minus-sign glyphicon"></span>';
-//   }
-// };
-
 /**
  * return html to show icon suitable for error status of the directory
  */
@@ -271,48 +255,12 @@ ROSLIB.DiagnosticsDirectory.prototype.getIcon = function () {
       return 'ok';
     case ROSLIB.DiagnosticsStatus.LEVEL.WARN:
       return 'warn';
-    case ROSLIB.DiagnosticsStatus.LEVEL.ERRO:
+    case ROSLIB.DiagnosticsStatus.LEVEL.ERROR:
       return 'error';
     case ROSLIB.DiagnosticsStatus.LEVEL.STALE:
       return 'stale';
   }
-  // if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.OK) {
-  //   // return '<span class="glyphicon-ok glyphicon"></span>';
-  //   return 'ok';
-  // } else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.WARN) {
-  //   // return '<span class="glyphicon-exclamation-sign glyphicon"></span>';
-  //   return 'warn';
-  // } else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.ERROR) {
-  //   // return '<span class="glyphicon-minus-sign glyphicon"></span>';
-  //   return 'error';
-  // }
 };
-
-// TODO delete
-/**
- * return html of icon to show this directory has child
- */
-// ROSLIB.DiagnosticsDirectory.prototype.getCollapseIconHTML = function () {
-//   if (this.children.length !== 0) {
-//     return '<span class="glyphicon-chevron-right glyphicon"></span>';
-//   }
-//   else {
-//     return '';
-//   }
-// };
-
-/**
- * return html of icon to show this directory has child
- */
-// ROSLIB.DiagnosticsDirectory.prototype.getCollapseIconHTML2 = function () {
-//   if (this.children.length !== 0) {
-//     return '<span class="glyphicon-chevron-right glyphicon"></span>';
-//   }
-//   else {
-//     return '';
-//   }
-// };
-
 
 /**
  * return true if the directory has any children
@@ -398,7 +346,8 @@ ROSLIB.DiagnosticsStatus = function (spec) {
 ROSLIB.DiagnosticsStatus.LEVEL = {
   OK: 0,
   WARN: 1,
-  ERROR: 2
+  ERROR: 2,
+  STALE: 3
 };
 
 /**
@@ -423,6 +372,14 @@ ROSLIB.DiagnosticsStatus.prototype.isERROR = function () {
 };
 
 /**
+ * return true if the level is STALE
+ */
+ROSLIB.DiagnosticsStatus.prototype.isSTALE = function () {
+  return this.level === ROSLIB.DiagnosticsStatus.LEVEL.STALE;
+};
+
+
+/**
  * create DiagnosticsStatus instances from DiagnosticArray
  */
 ROSLIB.DiagnosticsStatus.createFromArray = function (msg) {
@@ -445,13 +402,13 @@ ROSLIB.DiagnosticsStatus.createFromArray = function (msg) {
  */
 
 ROSLIB.DiagnosticsStatus.prototype.levelString = function () {
-  if (this.isERROR()) {
+  if (this.isSTALE()) {
+    return 'STALE';
+  } else if (this.isERROR()) {
     return 'ERROR';
-  }
-  else if (this.isWARN()) {
+  } else if (this.isWARN()) {
     return 'WARNING';
-  }
-  else if (this.isOK()) {
+  } else if (this.isOK()) {
     return 'OK';
   }
 };
@@ -571,9 +528,10 @@ ROSLIB.RWTRobotMonitor.prototype.updateLastTimeString = function () {
 ROSLIB.RWTRobotMonitor.prototype.updateView = function (history) {
   var resultError = this.updateErrorList();
   var resultWarn = this.updateWarnList();
+  var resultStale = this.checkStale();
   this.updateAllTable();
   if (!(history)) {
-    this.updateTimeList(resultError, resultWarn);
+    this.updateTimeList(resultError, resultWarn, resultStale);
   }
   this.registerBrowserCallback();
 };
@@ -737,9 +695,17 @@ ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
 };
 
 /**
+ * check stale list view
+ */
+ROSLIB.RWTRobotMonitor.prototype.checkStale = function () {
+  var resultSTALE = this.updateTable('stale-table', 'stale', ROSLIB.DiagnosticsStatus.LEVEL.STALE);
+  return resultSTALE;
+};
+
+/**
  * update time list
  */
-ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultWarn) {
+ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultWarn, resultSTALE) {
 
   var btn = document.getElementById('btn0');
   var nextNum = 0;
@@ -761,6 +727,10 @@ ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultW
         btn = document.getElementById('btn' + nextNum.toString());
         btn.className = 'time-item ok';
         break;
+      case 'time-item stale':
+        btn = document.getElementById('btn' + nextNum.toString());
+        btn.className = 'time-item stale';
+        break;
     }
   }
 
@@ -769,6 +739,8 @@ ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultW
     btn.className = 'time-item error';
   } else if (resultWarn) {
     btn.className = 'time-item warn';
+  } else if (resultSTALE) {
+    btn.className = 'time-item stale';
   } else {
     btn.className = 'time-item ok';
   }

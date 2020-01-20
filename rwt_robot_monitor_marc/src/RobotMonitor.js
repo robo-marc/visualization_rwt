@@ -113,9 +113,10 @@ ROSLIB.RWTRobotMonitor.prototype.updateLastTimeString = function () {
 ROSLIB.RWTRobotMonitor.prototype.updateView = function (history) {
   var resultError = this.updateErrorList();
   var resultWarn = this.updateWarnList();
+  var resultStale = this.checkStale();
   this.updateAllTable();
   if (!(history)) {
-    this.updateTimeList(resultError, resultWarn);
+    this.updateTimeList(resultError, resultWarn, resultStale);
   }
   this.registerBrowserCallback();
 };
@@ -279,9 +280,17 @@ ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
 };
 
 /**
+ * check stale list view
+ */
+ROSLIB.RWTRobotMonitor.prototype.checkStale = function () {
+  var resultSTALE = this.updateTable('stale-table', 'stale', ROSLIB.DiagnosticsStatus.LEVEL.STALE);
+  return resultSTALE;
+};
+
+/**
  * update time list
  */
-ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultWarn) {
+ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultWarn, resultSTALE) {
 
   var btn = document.getElementById('btn0');
   var nextNum = 0;
@@ -303,6 +312,10 @@ ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultW
         btn = document.getElementById('btn' + nextNum.toString());
         btn.className = 'time-item ok';
         break;
+      case 'time-item stale':
+        btn = document.getElementById('btn' + nextNum.toString());
+        btn.className = 'time-item stale';
+        break;
     }
   }
 
@@ -311,6 +324,8 @@ ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultW
     btn.className = 'time-item error';
   } else if (resultWarn) {
     btn.className = 'time-item warn';
+  } else if (resultSTALE) {
+    btn.className = 'time-item stale';
   } else {
     btn.className = 'time-item ok';
   }

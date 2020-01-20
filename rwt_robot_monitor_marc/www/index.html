@@ -6,7 +6,6 @@
   <title>rwt_robot_monitor_marc</title>
   <meta name="author" content="Prototype">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css"> -->
   <link rel="stylesheet" href="../rwt_utils_marc/common/iconfont/material-icons.css">
   <link rel="stylesheet" href="../rwt_utils_marc/common/css/common.css">
   <link rel="stylesheet" type="text/css" href="css/rwt_robot_monitor.css">
@@ -15,8 +14,6 @@
 
 <body>
   <div class="root">
-
-    <!-- <div class="container"> -->
 
     <header>
       <div class="column">
@@ -40,14 +37,10 @@
       </div>
 
       <div class="container">
-
-        <!-- <div class="contents"> -->
-
         <div class="contents_body">
 
           <div class="contents-box">
             <h3>Errors Device</h3>
-
             <div class="table-wrap">
               <table class="table-type-2" id="error-table">
                 <thead>
@@ -80,6 +73,25 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+
+        <!-- hide status stale -->
+        <div class="contents-box" hidden>
+          <h3>Stale Device</h3>
+          <div class="table-wrap">
+            <table class="table-type-2" id="stale-table">
+              <thead>
+                <tr>
+                  <th class="name_1">Name</th>
+                  <th class="name_2">Message</th>
+                </tr>
+              </thead>
+              <tbody>
+                <td class="data_1" id=error_data_1></td>
+                <td class="data_2" id=error_data_2></td>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -154,6 +166,7 @@
               <div class="dialog_header" id="dialog_header">
                 <h4 id="dialog_header_title"></h4>
               </div>
+
               <div class="dialog_body">
                 <div class="dialog_box_1">
                   <table class="table-type-3" id="table-type-3">
@@ -181,60 +194,17 @@
                     </tbody>
                   </table>
                 </div>
+
                 <div class="dialog_box_2">
                   <table class="table-type-4" id="table-type-4">
-                    <!-- <tbody>
-                      <tr>
-                        <th>topic</th>
-                        <td>/joy</td>
-                      </tr>
-                      <tr>
-                        <th>device</th>
-                        <td>/dev/input/js0</td>
-                      </tr>
-                      <tr>
-                        <th>device name</th>
-                        <td>0.05</td>
-                      </tr>
-                      <tr>
-                        <th>dead zone</th>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <th>autorepeat rate (Hz)</th>
-                        <td>0.001</td>
-                      </tr>
-                      <tr>
-                        <th>coalesce interval (s)</th>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <th>recent joystickevent rate (Hz)</th>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <th>recent publication rate (Hz)</th>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <th>subscribers</th>
-                        <td>False</td>
-                      </tr>
-                      <tr>
-                        <th>default trig val</th>
-                        <td>False</td>
-                      </tr>
-                      <tr>
-                        <th>sticky buttons</th>
-                        <td>-</td>
-                      </tr>
-                    </tbody> -->
                   </table>
                 </div>
+
               </div>
               <div class="dialog_footer">
                 <button id="close">OK</button>
               </div>
+
             </div>
           </div>
         </div>
@@ -247,8 +217,6 @@
   <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
-  <!-- <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script> -->
-  <!-- <script type="text/javascript" src="../rwt_utils_3rdparty/d3/d3.min.js"></script> -->
   <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
   <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
