@@ -669,6 +669,23 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
 
 };
 
+ROSLIB.RWTPlot.prototype.getBeginIndex = function (beginTime, searchTarget) {
+  //binary search
+  var left = 0;
+  var right = searchTarget.length - 1;
+  while (left < right) {
+    var middle = Math.floor(left + (right - left) / 2);
+    var stamp = searchTarget[middle].stamp.toNanoSec();
+    if (stamp <= beginTime) {
+      left = middle + 1;
+    } else {
+      right = middle;
+    }
+  }
+  var beginIndex = left;
+  return beginIndex;
+};
+
 ROSLIB.RWTPlot.prototype.drawTimestampedData = function (xEndTime) {
   this.refreshXAxisDomainByRosTime(xEndTime);
 
@@ -677,9 +694,8 @@ ROSLIB.RWTPlot.prototype.drawTimestampedData = function (xEndTime) {
   }
   var xBeginTime = xEndTime.substract(ROSLIB.Time.fromSec(this.xDomainWidth));
 
-  xEndTime = xEndTime.toDate().getTime();
-  xBeginTime = xBeginTime.toDate().getTime() - 500; // begin before 0.5 sec from y-axis position
-
+  xEndTime = xEndTime.toNanoSec();
+  xBeginTime = xBeginTime.toNanoSec() - 500000000; // begin before 0.5 sec from y-axis position
   var that = this;
   _.each(this.seriesMap, function (dataArr, msgFieldPath) {
     if (!dataArr) {
@@ -690,17 +706,20 @@ ROSLIB.RWTPlot.prototype.drawTimestampedData = function (xEndTime) {
     if (dataArr.length > 0) {
       dataItemLength = dataArr[0].length;
     }
+    var beginIndex = that.getBeginIndex(xBeginTime, dataArr);
     for (var i = 0; i < dataItemLength; i++) { // x_i := i
       var fieldPathId = that.getFieldPathId(msgFieldPath, i);
 
       var plotData = [];
       var dataArrLength = dataArr.length;
-      for (var j = 0; j < dataArrLength; j++) {
-        var stamp = dataArr[j].stamp.toDate().getTime();
-        var value = dataArr[j][i];
-        if (xBeginTime <= stamp && stamp <= xEndTime) {
+      for (var j = beginIndex; j < dataArrLength; j++) {
+        var stamp = dataArr[j].stamp.toNanoSec();
+        if (stamp <= xEndTime) {
+          var value = dataArr[j][i];
           var newData = [dataArr[j].stamp, value]; // [x1, y1] or [x1, z1]
           plotData.push(newData);
+        } else {
+          break;
         }
       }
 
@@ -712,7 +731,6 @@ ROSLIB.RWTPlot.prototype.drawTimestampedData = function (xEndTime) {
           .attr('d', that.line)
           .attr('transform', null)
           .transition()
-          //.duration(0)
           .ease('linear')
           .attr('transform', 'translate(' + (-translation) + ',0)');
       } else {
