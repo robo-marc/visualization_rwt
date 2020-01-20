@@ -343,10 +343,10 @@ $(function () {
         var topicInfo = _.cloneDeep(topicList);
         var keepInfo = { topics: [], types: [] };
 
-        for (var j = 0; j < comparisonItem.topics.length; j++) {
-          if (topicInfo.indexOf(comparisonItem.types[j]) >= 0) {
-            keepInfo.topics.push(comparisonItem.topics[j]);
-            keepInfo.types.push(comparisonItem.types[j]);
+        for (var i = 0; i < comparisonItem.topics.length; i++) {
+          if (topicInfo.indexOf(comparisonItem.types[i]) >= 0) {
+            keepInfo.topics.push(comparisonItem.topics[i]);
+            keepInfo.types.push(comparisonItem.types[i]);
           }
         }
         topicInfo = _.cloneDeep(keepInfo);
