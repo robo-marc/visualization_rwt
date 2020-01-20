@@ -11,8 +11,8 @@ $(function () {
   var serviceMap = {};
 
   var columns = [
-    { id: 'tree', name: 'Tree', field: 'tree', width: 170, minWidth: 20, maxWidth: 400, formatter: treeFormatter },
-    { id: 'type', name: 'Type', field: 'type', width: 170, minWidth: 20, maxWidth: 400, },
+    { id: 'tree', name: 'Tree', field: 'tree', width: 170, minWidth: 20, formatter: treeFormatter },
+    { id: 'type', name: 'Type', field: 'type', width: 170, minWidth: 20, },
     { id: 'path', name: 'Path', field: 'path', width: 380, minWidth: 20, },
     { id: 'remove', name: '', field: 'remove', width: 30, minWidth: 30, maxWidth: 30, formatter: removeButtonFormatter }
   ];
