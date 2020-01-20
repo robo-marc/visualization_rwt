@@ -3,25 +3,89 @@ var FilterUtils = {
   ////////////////////////////////////////
   // public
 
+  // equals to css class
+  FILTER_TYPE: {
+    MESSAGE: 'message',
+    SEVERITY: 'severities',
+    NODE: 'node',
+    STAMP: 'time',
+    TOPICS: 'topics',
+    LOCATION: 'location',
+  },
+
+  isMatchToFilterGroup: function (item, group) {
+    var isAnyFilterEffective = false;
+    var isAllFilterMatched = true;
+
+    for (var filterIndex = 0, filterCount = group.length; filterIndex < filterCount; filterIndex++) {
+      var filter = group[filterIndex]; // one filter
+
+      if (!filter.isEnabled) {
+        // console.log('filter not enabled');
+        continue;
+      }
+
+      var filterValue = filter.value;
+      switch (filter.filterType) {
+        case FilterUtils.FILTER_TYPE.MESSAGE:
+          if (filterValue.message + '' === '') {
+            // console.log('filter condition is empty');
+            continue;
+          }
+          isAnyFilterEffective = true;
+          if (filterValue.isRegex) {
+            // TODO: \ を \\ に置換
+            var re = new RegExp(filterValue.message);
+            isAllFilterMatched &= re.test(item.Message);
+          } else {
+            isAllFilterMatched &= item.Message.indexOf(filterValue.message) !== -1;
+            // console.log('item.Message:' + item.Message);
+            // console.log('exFltVal.message:' + exFltVal.message);
+            // console.log('isMatch:' + (item.Message.indexOf(exFltVal.message) !== -1));
+          }
+          break;
+      }
+
+    } // for
+
+    return { isEffective: isAnyFilterEffective, isMatched: isAllFilterMatched };
+  },
+
+  isMatchToFilter: function (item, filterGroupList) {
+    var isAnyGroupMatched = false;
+    for (var groupIndex = 0, groupCount = filterGroupList.length; groupIndex < groupCount; groupIndex++) {
+      var group = filterGroupList[groupIndex]; // one filter group
+
+      var groupResult = FilterUtils.isMatchToFilterGroup(item, group);
+      // console.log('groupResult:');
+      // console.log(groupResult);
+      if (groupResult.isEffective) {
+        isAnyGroupMatched |= groupResult.isMatched;
+      }
+    }
+    // console.log('isAnyGroupMatched result:' + (isAnyGroupMatched ? 'true' : 'false'));
+    return isAnyGroupMatched;
+  },
+
   getMessageFilterHtml: function (conditionType) {
     var contentHtml = ''
       + '<div class="parts-set textbox"><input type="text" class="message-value"placeholder="Message Text"></div>'
-      + '<div class="parts-set checkbox"><input type="checkbox"><label for="">Regex</label></div>'
+      + '<div class="parts-set checkbox"><label><input type="checkbox" class="regex">Regex</label></div>'
       ;
-    return FilterUtils.getCommonHtml('message', 'Message', conditionType, contentHtml);
+    return FilterUtils.getCommonHtml(FilterUtils.FILTER_TYPE.MESSAGE, 'Message', conditionType, contentHtml);
   },
 
   getSeverityFilterHtml: function (conditionType) {
     var contentHtml = ''
       + '<ul class="chips">'
-      + '<li><a href class="severities-select-button" data-value="Debug">Debug</a></li>'
-      + '<li><a href class="severities-select-button" data-value="Info">Info</a></li>'
-      + '<li><a href class="severities-select-button" data-value="Warn">Warn</a></li>'
-      + '<li><a href class="severities-select-button" data-value="Error">Error</a></li>'
-      + '<li><a href class="severities-select-button" data-value="Fatal">Fatal</a></li>'
+      + '<li><a href class="severities-select-button" data-value="1">Debug</a></li>'
+      + '<li><a href class="severities-select-button" data-value="2">Info</a></li>'
+      + '<li><a href class="severities-select-button" data-value="4">Warn</a></li>'
+      + '<li><a href class="severities-select-button" data-value="8">Error</a></li>'
+      + '<li><a href class="severities-select-button" data-value="16">Fatal</a></li>'
       + '</ul>'
       ;
-    return FilterUtils.getCommonHtml('severities', 'Severities', conditionType, contentHtml);
+    return FilterUtils.getCommonHtml(FilterUtils.FILTER_TYPE.SEVERITY, 'Severities', conditionType, contentHtml);
   },
 
   getNodesFilterHtml: function (conditionType, list) {
@@ -31,7 +95,7 @@ var FilterUtils = {
     });
     contentHtml += '</select>';
 
-    return FilterUtils.getCommonHtml('node', 'Node', conditionType, contentHtml);
+    return FilterUtils.getCommonHtml(FilterUtils.FILTER_TYPE.NODE, 'Node', conditionType, contentHtml);
   },
 
   getStampFilterHtml: function (conditionType) {
@@ -43,7 +107,7 @@ var FilterUtils = {
       + '<input type="checkbox" class="use-end-stamp" checked>'
       + '<div class="parts-set stamp"><input type="time" class="time end" step="0.01" value="' + timeStr + '"><input type="date" class="date end" value="' + dateStr + '"></div>'
       ;
-    return FilterUtils.getCommonHtml('time', 'from time range', conditionType, contentHtml);
+    return FilterUtils.getCommonHtml(FilterUtils.FILTER_TYPE.STAMP, 'from time range', conditionType, contentHtml);
   },
 
   getTopicsFilterHtml: function (conditionType, listist) {
@@ -53,15 +117,15 @@ var FilterUtils = {
     });
     contentHtml += '</select>';
 
-    return FilterUtils.getCommonHtml('topics', 'Topics', conditionType, contentHtml);
+    return FilterUtils.getCommonHtml(FilterUtils.FILTER_TYPE.TOPICS, 'Topics', conditionType, contentHtml);
   },
 
   getLocationFilterHtml: function (conditionType) {
     var contentHtml = ''
       + '<div class="parts-set textbox"><input type="text" class="location-value" placeholder="Location Text"></div>'
-      + '<div class="parts-set checkbox"><input type="checkbox"><label for="">Regex</label></div>'
+      + '<div class="parts-set checkbox"><label><input type="checkbox" class="regex">Regex</label></div>'
       ;
-    return FilterUtils.getCommonHtml('location', 'Location', conditionType, contentHtml);
+    return FilterUtils.getCommonHtml(FilterUtils.FILTER_TYPE.LOCATION, 'Location', conditionType, contentHtml);
   },
 
 
@@ -74,7 +138,7 @@ var FilterUtils = {
       + '<div class="column">'
       + FilterUtils.getConditionLabelHtml(conditionType)
       + '<div class="name">'
-      + '<div class="parts-set checkbox"><input type="checkbox" name="isEffective" class="isEffective" checked="checked"><label for="">' + title + '</label></div>'
+      + '<div class="parts-set checkbox"><label><input type="checkbox" name="isEffective" class="isEffective" checked="checked" />' + title + '</label></div>'
       + '</div>'
       + '<div class="data">'
       + contentHtml

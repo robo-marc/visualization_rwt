@@ -11,21 +11,30 @@ $(function () {
   ////////////////////////////////////////
   // constants
 
-  var FILTER_TYPE_MESSAGE = 'Message';
-  var FILTER_TYPE_SEVERITY = 'Severity';
-  var FILTER_TYPE_NODE = 'Node';
-  var FILTER_TYPE_STAMP = 'Stamp';
-  var FILTER_TYPE_TOPICS = 'Topics';
-  var FILTER_TYPE_LOCATION = 'Location';
+  // for grid, dropdown
+  var FILTER_NAME = {
+    MESSAGE: 'Message',
+    SEVERITY: 'Severity',
+    NODE: 'Node',
+    STAMP: 'Stamp',
+    TOPICS: 'Topics',
+    LOCATION: 'Location',
+    NUMBER: 'Number',
+  };
 
-  var FILTER_TYPE_LIST = [
-    FILTER_TYPE_MESSAGE,
-    FILTER_TYPE_SEVERITY,
-    FILTER_TYPE_NODE,
-    FILTER_TYPE_STAMP,
-    FILTER_TYPE_TOPICS,
-    FILTER_TYPE_LOCATION,
+  var FILTER_NAME_LIST = [
+    FILTER_NAME.MESSAGE,
+    FILTER_NAME.SEVERITY,
+    FILTER_NAME.NODE,
+    FILTER_NAME.STAMP,
+    FILTER_NAME.TOPICS,
+    FILTER_NAME.LOCATION,
+    // NUMBER is hidden field
   ];
+
+  var jQueryEachBreakValue = false;
+  var jQueryEachContinueValue = true;
+
 
 
   ////////////////////////////////////////
@@ -45,14 +54,13 @@ $(function () {
   // for grid
   var columns = [
     { id: '#', name: '#', field: '#', width: 80, sortable: true },
-    { id: 'Message', name: 'Message', field: 'Message', width: 300, sortable: true },
-    { id: 'Severity', name: 'Severity', field: 'Severity', width: 70, sortable: true, formatter: severityFormatter },
-    // { id: 'Severity', name: 'Severity', field: 'Severity', width: 70, sortable: true },
-    { id: 'Node', name: 'Node', field: 'Node', width: 100, sortable: true },
-    { id: 'Stamp', name: 'Stamp', field: 'Stamp', width: 100, sortable: true },
-    { id: 'Topics', name: 'Topics', field: 'Topics', width: 100, sortable: true },
-    { id: 'Location', name: 'Location', field: 'Location', width: 100, sortable: true },
-    { id: 'Number', name: 'Number', field: 'Number', width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
+    { id: 'Message', name: FILTER_NAME.MESSAGE, field: 'Message', width: 300, sortable: true },
+    { id: 'Severity', name: FILTER_NAME.SEVERITY, field: 'Severity', width: 70, sortable: true, formatter: severityFormatter },
+    { id: 'Node', name: FILTER_NAME.NODE, field: 'Node', width: 100, sortable: true },
+    { id: 'Stamp', name: FILTER_NAME.STAMP, field: 'Stamp', width: 100, sortable: true },
+    { id: 'Topics', name: FILTER_NAME.TOPICS, field: 'Topics', width: 100, sortable: true },
+    { id: 'Location', name: FILTER_NAME.LOCATION, field: 'Location', width: 100, sortable: true },
+    { id: 'Number', name: FILTER_NAME.NUMBER, field: 'Number', width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
   ];
   var options = {
     editable: true,
@@ -66,6 +74,9 @@ $(function () {
 
   // for filter
   var filterScript = 'function init() {return true; } init();';
+  var excludeFilter = [];
+  var highlightFilter = [];
+  var showOnlyHighlighted = false;
 
 
   ////////////////////////////////////////
@@ -80,15 +91,13 @@ $(function () {
     $('#open_sub_button').click();
 
     // for dropdown
-    setDropdownList('#exclude-select', FILTER_TYPE_LIST);
-    setDropdownList('#highlight-select', FILTER_TYPE_LIST);
+    setDropdownList('#exclude-select', FILTER_NAME_LIST);
+    setDropdownList('#highlight-select', FILTER_NAME_LIST);
 
     // for grid
     dataView.beginUpdate();
     dataView.setItems([]);
-    dataView.setFilterArgs({
-      filterScript: filterScript,
-    });
+    updateFilter();
     dataView.setFilter(myFilter);
     dataView.endUpdate();
 
@@ -175,20 +184,115 @@ $(function () {
   }
 
   function severityFormatter(row, cell, value, columnDef, dataContext) {
+    // console.log(dataContext);
     if (value === null || value === undefined || dataContext === undefined) { return ''; }
     return '<span class="severity ' + value + '">' + value + '</span>';
   }
 
+  function isItemMatchFilter(item, filterList) {
+    // var filterList = args.excludeFilter;
+    var isExAnyGrpMatch = false;
+    for (var exGrpIdx = 0, exGrpLen = filterList.length; exGrpIdx < exGrpLen; exGrpIdx++) {
+      var exGrp = filterList[exGrpIdx]; // one filter group
+      var isExGrpMatch = true;
+
+      for (var exFltIdx = 0, exFltLen = exGrp.length; exFltIdx < exFltLen; exFltIdx++) {
+        var exFlt = exGrp[exFltIdx]; // one filter
+        // console.log(exFlt);
+
+        if (!exFlt.isEnabled) {
+          console.log('isExGrpMatch:' + (isExGrpMatch ? 'true' : 'false'));
+          continue;
+        }
+
+        var exFltVal = exFlt.value;
+        switch (exFlt.filterType) {
+          case FilterUtils.FILTER_TYPE.MESSAGE:
+            if (exFltVal.message + '' === '') {
+              isExGrpMatch = false;
+              console.log('isExGrpMatch:' + (isExGrpMatch ? 'true' : 'false'));
+              continue;
+            }
+            if (exFltVal.isRegex) {
+
+            } else {
+              isExGrpMatch &= item.Message.indexOf(exFltVal.message) !== -1;
+              // console.log('item.Message:' + item.Message);
+              // console.log('exFltVal.message:' + exFltVal.message);
+              // console.log('isMatch:' + (item.Message.indexOf(exFltVal.message) !== -1));
+            }
+            break;
+        }
+
+      }
+      console.log('isExGrpMatch result:' + (isExGrpMatch ? 'true' : 'false'));
+      isExAnyGrpMatch |= isExGrpMatch;
+    }
+    console.log('isExAnyGrpMatch result:' + (isExAnyGrpMatch ? 'true' : 'false'));
+    return isExAnyGrpMatch;
+  }
+
   function myFilter(item, args) {
-    // console.log(eval(args.filterScript));
-    // return eval(args.filterScript);
-    return true; // for development(no filter)
+    // console.log(args.excludeFilter);
+    // console.log(args.highlightFilter);
+    // console.log(args.showOnlyHighlighted);
+    var isVisible = true;
+
+    // excludeFilter
+    var isMatchToExcludeFilter = FilterUtils.isMatchToFilter(item, args.excludeFilter);
+    // var excludeFilter = args.excludeFilter;
+    // var isExAnyGrpMatch = false;
+    // for (var exGrpIdx = 0, exGrpLen = excludeFilter.length; exGrpIdx < exGrpLen; exGrpIdx++) {
+    //   var exGrp = excludeFilter[exGrpIdx]; // one filter group
+    //   var isExGrpMatch = true;
+
+    //   for (var exFltIdx = 0, exFltLen = exGrp.length; exFltIdx < exFltLen; exFltIdx++) {
+    //     var exFlt = exGrp[exFltIdx]; // one filter
+    //     // console.log(exFlt);
+
+    //     if (!exFlt.isEnabled) {
+    //       console.log('isExGrpMatch:' + (isExGrpMatch ? 'true' : 'false'));
+    //       continue;
+    //     }
+
+    //     var exFltVal = exFlt.value;
+    //     switch (exFlt.filterType) {
+    //       case FilterUtils.FILTER_TYPE.MESSAGE:
+    //         if (exFltVal.message + '' === '') {
+    //           isExGrpMatch = false;
+    //           console.log('isExGrpMatch:' + (isExGrpMatch ? 'true' : 'false'));
+    //           continue;
+    //         }
+    //         if (exFltVal.isRegex) {
+
+    //         } else {
+    //           isExGrpMatch &= item.Message.indexOf(exFltVal.message) !== -1;
+    //           // console.log('item.Message:' + item.Message);
+    //           // console.log('exFltVal.message:' + exFltVal.message);
+    //           // console.log('isMatch:' + (item.Message.indexOf(exFltVal.message) !== -1));
+    //         }
+    //         break;
+    //     }
+
+    //   }
+    //   console.log('isExGrpMatch result:' + (isExGrpMatch ? 'true' : 'false'));
+    //   isExAnyGrpMatch |= isExGrpMatch;
+    // }
+    // console.log('isExAnyGrpMatch result:' + (isExAnyGrpMatch ? 'true' : 'false'));
+    isVisible = !isMatchToExcludeFilter;
+
+    item['_highlited_test'] = true;
+
+    return isVisible;
+    // return true; // for development(no filter)
   }
 
   function updateFilter() {
-    console.log('filter update');
+    // console.log('filter update');
     dataView.setFilterArgs({
-      filterScript: filterScript,
+      excludeFilter: excludeFilter,
+      highlightFilter: highlightFilter,
+      showOnlyHighlighted: showOnlyHighlighted,
     });
     dataView.refresh();
   }
@@ -480,26 +584,26 @@ $(function () {
 
     // build html
     var html;
-    var filterType = $('#' + parentId + '-select').val();
-    switch (filterType) {
-      case FILTER_TYPE_MESSAGE:
+    var filterName = $('#' + parentId + '-select').val();
+    switch (filterName) {
+      case FILTER_NAME.MESSAGE:
         html = FilterUtils.getMessageFilterHtml(conditionType);
         break;
-      case FILTER_TYPE_SEVERITY:
+      case FILTER_NAME.SEVERITY:
         html = FilterUtils.getSeverityFilterHtml(conditionType);
         break;
-      case FILTER_TYPE_NODE:
+      case FILTER_NAME.NODE:
         var nodeList = getNodeList(list);
         html = FilterUtils.getNodesFilterHtml(conditionType, nodeList);
         break;
-      case FILTER_TYPE_STAMP:
+      case FILTER_NAME.STAMP:
         html = FilterUtils.getStampFilterHtml(conditionType);
         break;
-      case FILTER_TYPE_TOPICS:
+      case FILTER_NAME.TOPICS:
         var topicList = getTopicList(list);
         html = FilterUtils.getTopicsFilterHtml(conditionType, topicList);
         break;
-      case FILTER_TYPE_LOCATION:
+      case FILTER_NAME.LOCATION:
         html = FilterUtils.getLocationFilterHtml(conditionType);
         break;
       default:
@@ -648,6 +752,12 @@ $(function () {
   ////////////////////////////////////////
   // filter input
 
+  // show-only-highlighted
+  $('#show-only-highlighted').on('click', function () {
+    showOnlyHighlighted = $(this).prop('checked');
+    updateFilter();
+  });
+
   // toggle severity on/off
   $('#exclude').on('click', '.severities-select-button', function (e) {
     e.preventDefault();
@@ -682,73 +792,142 @@ $(function () {
   ////////////////////////////////////////
   // when filter changed
 
-  function getElementName(element) {
-    var elementName = element.attr('class');
-    switch (elementName) {
-      case 'message':
-        elementName = 'Message';
-        break;
+  // function getElementName(element) {
+  //   var elementName = element.attr('class');
+  //   switch (elementName) {
+  //     case 'message':
+  //       elementName = 'Message';
+  //       break;
 
-      case 'severities':
-        elementName = 'Severity';
-        break;
+  //     case 'severities':
+  //       elementName = 'Severity';
+  //       break;
 
-      case 'node':
-        elementName = 'Node';
-        break;
+  //     case 'node':
+  //       elementName = 'Node';
+  //       break;
 
-      case 'time':
-        elementName = 'Stamp';
-        break;
+  //     case 'time':
+  //       elementName = 'Stamp';
+  //       break;
 
-      case 'topics':
-        elementName = 'Topics';
-        break;
+  //     case 'topics':
+  //       elementName = 'Topics';
+  //       break;
 
-      case 'location':
-        elementName = 'Location';
-        break;
-    }
-    return elementName;
+  //     case 'location':
+  //       elementName = 'Location';
+  //       break;
+  //   }
+  //   return elementName;
+  // }
+
+  // function getFilterValue(elementName, $elm) {
+  //   var filterValue;
+  //   switch (elementName) {
+  //     case 'Message':
+  //       filterValue = $elm.find('.message-value').val();
+  //       break;
+
+  //     case 'Severity':
+  //       filterValue = $elm.find('.severities-select-button.active');
+  //       console.log(filterValue);
+  //       break;
+
+  //     case 'Node':
+  //       filterValue = $elm.find('.node-value').val();
+  //       break;
+
+  //     case 'Stamp':
+  //       filterValue = $elm.find('.topic-value').val();
+  //       break;
+
+  //     case 'Topics':
+  //       filterValue = $elm.find('.topic-value').val();
+  //       break;
+
+  //     case 'Location':
+  //       filterValue = $elm.find('.location-value').val();
+  //       break;
+  //   }
+  //   return filterValue;
+  // }
+
+  function getSeveritiesValue($elm) {
+    var severity = 0;
+    $elm.find('.severities-select-button.active').each(function (index, item) {
+      var value = parseInt($(item).data('value'), 10);
+      if (!isNaN(value)) {
+        severity += value;
+      }
+    });
+    return severity;
   }
 
-  function getFilterValue(elementName, $elm) {
-    var filterValue;
-    switch (elementName) {
-      case 'Message':
-        filterValue = $elm.find('.message-value').val();
-        break;
+  function getFilterValue($elm) {
+    var isEnabled = $elm.find('input.isEffective').prop('checked');
 
-      case 'Severity':
-        filterValue = $elm.find('.severities-select-button.active');
-        console.log(filterValue);
-        break;
+    if ($elm.hasClass(FilterUtils.FILTER_TYPE.MESSAGE)) {
+      return {
+        filterType: FilterUtils.FILTER_TYPE.MESSAGE,
+        isEnabled: isEnabled,
+        value: {
+          message: $elm.find('.message-value').val(),
+          isRegex: $elm.find('.regex').prop('checked'),
+        }
+      };
 
-      case 'Node':
-        filterValue = $elm.find('.node-value').val();
-        break;
+    } else if ($elm.hasClass(FilterUtils.FILTER_TYPE.SEVERITY)) {
+      return {
+        filterType: FilterUtils.FILTER_TYPE.SEVERITY,
+        isEnabled: isEnabled,
+        value: getSeveritiesValue($elm)
+      };
 
-      case 'Stamp':
-        filterValue = $elm.find('.topic-value').val();
-        break;
+    } else if ($elm.hasClass(FilterUtils.FILTER_TYPE.NODE)) {
+      return {
+        filterType: FilterUtils.FILTER_TYPE.NODE,
+        isEnabled: isEnabled,
+        value: $elm.find('.node-value').val()
+      };
 
-      case 'Topics':
-        filterValue = $elm.find('.topic-value').val();
-        break;
+    } else if ($elm.hasClass(FilterUtils.FILTER_TYPE.STAMP)) {
+      return {
+        filterType: FilterUtils.FILTER_TYPE.STAMP,
+        isEnabled: isEnabled,
+        value: {
+          useEndTime: $elm.find('.use-end-stamp').prop('checked'),
+          beginTime: $elm.find('.time.begin').val(),
+          beginDate: $elm.find('.date.begin').val(),
+          endTime: $elm.find('.time.end').val(),
+          endDate: $elm.find('.date.end').val(),
+        }
+      };
 
-      case 'Location':
-        filterValue = $elm.find('.location-value').val();
-        break;
+    } else if ($elm.hasClass(FilterUtils.FILTER_TYPE.TOPICS)) {
+      return {
+        filterType: FilterUtils.FILTER_TYPE.TOPICS,
+        isEnabled: isEnabled,
+        value: $elm.find('.topic-value').val()
+      };
+
+    } else if ($elm.hasClass(FilterUtils.FILTER_TYPE.LOCATION)) {
+      return {
+        filterType: FilterUtils.FILTER_TYPE.NODE,
+        isEnabled: isEnabled,
+        value: {
+          location: $elm.find('.location-value').val(),
+          isRegex: $elm.find('.regex').prop('checked'),
+        }
+      };
+
     }
-    return filterValue;
   }
 
-  //excludeフィルタの中の値に変化があった時の処理
-  $('#exclude').on('change', function (e) {
-    e.preventDefault();
+  function filterOnChange(parentId) {
 
-    var excludeScript = '';
-    var excludeDetail = $('#exclude li');
+    var script = '';
+    var $filterList = $('#' + parentId + ' li.filter');
     var isParentEffective = true;
     var isParent = false;
     var isTopic = false;
@@ -756,147 +935,191 @@ $(function () {
     var headScript = 'function filter(item){';
     var $checkbox;
     var elementName;
-    var filterValue;
+    // var filterValue;
+
+    var groupList = [];
+    var valueList = [];
 
     // var isSelectType = true;
-    _.each(excludeDetail, function (nativeElm, index) {
-      // console.log(index + ':' + nativeElm);
+    var filterCount = $filterList.length;
+    $filterList.each(function (index, nativeElm) {
+      console.log('-----');
       var $elm = $(nativeElm);
+
       var isNewGroup = ($elm.find('span.label.and').length === 0);
       // console.log('isNewGroup:' + isNewGroup);
-
-
       if (isNewGroup) {
-        // isParent = false;
-
-        //OR時の処理
-        $checkbox = $($elm.find('input.isEffective'));
-        isParentEffective = $checkbox.prop('checked');
-
-        if (isParentEffective) {
-          if (index !== 0 && isParent) {
-            excludeScript = excludeScript + '){ return false; }';
-          }
-          // console.log('parent in!!!!');
-
-          isParent = true;
-          //選択系
-          //node
-          elementName = getElementName($elm);
-          filterValue = getFilterValue(elementName, $elm);
-          // console.log(elementName);
-          // console.log(filterValue);
-
-          switch (elementName) {
-            case 'Message':
-              excludeScript = excludeScript + ' if(' + 'item["Message"]' + '.indexOf("' + filterValue + '") !== -1';
-              break;
-
-            case 'Severity':
-              if (!isSeverity) {
-                isSeverity = true;
-                headScript = headScript + ' var severity=[];';
-
-                // for (var key in filterValue) {
-                _.each(filterValue, function (value, index) {
-                  console.log($(value).data());
-                  var severityValue = $(value).data();
-                  console.log(severityValue['value']);
-                  headScript = headScript + ' severity.push("' + severityValue['value'] + '"); ';
-                });
-              }
-              excludeScript = excludeScript + ' if( severity.indexOf(' + 'item["Severity"]' + ') !== -1';
-              break;
-
-            case 'Node':
-              excludeScript = excludeScript + ' if(' + 'item["Node"]' + '.indexOf("' + filterValue + '") !== -1';
-              break;
-
-            case 'Stamp':
-              break;
-
-            case 'Topic':
-              if (!isTopic) {
-                isTopic = true;
-                headScript = headScript + ' var topicName = item["Topics"].split(",");';
-              }
-              excludeScript = excludeScript + ' if(' + 'topicName' + '.indexOf("' + filterValue + '") !== -1';
-              break;
-
-            case 'Location':
-              excludeScript = excludeScript + ' if(' + 'item["Location"]' + '.indexOf("' + filterValue + '") !== -1';
-              break;
-          }
-        }
-
-      } else {
-        if (isParentEffective) {
-          $checkbox = $($elm.find('input.isEffective'));
-          var isChildEffective = $checkbox.prop('checked');
-          //AND時の処理
-          elementName = getElementName($elm);
-          filterValue = getFilterValue(elementName, $elm);
-
-          if (isChildEffective) {
-
-            switch (elementName) {
-              case 'Message':
-                excludeScript = excludeScript + ' &&' + 'item["' + elementName + '"]' + '.indexOf("' + filterValue + '") !== -1';
-                break;
-
-              case 'Severity':
-                if (!isSeverity) {
-                  isSeverity = true;
-                  headScript = headScript + ' var severity=[];';
-
-                  // for (var key in filterValue) {
-                  _.each(filterValue, function (value, index) {
-                    console.log(value);
-                    var severityValue = $(value).data();
-                    headScript = headScript + ' severity.push("' + severityValue['value'] + '"); ';
-                  });
-                }
-                excludeScript = excludeScript + ' && severity.indexOf(' + 'item["' + elementName + '"]' + ') !== -1';
-                break;
-
-              case 'Node':
-                excludeScript = excludeScript + ' &&' + 'item["' + elementName + '"]' + '.indexOf("' + filterValue + '") !== -1';
-                break;
-
-              case 'Stamp':
-
-                break;
-
-              case 'Topics':
-                if (!isTopic) {
-                  isTopic = true;
-                  headScript = headScript + ' var topicName = item["Topics"].split(",");';
-                }
-                excludeScript = excludeScript + ' &&' + ' topicName' + '.indexOf("' + filterValue + '") !== -1';
-                break;
-
-              case 'Location':
-                excludeScript = excludeScript + ' &&' + 'item["Location"]' + '.indexOf("' + filterValue + '") !== -1';
-                break;
-            }
-
-          }
-
-        }
+        valueList = [];
+        groupList.push(valueList);
       }
 
-      console.log('isParentEffective:' + isParentEffective);
+      var filterValue = getFilterValue($elm);
+      // console.log(filterValue);
+      valueList.push(filterValue);
+
+      // if (isNewGroup) {
+      //   // isParent = false;
+
+      //   //OR時の処理
+      //   $checkbox = $($elm.find('input.isEffective'));
+      //   isParentEffective = $checkbox.prop('checked');
+
+      //   if (!isParentEffective) {
+      //     console.log('filter disabled');
+      //     return jQueryEachContinueValue;
+      //   }
+      //   console.log('filter enabled');
+
+      //   if (isParentEffective) {
+      //     if (index !== 0 && isParent) {
+      //       script = script + '){ return false; }';
+      //     }
+      //     // console.log('parent in!!!!');
+
+      //     isParent = true;
+      //     //選択系
+      //     //node
+      //     elementName = getElementName($elm);
+      //     // filterValue = getFilterValue(elementName, $elm);
+      //     filterValue = getFilterValue($elm);
+      //     // console.log(elementName);
+      //     // console.log(filterValue);
+
+      //     switch (elementName) {
+      //       case 'Message':
+      //         script = script + ' if(' + 'item["Message"]' + '.indexOf("' + filterValue + '") !== -1';
+      //         break;
+
+      //       case 'Severity':
+      //         if (!isSeverity) {
+      //           isSeverity = true;
+      //           headScript = headScript + ' var severity=[];';
+
+      //           // for (var key in filterValue) {
+      //           _.each(filterValue, function (value, index) {
+      //             console.log($(value).data());
+      //             var severityValue = $(value).data();
+      //             console.log(severityValue['value']);
+      //             headScript = headScript + ' severity.push("' + severityValue['value'] + '"); ';
+      //           });
+      //         }
+      //         script = script + ' if( severity.indexOf(' + 'item["Severity"]' + ') !== -1';
+      //         break;
+
+      //       case 'Node':
+      //         script = script + ' if(' + 'item["Node"]' + '.indexOf("' + filterValue + '") !== -1';
+      //         break;
+
+      //       case 'Stamp':
+      //         break;
+
+      //       case 'Topic':
+      //         if (!isTopic) {
+      //           isTopic = true;
+      //           headScript = headScript + ' var topicName = item["Topics"].split(",");';
+      //         }
+      //         script = script + ' if(' + 'topicName' + '.indexOf("' + filterValue + '") !== -1';
+      //         break;
+
+      //       case 'Location':
+      //         script = script + ' if(' + 'item["Location"]' + '.indexOf("' + filterValue + '") !== -1';
+      //         break;
+      //     }
+      //   }
+
+      // } else {
+      //   if (!isParentEffective) {
+      //     console.log('parent filter disabled');
+      //     return jQueryEachContinue();
+      //   }
+      //   console.log('parent filter enabled');
+
+      //   $checkbox = $($elm.find('input.isEffective'));
+      //   var isChildEffective = $checkbox.prop('checked');
+      //   if (!isChildEffective) {
+      //     console.log('child filter disabled');
+      //     return jQueryEachContinue();
+      //   }
+      //   console.log('child filter enabled');
+
+
+      //   //AND時の処理
+      //   elementName = getElementName($elm);
+      //   // filterValue = getFilterValue(elementName, $elm);
+      //   filterValue = getFilterValue($elm);
+
+      //   if (isChildEffective) {
+
+      //     switch (elementName) {
+      //       case 'Message':
+      //         script = script + ' &&' + 'item["' + elementName + '"]' + '.indexOf("' + filterValue + '") !== -1';
+      //         break;
+
+      //       case 'Severity':
+      //         if (!isSeverity) {
+      //           isSeverity = true;
+      //           headScript =    updateFilter();
+      // rValue, function (value, index) {
+      //             console.log(value);
+      //             var severityValue = $(value).data();
+      //             headScript = headScript + ' severity.push("' + severityValue['value'] + '"); ';
+      //           });
+      //         }
+      //         script = script + ' && severity.indexOf(' + 'item["' + elementName + '"]' + ') !== -1';
+      //         break;
+
+      //       case 'Node':
+      //         script = script + ' &&' + 'item["' + elementName + '"]' + '.indexOf("' + filterValue + '") !== -1';
+      //         break;
+
+      //       case 'Stamp':
+
+      //         break;
+
+      //       case 'Topics':
+      //         if (!isTopic) {
+      //           isTopic = true;
+      //           headScript = headScript + ' var topicName = item["Topics"].split(",");';
+      //         }
+      //         script = script + ' &&' + ' topicName' + '.indexOf("' + filterValue + '") !== -1';
+      //         break;
+
+      //       case 'Location':
+      //         script = script + ' &&' + 'item["Location"]' + '.indexOf("' + filterValue + '") !== -1';
+      //         break;
+      //     }
+
+      //   }
+      // }
+
+      // console.log('isParentEffective:' + isParentEffective);
     });
-    if (!isParent) {
-      excludeScript = excludeScript + 'return true;} filter(item);';
+    // if (!isParent) {
+    //   script = script + 'return true;} filter(item);';
+    // } else {
+    //   script = script + '){ return false; } return true ;} filter(item);';
+    // }
+
+    // console.log(groupList);
+    if (parentId === 'exclude') {
+      excludeFilter = groupList;
     } else {
-      excludeScript = excludeScript + '){ return false; } return true ;} filter(item);';
+      highlightFilter = groupList;
     }
-
-
-    filterScript = headScript + excludeScript;
-    console.log(filterScript);
+    // filterScript = headScript + script;
+    // console.log(filterScript);
     updateFilter();
+  }
+
+  //excludeフィルタの中の値に変化があった時の処理
+  $('#exclude').on('change', function (e) {
+    // e.preventDefault();
+    filterOnChange('exclude');
+  });
+
+  $('#highlight').on('change', function (e) {
+    // e.preventDefault();
+    filterOnChange('highlight');
   });
 
 
