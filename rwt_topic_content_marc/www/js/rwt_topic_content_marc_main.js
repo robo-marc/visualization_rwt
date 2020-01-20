@@ -341,13 +341,12 @@ $(function () {
     } else {
       ros.getTopics(function (comparisonItem) {
         var topicInfo = _.cloneDeep(topicList);
-
         var keepInfo = { topics: [], types: [] };
 
-        for (var j = 0; j < topicInfo.topics.length; j++) {
-          if (comparisonItem.topics.indexOf(topicInfo.topics[j]) >= 0) {
-            keepInfo.topics.push(topicInfo.topics[j]);
-            keepInfo.types.push(topicInfo.types[j]);
+        for (var j = 0; j < comparisonItem.topics.length; j++) {
+          if (topicInfo.indexOf(comparisonItem.types[j]) >= 0) {
+            keepInfo.topics.push(comparisonItem.topics[j]);
+            keepInfo.types.push(comparisonItem.types[j]);
           }
         }
         topicInfo = _.cloneDeep(keepInfo);
