@@ -250,60 +250,68 @@ ROSLIB.DiagnosticsDirectory.prototype.findByName = function (name) {
 /**
  * return html to show icon suitable for error status of the directory
  */
-ROSLIB.DiagnosticsDirectory.prototype.getIconHTML = function () {
-  if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.OK) {
-    return '<span class="glyphicon-ok glyphicon"></span>';
-  }
-  else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.WARN) {
-    return '<span class="glyphicon-exclamation-sign glyphicon"></span>';
-  }
-  else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.ERROR) {
-    return '<span class="glyphicon-minus-sign glyphicon"></span>';
-  }
-};
+// ROSLIB.DiagnosticsDirectory.prototype.getIconHTML = function () {
+//   if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.OK) {
+//     return '<span class="glyphicon-ok glyphicon"></span>';
+//   }
+//   else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.WARN) {
+//     return '<span class="glyphicon-exclamation-sign glyphicon"></span>';
+//   }
+//   else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.ERROR) {
+//     return '<span class="glyphicon-minus-sign glyphicon"></span>';
+//   }
+// };
 
 /**
  * return html to show icon suitable for error status of the directory
  */
-ROSLIB.DiagnosticsDirectory.prototype.getIconHTML2 = function () {
-  if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.OK) {
-    // return '<span class="glyphicon-ok glyphicon"></span>';
-    return 'ok';
+ROSLIB.DiagnosticsDirectory.prototype.getIcon = function () {
+  switch (this.status.level) {
+    case ROSLIB.DiagnosticsStatus.LEVEL.OK:
+      return 'ok';
+    case ROSLIB.DiagnosticsStatus.LEVEL.WARN:
+      return 'warn';
+    case ROSLIB.DiagnosticsStatus.LEVEL.ERRO:
+      return 'error';
+    case ROSLIB.DiagnosticsStatus.LEVEL.STALE:
+      return 'stale';
   }
-  else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.WARN) {
-    // return '<span class="glyphicon-exclamation-sign glyphicon"></span>';
-    return 'warn';
-  }
-  else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.ERROR) {
-    // return '<span class="glyphicon-minus-sign glyphicon"></span>';
-    return 'error';
-  }
+  // if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.OK) {
+  //   // return '<span class="glyphicon-ok glyphicon"></span>';
+  //   return 'ok';
+  // } else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.WARN) {
+  //   // return '<span class="glyphicon-exclamation-sign glyphicon"></span>';
+  //   return 'warn';
+  // } else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.ERROR) {
+  //   // return '<span class="glyphicon-minus-sign glyphicon"></span>';
+  //   return 'error';
+  // }
 };
 
 // TODO delete
 /**
  * return html of icon to show this directory has child
  */
-ROSLIB.DiagnosticsDirectory.prototype.getCollapseIconHTML = function () {
-  if (this.children.length !== 0) {
-    return '<span class="glyphicon-chevron-right glyphicon"></span>';
-  }
-  else {
-    return '';
-  }
-};
+// ROSLIB.DiagnosticsDirectory.prototype.getCollapseIconHTML = function () {
+//   if (this.children.length !== 0) {
+//     return '<span class="glyphicon-chevron-right glyphicon"></span>';
+//   }
+//   else {
+//     return '';
+//   }
+// };
 
 /**
  * return html of icon to show this directory has child
  */
-ROSLIB.DiagnosticsDirectory.prototype.getCollapseIconHTML2 = function () {
-  if (this.children.length !== 0) {
-    return '<span class="glyphicon-chevron-right glyphicon"></span>';
-  }
-  else {
-    return '';
-  }
-};
+// ROSLIB.DiagnosticsDirectory.prototype.getCollapseIconHTML2 = function () {
+//   if (this.children.length !== 0) {
+//     return '<span class="glyphicon-chevron-right glyphicon"></span>';
+//   }
+//   else {
+//     return '';
+//   }
+// };
 
 
 /**
@@ -674,7 +682,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
       + '" class="'
       + parentId
       + ' '
-      + directory.getIconHTML2()
+      + directory.getIcon()
       + leaf
       + toggle
       + display

@@ -26,6 +26,15 @@
   left: calc(1.05rem);
   font-size: 1.25rem;
 }
+.robot_monitor .table-type-2 tr.stale td.data_1:before {
+  font-family: 'Material Icons';
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  font-size: 1.25rem;
+  vertical-align: middle;
+  color: #323cc8;
+}
 .time-item.no {
   background-color: #fff;
 }

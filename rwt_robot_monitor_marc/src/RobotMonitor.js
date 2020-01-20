@@ -224,7 +224,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
       + '" class="'
       + parentId
       + ' '
-      + directory.getIconHTML2()
+      + directory.getIcon()
       + leaf
       + toggle
       + display
