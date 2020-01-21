@@ -24,35 +24,49 @@
             margin: 0;
             background-color: white;
             height: 100%;
-        }
-        html {
-            height: 100%;
+            display: flex;
+            flex-flow: column;
         }
 
-        #top_bar {
-            background-color: #6e84a3;
-            color: white;
-            font: bold 12px Helvetica;
-            padding: 6px 5px 4px 5px;
-            border-bottom: 1px outset;
-        }
-        #status {
-            text-align: center;
-        }
-        #sendCtrlAltDelButton {
-            position: fixed;
-            top: 0px;
-            right: 0px;
-            border: 1px outset;
-            padding: 5px 5px 4px 5px;
-            cursor: pointer;
+        html {
+            height: 100%;
         }
 
         #screen {
             margin: 0px;
             padding: 0px;
             width: 100%;
-            height: 100%;
+            flex: 1;
+            overflow: auto;
+        }
+
+        #noVNC_keyboardinput {
+            width: 1px;
+            height: 1px;
+            background-color: #fff;
+            color: #fff;
+            border: 0;
+            position: absolute;
+            left: -40px;
+            z-index: -1;
+            ime-mode: disabled;
+        }
+
+        #noVNC_keyboard_button {
+          height: 20px;
+          margin: 3px;
+          padding: 0px;
+        }
+
+        #noVNC_mobile_buttons {
+          margin: 0px;
+          padding: 0px;
+          height: 26px;
+          background-color: #333;
+        }
+
+        :root:not(.noVNC_touch) #noVNC_mobile_buttons {
+            display: none;
         }
 
     </style>
@@ -67,6 +81,8 @@
     <script type="module" crossorigin="anonymous">
         // RFB holds the API to connect and communicate with a VNC server
         import RFB from '../rwt_utils_3rdparty/noVNC/core/rfb.js';
+        import { isTouchDevice } from '../rwt_utils_3rdparty/noVNC/core/util/browser.js';
+        import Keyboard from "../rwt_utils_3rdparty/noVNC/core/input/keyboard.js";
 
         let rfb;
         let desktopName;
@@ -132,12 +148,239 @@
         rfb.viewOnly = readQueryVariable('view_only', false);
         rfb.scaleViewport = readQueryVariable('scale', false);
         rfb.resizeSession = readQueryVariable('resize', true);
+
+        // virtual keyboard support
+            const UI = {
+
+                lastKeyboardinput: null,
+                defaultKeyboardinputLen: 100,
+
+                addTouchSpecificHandlers() {
+                    document.getElementById("noVNC_keyboard_button")
+                        .addEventListener('click', UI.toggleVirtualKeyboard);
+
+                    UI.touchKeyboard = new Keyboard(document.getElementById('noVNC_keyboardinput'));
+                    UI.touchKeyboard.onkeyevent = UI.keyEvent;
+                    UI.touchKeyboard.grab();
+                    document.getElementById("noVNC_keyboardinput")
+                        .addEventListener('input', UI.keyInput);
+                    document.getElementById("noVNC_keyboardinput")
+                        .addEventListener('focus', UI.onfocusVirtualKeyboard);
+                    document.getElementById("noVNC_keyboardinput")
+                        .addEventListener('blur', UI.onblurVirtualKeyboard);
+                    document.getElementById("noVNC_keyboardinput")
+                        .addEventListener('submit', () => false);
+
+                    document.documentElement
+                        .addEventListener('mousedown', UI.keepVirtualKeyboard, true);
+
+                },
+
+                setRFB(rfb) {
+                    console.log('hello!');
+                    UI.rfb = rfb;
+                },
+
+                showVirtualKeyboard() {
+                    if (!isTouchDevice) return;
+
+                    const input = document.getElementById('noVNC_keyboardinput');
+
+                    if (document.activeElement == input) return;
+
+                    input.focus();
+
+                    try {
+                        const l = input.value.length;
+                        // Move the caret to the end
+                        input.setSelectionRange(l, l);
+                    } catch (err) {
+                        // setSelectionRange is undefined in Google Chrome
+                    }
+                },
+
+                hideVirtualKeyboard() {
+                    if (!isTouchDevice) return;
+
+                    const input = document.getElementById('noVNC_keyboardinput');
+
+                    if (document.activeElement != input) return;
+
+                    input.blur();
+                },
+
+                toggleVirtualKeyboard() {
+                    console.log('toggle!');
+                    if (document.getElementById('noVNC_keyboard_button')
+                        .classList.contains("noVNC_selected")) {
+                        UI.hideVirtualKeyboard();
+                    } else {
+                        UI.showVirtualKeyboard();
+                    }
+                },
+
+                onfocusVirtualKeyboard(event) {
+                    document.getElementById('noVNC_keyboard_button')
+                        .classList.add("noVNC_selected");
+                    if (UI.rfb) {
+                        UI.rfb.focusOnClick = false;
+                    }
+                },
+
+                onblurVirtualKeyboard(event) {
+                    document.getElementById('noVNC_keyboard_button')
+                        .classList.remove("noVNC_selected");
+                    if (UI.rfb) {
+                        UI.rfb.focusOnClick = true;
+                    }
+                },
+
+                keepVirtualKeyboard(event) {
+                    const input = document.getElementById('noVNC_keyboardinput');
+
+                    // Only prevent focus change if the virtual keyboard is active
+                    if (document.activeElement != input) {
+                        return;
+                    }
+
+                    // Only allow focus to move to other elements that need
+                    // focus to function properly
+                    if (event.target.form !== undefined) {
+                        switch (event.target.type) {
+                            case 'text':
+                            case 'email':
+                            case 'search':
+                            case 'password':
+                            case 'tel':
+                            case 'url':
+                            case 'textarea':
+                            case 'select-one':
+                            case 'select-multiple':
+                                return;
+                        }
+                    }
+
+                    event.preventDefault();
+                },
+
+                keyboardinputReset() {
+                    const kbi = document.getElementById('noVNC_keyboardinput');
+                    kbi.value = new Array(UI.defaultKeyboardinputLen).join("_");
+                    UI.lastKeyboardinput = kbi.value;
+                },
+
+                keyEvent(keysym, code, down) {
+                    if (!UI.rfb) return;
+
+                    UI.rfb.sendKey(keysym, code, down);
+                },
+
+                // When normal keyboard events are left uncought, use the input events from
+                // the keyboardinput element instead and generate the corresponding key events.
+                // This code is required since some browsers on Android are inconsistent in
+                // sending keyCodes in the normal keyboard events when using on screen keyboards.
+                keyInput(event) {
+
+                    if (!UI.rfb) return;
+
+                    const newValue = event.target.value;
+
+                    if (!UI.lastKeyboardinput) {
+                        UI.keyboardinputReset();
+                    }
+                    const oldValue = UI.lastKeyboardinput;
+
+                    let newLen;
+                    try {
+                        // Try to check caret position since whitespace at the end
+                        // will not be considered by value.length in some browsers
+                        newLen = Math.max(event.target.selectionStart, newValue.length);
+                    } catch (err) {
+                        // selectionStart is undefined in Google Chrome
+                        newLen = newValue.length;
+                    }
+                    const oldLen = oldValue.length;
+
+                    let inputs = newLen - oldLen;
+                    let backspaces = inputs < 0 ? -inputs : 0;
+
+                    // Compare the old string with the new to account for
+                    // text-corrections or other input that modify existing text
+                    for (let i = 0; i < Math.min(oldLen, newLen); i++) {
+                        if (newValue.charAt(i) != oldValue.charAt(i)) {
+                            inputs = newLen - i;
+                            backspaces = oldLen - i;
+                            break;
+                        }
+                    }
+
+                    // Send the key events
+                    for (let i = 0; i < backspaces; i++) {
+                        UI.rfb.sendKey(KeyTable.XK_BackSpace, "Backspace");
+                    }
+                    for (let i = newLen - inputs; i < newLen; i++) {
+                        UI.rfb.sendKey(keysyms.lookup(newValue.charCodeAt(i)));
+                    }
+
+                    // Control the text content length in the keyboardinput element
+                    if (newLen > 2 * UI.defaultKeyboardinputLen) {
+                        UI.keyboardinputReset();
+                    } else if (newLen < 1) {
+                        // There always have to be some text in the keyboardinput
+                        // element with which backspace can interact.
+                        UI.keyboardinputReset();
+                        // This sometimes causes the keyboard to disappear for a second
+                        // but it is required for the android keyboard to recognize that
+                        // text has been added to the field
+                        event.target.blur();
+                        // This has to be ran outside of the input handler in order to work
+                        setTimeout(event.target.focus.bind(event.target), 0);
+                    } else {
+                        UI.lastKeyboardinput = newValue;
+                    }
+                },
+
+                sendKey(keysym, code, down) {
+                    UI.rfb.sendKey(keysym, code, down);
+
+                    // Move focus to the screen in order to be able to use the
+                    // keyboard right after these extra keys.
+                    // The exception is when a virtual keyboard is used, because
+                    // if we focus the screen the virtual keyboard would be closed.
+                    // In this case we focus our special virtual keyboard input
+                    // element instead.
+                    if (document.getElementById('noVNC_keyboard_button')
+                        .classList.contains("noVNC_selected")) {
+                        document.getElementById('noVNC_keyboardinput').focus();
+                    } else {
+                        UI.rfb.focus();
+                    }
+                    // fade out the controlbar to highlight that
+                    // the focus has been moved to the screen
+                    UI.idleControlbar();
+                },
+
+            };
+
+        UI.addTouchSpecificHandlers();
+        UI.setRFB(rfb);
+        if (isTouchDevice) {
+            document.documentElement.classList.add("noVNC_touch");
+        }
+
     </script>
 </head>
 
 <body>
+    <div id="noVNC_mobile_buttons">
+        <input type="image" alt="Keyboard" src="../rwt_utils_3rdparty/noVNC/app/images/keyboard.svg"
+                    id="noVNC_keyboard_button" class="noVNC_button" title="Show Keyboard">
+    </div>
     <div id="screen" style="padding: 0; margin: 0">
         <!-- This is where the remote screen will appear -->
+        <textarea id="noVNC_keyboardinput" autocapitalize="off"
+        autocomplete="off" spellcheck="false" tabindex="-1"></textarea>
     </div>
 </body>
+
 </html>
