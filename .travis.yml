@@ -28,14 +28,14 @@ after_success:
   - sudo apt-get install -qq -y catkin # .deploy.sh needs catkin_topological_order
   - $CI_SOURCE_PATH/.deploy.sh
   - cd $CI_SOURCE_PATH  # This is for deploy section
-deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GH_TOKEN
-  local_dir: $PUBLISHED_DIR
-  target_branch: gh-pages
-  keep_history: false
-  on:
-    branch: kinetic-devel  # set to default branch
-    condition: "$ROS_DISTRO = kinetic"
+#deploy:
+#  provider: pages
+#  skip_cleanup: true
+#  github_token: $GH_TOKEN
+#  local_dir: $PUBLISHED_DIR
+#  target_branch: gh-pages
+#  keep_history: false
+#  on:
+#    branch: kinetic-devel  # set to default branch
+#    condition: "$ROS_DISTRO = kinetic"
 
