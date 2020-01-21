@@ -638,6 +638,12 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
   if (dataDimension === 0) {
     dataItem = [dataItem];          // force to encapsulate into array
   }
+
+  // isNumeric
+  if (!($.isNumeric(dataItem[0]))) {
+    return;
+  }
+
   this.checkYAxisMinMax(dataItem);
 
   this.allocatePathForArr(msgFieldPath, dataItem);
