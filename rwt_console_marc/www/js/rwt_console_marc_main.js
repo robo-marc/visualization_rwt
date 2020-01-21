@@ -1,40 +1,28 @@
-function requiredFieldValidator(value) {
-  if (value === null || value === undefined || !value.length) {
-    return { valid: false, msg: 'This is a required field' };
-  } else {
-    return { valid: true, msg: null };
-  }
-}
-
 $(function () {
 
   ////////////////////////////////////////
   // constants
 
   // for grid, dropdown
-  var FILTER_NAME = {
+  var COLUMN_NAMES = {
+    DISPLAY_NUMBER: '#',
     MESSAGE: 'Message',
     SEVERITY: 'Severity',
     NODE: 'Node',
     STAMP: 'Stamp',
     TOPICS: 'Topics',
     LOCATION: 'Location',
-    NUMBER: 'Number',
+    NUMBER: '',
   };
 
   var FILTER_NAME_LIST = [
-    FILTER_NAME.MESSAGE,
-    FILTER_NAME.SEVERITY,
-    FILTER_NAME.NODE,
-    FILTER_NAME.STAMP,
-    FILTER_NAME.TOPICS,
-    FILTER_NAME.LOCATION,
-    // NUMBER is hidden field
+    COLUMN_NAMES.MESSAGE,
+    COLUMN_NAMES.SEVERITY,
+    COLUMN_NAMES.NODE,
+    COLUMN_NAMES.STAMP,
+    COLUMN_NAMES.TOPICS,
+    COLUMN_NAMES.LOCATION,
   ];
-
-  var jQueryEachBreakValue = false;
-  var jQueryEachContinueValue = true;
-
 
 
   ////////////////////////////////////////
@@ -44,6 +32,7 @@ $(function () {
 
   // config
   var maxCount = 20000;
+  var refleshRate = 4;
 
   // status
   var isPaused = false;
@@ -53,14 +42,14 @@ $(function () {
 
   // for grid
   var columns = [
-    { id: '#', name: '#', field: '#', width: 80, sortable: true, formatter: highlightFormatter },
-    { id: 'Message', name: FILTER_NAME.MESSAGE, field: 'Message', width: 300, sortable: true, formatter: highlightFormatter },
-    { id: 'Severity', name: FILTER_NAME.SEVERITY, field: 'Severity', width: 70, sortable: true, formatter: severityFormatter },
-    { id: 'Node', name: FILTER_NAME.NODE, field: 'Node', width: 100, sortable: true, formatter: highlightFormatter },
-    { id: 'Stamp', name: FILTER_NAME.STAMP, field: 'Stamp', width: 100, sortable: true, formatter: highlightFormatter },
-    { id: 'Topics', name: FILTER_NAME.TOPICS, field: 'Topics', width: 100, sortable: true, formatter: highlightFormatter },
-    { id: 'Location', name: FILTER_NAME.LOCATION, field: 'Location', width: 100, sortable: true, formatter: highlightFormatter },
-    { id: 'Number', name: FILTER_NAME.NUMBER, field: 'Number', width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
+    { id: '#', name: COLUMN_NAMES.DISPLAY_NUMBER, field: '#', width: 80, sortable: true, formatter: highlightFormatter },
+    { id: 'Message', name: COLUMN_NAMES.MESSAGE, field: 'Message', width: 300, sortable: true, formatter: highlightFormatter },
+    { id: 'Severity', name: COLUMN_NAMES.SEVERITY, field: 'Severity', width: 70, sortable: true, formatter: severityFormatter },
+    { id: 'Node', name: COLUMN_NAMES.NODE, field: 'Node', width: 100, sortable: true, formatter: highlightFormatter },
+    { id: 'Stamp', name: COLUMN_NAMES.STAMP, field: 'Stamp', width: 100, sortable: true, formatter: highlightFormatter },
+    { id: 'Topics', name: COLUMN_NAMES.TOPICS, field: 'Topics', width: 100, sortable: true, formatter: highlightFormatter },
+    { id: 'Location', name: COLUMN_NAMES.LOCATION, field: 'Location', width: 100, sortable: true, formatter: highlightFormatter },
+    { id: 'Number', name: COLUMN_NAMES.NUMBER, field: 'Number', width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
   ];
   var options = {
     editable: true,
@@ -73,7 +62,6 @@ $(function () {
   var list = [];
 
   // for filter
-  var filterScript = 'function init() {return true; } init();';
   var excludeFilter = [];
   var highlightFilter = [];
   var showOnlyHighlighted = false;
@@ -101,13 +89,16 @@ $(function () {
     dataView.setFilter(myFilter);
     dataView.endUpdate();
 
+    setCountLabelStatus();
+
     // for filter
     setAndConditionCanSelect('exclude');
     setAndConditionCanSelect('highlight');
 
     // start
     startSubscribing();
-    setInterval(renderList, 500);
+    setInterval(renderList, 1000 / refleshRate);
+    setTimeout(adjustColumnWidth, 1000 / refleshRate); // initial adjust
   }
 
   function setDropdownList(selectId, valueList) {
@@ -125,8 +116,10 @@ $(function () {
     dataView.setItems(list);
     // grid.invalidate();
 
-    //TODO: フィルタ条件の Node と Topic のドロップダウンに候補を追加する
+    $('#displaying-count').text(dataView.getLength());
+    $('#message-count').text(list.length);
 
+    //TODO: フィルタ条件の Node と Topic のドロップダウンに候補を追加する
   }
 
   // start subscribing
@@ -143,11 +136,11 @@ $(function () {
       }
       var mes = msg.msg;
       var severityNumber = msg.level;
-      var severity = getSeverityLabel(msg.level);
+      var severityLabel = getSeverityLabel(msg.level);
       var node = msg.name;
-      var time = formatTime(msg.header.stamp.secs, msg.header.stamp.nsecs);
+      var stamp = formatTime(msg.header.stamp.secs, msg.header.stamp.nsecs);
+      var milliSec = toMilliSec(msg.header.stamp.secs, msg.header.stamp.nsecs);
       var regular = ('0000000000' + msg.header.stamp.nsecs).slice(-9);
-      var stamp = time;
       var topics = msg.topics.join(',');
       var location = msg.file + ':' + msg.function + ':' + msg.line;
 
@@ -157,9 +150,10 @@ $(function () {
         '#': '#' + rowNumber,
         Message: mes,
         SeverityNumber: severityNumber,
-        Severity: severity,
+        Severity: severityLabel,
         Node: node,
         Stamp: stamp,
+        MilliSec: milliSec,
         RawTime: msg.header.stamp.secs + '.' + regular,
         Topics: topics,
         Location: location,
@@ -178,8 +172,6 @@ $(function () {
         }
       }
       rowNumber++;
-
-      $('#message-number').text(list.length);
     });
   }
 
@@ -203,9 +195,6 @@ $(function () {
   }
 
   function myFilter(item, args) {
-    // console.log(args.excludeFilter);
-    // console.log(args.highlightFilter);
-    // console.log(args.showOnlyHighlighted);
     var isVisible;
 
     // excludeFilter
@@ -230,6 +219,18 @@ $(function () {
     dataView.refresh();
     grid.invalidateAllRows();
     grid.render();
+
+    setCountLabelStatus();
+  }
+
+  function setCountLabelStatus() {
+    var filterCount = $('#exclude .filter input.isEffective:checked').length
+      + $('#highlight .filter input.isEffective:checked').length;
+    if (filterCount > 0) {
+      $('#displaying-count-area').removeClass('hidden');
+    } else {
+      $('#displaying-count-area').addClass('hidden');
+    }
   }
 
   function getSeverityLabel(value) {
@@ -269,6 +270,10 @@ $(function () {
     return timestamp;
   }
 
+  function toMilliSec(secs, nsecs) {
+    return (secs || 0) * 1000 + (nsecs || 0) / 1000000.0;
+  }
+
 
   ////////////////////////////////////////
   // button events
@@ -283,6 +288,7 @@ $(function () {
       delete value.id;
       delete value['#'];
       delete value.Stamp;
+      delete value.MilliSec;
       // delete value.RawTime;
       delete value.indent;
       delete value.Severity;
@@ -358,21 +364,31 @@ $(function () {
     // ignore header row and trailing empty row
     for (var i = 1; i < dataList.length - 1; i++) {
       if (dataList[i]) {
+        var severityNumber = parseInt(dataList[i][1], 10);
+        var severityLabel = getSeverityLabel(severityNumber);
         var time = dataList[i][3].split('.');
         var secs = time[0];
         var nsecs = time[1];
+        var stamp = formatTime(secs, nsecs);
+        var milliSec;
+        try {
+          milliSec = toMilliSec(parseInt(secs, 10), parseInt(nsecs, 10));
+        } catch (e) {
+          console.info(e);
+        }
+        var regular = ('0000000000' + nsecs).slice(-9);
 
-        var severityNumber = parseInt(dataList[i][1], 10);
         var associationItem = {
           id: rowNumber,
           indent: 0,
           '#': '#' + rowNumber,
           Message: dataList[i][0],
           SeverityNumber: severityNumber,
-          Severity: getSeverityLabel(severityNumber),
+          Severity: severityLabel,
           Node: dataList[i][2],
-          Stamp: formatTime(secs, nsecs),
-          // RawTime: msg.header.stamp.secs + '.' + regular,
+          Stamp: stamp,
+          MilliSec: milliSec,
+          RawTime: secs + '.' + regular,
           Topics: dataList[i][4],
           Location: dataList[i][5],
           // Number: dataList[i][6]
@@ -398,7 +414,8 @@ $(function () {
     dataView.setItems(view);
     grid.invalidate();
 
-    $('#message-number').text(list.length);
+    $('#displaying-count').text(dataView.getLength());
+    $('#message-count').text(list.length);
   }
 
   // pause
@@ -425,7 +442,8 @@ $(function () {
     rowNumber = 1;
     dataView.setItems(list);
     grid.invalidate();
-    $('#message-number').text('0');
+    $('#displaying-count').text('0');
+    $('#message-count').text('0');
   });
 
   $('#open_sub_button').on('click', function (e) {
@@ -457,7 +475,7 @@ $(function () {
     if (sortCol === 'Stamp') {
       dataView.sort(comparer, isAsc);
     } else if (sortCol !== 'Stamp') {
-      dataView.sort(comparer, isAsc);
+      // dataView.sort(comparer, isAsc);
       dataView.sort(comparer2, isAsc);
     }
 
@@ -477,8 +495,6 @@ $(function () {
   dataView.onRowCountChanged.subscribe(function (e, args) {
     grid.updateRowCount();
     grid.render();
-    grid.resizeCanvas();
-    grid.autosizeColumns();
   });
 
   dataView.onRowsChanged.subscribe(function (e, args) {
@@ -487,12 +503,13 @@ $(function () {
   });
 
   $(window).on('load resize', function () {
+    adjustColumnWidth();
+  });
+
+  function adjustColumnWidth() {
     grid.resizeCanvas();
     grid.autosizeColumns();
-
-    // prevent the delete button from being hidden when switching screens vertically
-    grid.resizeCanvas();
-  });
+  }
 
 
   ////////////////////////////////////////
@@ -520,24 +537,24 @@ $(function () {
     var html;
     var filterName = $('#' + parentId + '-select').val();
     switch (filterName) {
-      case FILTER_NAME.MESSAGE:
+      case COLUMN_NAMES.MESSAGE:
         html = FilterUtils.getMessageFilterHtml(conditionType);
         break;
-      case FILTER_NAME.SEVERITY:
+      case COLUMN_NAMES.SEVERITY:
         html = FilterUtils.getSeverityFilterHtml(conditionType);
         break;
-      case FILTER_NAME.NODE:
+      case COLUMN_NAMES.NODE:
         var nodeList = getNodeList(list);
         html = FilterUtils.getNodesFilterHtml(conditionType, nodeList);
         break;
-      case FILTER_NAME.STAMP:
+      case COLUMN_NAMES.STAMP:
         html = FilterUtils.getStampFilterHtml(conditionType);
         break;
-      case FILTER_NAME.TOPICS:
+      case COLUMN_NAMES.TOPICS:
         var topicList = getTopicList(list);
         html = FilterUtils.getTopicsFilterHtml(conditionType, topicList);
         break;
-      case FILTER_NAME.LOCATION:
+      case COLUMN_NAMES.LOCATION:
         html = FilterUtils.getLocationFilterHtml(conditionType);
         break;
       default:
@@ -726,76 +743,41 @@ $(function () {
   ////////////////////////////////////////
   // when filter changed
 
-  // function getElementName(element) {
-  //   var elementName = element.attr('class');
-  //   switch (elementName) {
-  //     case 'message':
-  //       elementName = 'Message';
-  //       break;
+  $('#exclude').on('change', function () {
+    filterOnChangeHandler('exclude');
+  });
 
-  //     case 'severities':
-  //       elementName = 'Severity';
-  //       break;
+  $('#highlight').on('change', function () {
+    filterOnChangeHandler('highlight');
+  });
 
-  //     case 'node':
-  //       elementName = 'Node';
-  //       break;
+  function filterOnChangeHandler(parentId) {
+    var $filterList = $('#' + parentId + ' li.filter');
 
-  //     case 'time':
-  //       elementName = 'Stamp';
-  //       break;
+    var groupList = [];
+    var valueList = [];
 
-  //     case 'topics':
-  //       elementName = 'Topics';
-  //       break;
+    $filterList.each(function (index, nativeElm) {
+      var $elm = $(nativeElm);
 
-  //     case 'location':
-  //       elementName = 'Location';
-  //       break;
-  //   }
-  //   return elementName;
-  // }
-
-  // function getFilterValue(elementName, $elm) {
-  //   var filterValue;
-  //   switch (elementName) {
-  //     case 'Message':
-  //       filterValue = $elm.find('.message-value').val();
-  //       break;
-
-  //     case 'Severity':
-  //       filterValue = $elm.find('.severities-select-button.active');
-  //       console.log(filterValue);
-  //       break;
-
-  //     case 'Node':
-  //       filterValue = $elm.find('.node-value').val();
-  //       break;
-
-  //     case 'Stamp':
-  //       filterValue = $elm.find('.topic-value').val();
-  //       break;
-
-  //     case 'Topics':
-  //       filterValue = $elm.find('.topic-value').val();
-  //       break;
-
-  //     case 'Location':
-  //       filterValue = $elm.find('.location-value').val();
-  //       break;
-  //   }
-  //   return filterValue;
-  // }
-
-  function getSeveritiesValue($elm) {
-    var severity = 0;
-    $elm.find('.severities-select-button.active').each(function (index, item) {
-      var value = parseInt($(item).data('value'), 10);
-      if (!isNaN(value)) {
-        severity += value;
+      var isNewGroup = ($elm.find('span.label.and').length === 0);
+      if (isNewGroup) {
+        valueList = [];
+        groupList.push(valueList);
       }
+
+      var filterValue = getFilterValue($elm);
+
+      valueList.push(filterValue);
     });
-    return severity;
+
+    if (parentId === 'exclude') {
+      excludeFilter = groupList;
+    } else {
+      highlightFilter = groupList;
+    }
+
+    updateFilter();
   }
 
   function getFilterValue($elm) {
@@ -837,15 +819,27 @@ $(function () {
       };
 
     } else if ($elm.hasClass(FilterUtils.FILTER_TYPE.STAMP)) {
+      var beginDateStr = $elm.find('.date.begin').val() + ' ' + $elm.find('.time.begin').val();
+      var endDateStr = $elm.find('.date.end').val() + ' ' + $elm.find('.time.end').val();
+      var beginDate;
+      var endDate;
+      try {
+        beginDate = Date.parse(beginDateStr);
+      } catch (e) {
+        console.info(e);
+      }
+      try {
+        endDate = Date.parse(endDateStr);
+      } catch (e) {
+        console.info(e);
+      }
       return {
         filterType: FilterUtils.FILTER_TYPE.STAMP,
         isEnabled: isEnabled,
         value: {
           useEndTime: $elm.find('.use-end-stamp').prop('checked'),
-          beginTime: $elm.find('.time.begin').val(),
-          beginDate: $elm.find('.date.begin').val(),
-          endTime: $elm.find('.time.end').val(),
-          endDate: $elm.find('.date.end').val(),
+          beginDate: beginDate,
+          endDate: endDate,
         }
       };
 
@@ -867,7 +861,7 @@ $(function () {
         }
       }
       return {
-        filterType: FilterUtils.FILTER_TYPE.NODE,
+        filterType: FilterUtils.FILTER_TYPE.LOCATION,
         isEnabled: isEnabled,
         value: {
           location: text,
@@ -878,203 +872,16 @@ $(function () {
     }
   }
 
-  function filterOnChange(parentId) {
-
-    var script = '';
-    var $filterList = $('#' + parentId + ' li.filter');
-    var isParentEffective = true;
-    var isParent = false;
-    var isTopic = false;
-    var isSeverity = false;
-    var headScript = 'function filter(item){';
-    var $checkbox;
-    var elementName;
-    // var filterValue;
-
-    var groupList = [];
-    var valueList = [];
-
-    // var isSelectType = true;
-    var filterCount = $filterList.length;
-    $filterList.each(function (index, nativeElm) {
-      console.log('-----');
-      var $elm = $(nativeElm);
-
-      var isNewGroup = ($elm.find('span.label.and').length === 0);
-      // console.log('isNewGroup:' + isNewGroup);
-      if (isNewGroup) {
-        valueList = [];
-        groupList.push(valueList);
+  function getSeveritiesValue($elm) {
+    var severity = 0;
+    $elm.find('.severities-select-button.active').each(function (index, item) {
+      var value = parseInt($(item).data('value'), 10);
+      if (!isNaN(value)) {
+        severity |= value;
       }
-
-      var filterValue = getFilterValue($elm);
-      // console.log(filterValue);
-      valueList.push(filterValue);
-
-      // if (isNewGroup) {
-      //   // isParent = false;
-
-      //   //OR時の処理
-      //   $checkbox = $($elm.find('input.isEffective'));
-      //   isParentEffective = $checkbox.prop('checked');
-
-      //   if (!isParentEffective) {
-      //     console.log('filter disabled');
-      //     return jQueryEachContinueValue;
-      //   }
-      //   console.log('filter enabled');
-
-      //   if (isParentEffective) {
-      //     if (index !== 0 && isParent) {
-      //       script = script + '){ return false; }';
-      //     }
-      //     // console.log('parent in!!!!');
-
-      //     isParent = true;
-      //     //選択系
-      //     //node
-      //     elementName = getElementName($elm);
-      //     // filterValue = getFilterValue(elementName, $elm);
-      //     filterValue = getFilterValue($elm);
-      //     // console.log(elementName);
-      //     // console.log(filterValue);
-
-      //     switch (elementName) {
-      //       case 'Message':
-      //         script = script + ' if(' + 'item["Message"]' + '.indexOf("' + filterValue + '") !== -1';
-      //         break;
-
-      //       case 'Severity':
-      //         if (!isSeverity) {
-      //           isSeverity = true;
-      //           headScript = headScript + ' var severity=[];';
-
-      //           // for (var key in filterValue) {
-      //           _.each(filterValue, function (value, index) {
-      //             console.log($(value).data());
-      //             var severityValue = $(value).data();
-      //             console.log(severityValue['value']);
-      //             headScript = headScript + ' severity.push("' + severityValue['value'] + '"); ';
-      //           });
-      //         }
-      //         script = script + ' if( severity.indexOf(' + 'item["Severity"]' + ') !== -1';
-      //         break;
-
-      //       case 'Node':
-      //         script = script + ' if(' + 'item["Node"]' + '.indexOf("' + filterValue + '") !== -1';
-      //         break;
-
-      //       case 'Stamp':
-      //         break;
-
-      //       case 'Topic':
-      //         if (!isTopic) {
-      //           isTopic = true;
-      //           headScript = headScript + ' var topicName = item["Topics"].split(",");';
-      //         }
-      //         script = script + ' if(' + 'topicName' + '.indexOf("' + filterValue + '") !== -1';
-      //         break;
-
-      //       case 'Location':
-      //         script = script + ' if(' + 'item["Location"]' + '.indexOf("' + filterValue + '") !== -1';
-      //         break;
-      //     }
-      //   }
-
-      // } else {
-      //   if (!isParentEffective) {
-      //     console.log('parent filter disabled');
-      //     return jQueryEachContinue();
-      //   }
-      //   console.log('parent filter enabled');
-
-      //   $checkbox = $($elm.find('input.isEffective'));
-      //   var isChildEffective = $checkbox.prop('checked');
-      //   if (!isChildEffective) {
-      //     console.log('child filter disabled');
-      //     return jQueryEachContinue();
-      //   }
-      //   console.log('child filter enabled');
-
-
-      //   //AND時の処理
-      //   elementName = getElementName($elm);
-      //   // filterValue = getFilterValue(elementName, $elm);
-      //   filterValue = getFilterValue($elm);
-
-      //   if (isChildEffective) {
-
-      //     switch (elementName) {
-      //       case 'Message':
-      //         script = script + ' &&' + 'item["' + elementName + '"]' + '.indexOf("' + filterValue + '") !== -1';
-      //         break;
-
-      //       case 'Severity':
-      //         if (!isSeverity) {
-      //           isSeverity = true;
-      //           headScript =    updateFilter();
-      // rValue, function (value, index) {
-      //             console.log(value);
-      //             var severityValue = $(value).data();
-      //             headScript = headScript + ' severity.push("' + severityValue['value'] + '"); ';
-      //           });
-      //         }
-      //         script = script + ' && severity.indexOf(' + 'item["' + elementName + '"]' + ') !== -1';
-      //         break;
-
-      //       case 'Node':
-      //         script = script + ' &&' + 'item["' + elementName + '"]' + '.indexOf("' + filterValue + '") !== -1';
-      //         break;
-
-      //       case 'Stamp':
-
-      //         break;
-
-      //       case 'Topics':
-      //         if (!isTopic) {
-      //           isTopic = true;
-      //           headScript = headScript + ' var topicName = item["Topics"].split(",");';
-      //         }
-      //         script = script + ' &&' + ' topicName' + '.indexOf("' + filterValue + '") !== -1';
-      //         break;
-
-      //       case 'Location':
-      //         script = script + ' &&' + 'item["Location"]' + '.indexOf("' + filterValue + '") !== -1';
-      //         break;
-      //     }
-
-      //   }
-      // }
-
-      // console.log('isParentEffective:' + isParentEffective);
     });
-    // if (!isParent) {
-    //   script = script + 'return true;} filter(item);';
-    // } else {
-    //   script = script + '){ return false; } return true ;} filter(item);';
-    // }
-
-    // console.log(groupList);
-    if (parentId === 'exclude') {
-      excludeFilter = groupList;
-    } else {
-      highlightFilter = groupList;
-    }
-    // filterScript = headScript + script;
-    // console.log(filterScript);
-    updateFilter();
+    return severity;
   }
-
-  //excludeフィルタの中の値に変化があった時の処理
-  $('#exclude').on('change', function (e) {
-    // e.preventDefault();
-    filterOnChange('exclude');
-  });
-
-  $('#highlight').on('change', function (e) {
-    // e.preventDefault();
-    filterOnChange('highlight');
-  });
 
 
   ////////////////////////////////////////

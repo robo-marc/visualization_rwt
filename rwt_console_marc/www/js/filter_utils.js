@@ -13,7 +13,7 @@ var FilterUtils = {
     LOCATION: 'location',
   },
 
-  isMatchedToFilterGroup: function (item, group, useHighlight) {
+  isMatchedToFilterGroup: function (item, group) {
     var isAnyFilterEffective = false;
     var isAllFilterMatched = true;
 
@@ -43,30 +43,66 @@ var FilterUtils = {
           break;
 
         case FilterUtils.FILTER_TYPE.SEVERITY:
-          // TODO
+          if (filterValue === 0) {
+            // filter condition is empty
+            continue;
+          }
+
+          isAnyFilterEffective = true;
+          isMatched = ((item.SeverityNumber & filterValue) === item.SeverityNumber);
           break;
 
         case FilterUtils.FILTER_TYPE.NODE:
-          // TODO
+          if (filterValue + '' === '') {
+            // filter condition is empty
+            continue;
+          }
+
+          isAnyFilterEffective = true;
+          isMatched = (item.Node === filterValue);
           break;
 
         case FilterUtils.FILTER_TYPE.STAMP:
-          // TODO
+          if (filterValue.beginDate === undefined
+            && filterValue.endDate === undefined) {
+            // filter condition is empty
+            continue;
+          }
+
+          isAnyFilterEffective = true;
+          var itemStamp = item.MilliSec;
+          if (filterValue.useEndTime) {
+            isMatched = (filterValue.beginDate <= itemStamp) && (itemStamp <= filterValue.endDate);
+          } else {
+            isMatched = (filterValue.beginDate <= itemStamp);
+          }
           break;
 
         case FilterUtils.FILTER_TYPE.TOPICS:
-          // TODO
+          if (filterValue + '' === '') {
+            // filter condition is empty
+            continue;
+          }
+
+          isAnyFilterEffective = true;
+          isMatched = (item.Topics.indexOf(filterValue) !== -1);
           break;
 
         case FilterUtils.FILTER_TYPE.LOCATION:
-          // TODO
+          if (filterValue.location + '' === '') {
+            // filter condition is empty
+            continue;
+          }
+
+          isAnyFilterEffective = true;
+          if (filterValue.regex) {
+            isMatched = filterValue.regex.test(item.Location);
+          } else {
+            isMatched = (item.Location.indexOf(filterValue.location) !== -1);
+          }
           break;
 
-      } // end switch (filter.filterType)
-
-      if (useHighlight) {
-        item['_matched'] = isMatched;
-      }
+      } // end switch
       isAllFilterMatched &= isMatched;
     } // end for
 
@@ -78,15 +114,22 @@ var FilterUtils = {
       item['_matched'] = undefined;
     }
 
+    var isAnyGroupEffective = false;
     var isAnyGroupMatched = false;
     for (var i = 0, groupCount = filterGroupList.length; i < groupCount; i++) {
       var group = filterGroupList[i]; // one filter group
 
-      var groupResult = FilterUtils.isMatchedToFilterGroup(item, group, useHighlight);
+      var groupResult = FilterUtils.isMatchedToFilterGroup(item, group);
       if (groupResult.isEffective) {
+        isAnyGroupEffective = true;
         isAnyGroupMatched |= groupResult.isMatched;
       }
     }
+
+    if (useHighlight && isAnyGroupEffective) {
+      item['_matched'] = (isAnyGroupMatched ? true : false);
+    }
+
     return isAnyGroupMatched;
   },
 
@@ -126,9 +169,9 @@ var FilterUtils = {
     var dateStr = FilterUtils.getDateStr(now);
     var timeStr = FilterUtils.getTimeStr(now);
     var contentHtml = ''
-      + '<div class="parts-set stamp"><input type="time" class="time begin" step="0.01" value="' + timeStr + '"><input type="date" class="date begin" value="' + dateStr + '"></div>'
+      + '<div class="parts-set stamp"><input type="time" class="time begin" step="0.001" value="' + timeStr + '"><input type="date" class="date begin" value="' + dateStr + '"></div>'
       + '<input type="checkbox" class="use-end-stamp" checked>'
-      + '<div class="parts-set stamp"><input type="time" class="time end" step="0.01" value="' + timeStr + '"><input type="date" class="date end" value="' + dateStr + '"></div>'
+      + '<div class="parts-set stamp"><input type="time" class="time end" step="0.001" value="' + timeStr + '"><input type="date" class="date end" value="' + dateStr + '"></div>'
       ;
     return FilterUtils.getCommonHtml(FilterUtils.FILTER_TYPE.STAMP, 'from time range', conditionType, contentHtml);
   },
