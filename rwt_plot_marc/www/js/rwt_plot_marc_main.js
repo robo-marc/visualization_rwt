@@ -105,23 +105,9 @@ $(function () {
 
     _.each(typeInfo, function (fieldType, fieldName) {
       if (_.isArray(fieldType)) {
-        // console.log('[name, type]: [' + fieldName + ', ' + fieldType + '] is array');
         typeList.push(fieldName);
 
-        // // Parse object array. Is this necessary?
-        // _.each(fieldType, function (childType, index) {
-        //   if (typeof childType === 'object') {
-        //     var grandChildren = getMemberList(childType);
-        //     _.each(grandChildren, function (grandChild, index) {
-        //       var s = fieldName + '/' + grandChild;
-        //       typeList.push(s);
-        //     });
-        //   }
-        // });
-
       } else if (typeof fieldType === 'object') {
-        // console.log('[name, type]: [' + fieldName + ', ' + fieldType + '] is object');
-        // typeList.push(fieldName); // For set all member, but not implemented.
         var children = getFieldList(fieldType);
         _.each(children, function (child, index) {
           var s = fieldName + '/' + child;
@@ -152,7 +138,6 @@ $(function () {
   $('#remove-topic-button').on('click', function () {
     var msgFieldPath = $('#subscribed-select').val();
     if (subscribingMap[msgFieldPath]) {
-      console.log('unsubscribe: %s', msgFieldPath);
       subscribingMap[msgFieldPath].unsubscribe();
       delete subscribingMap[msgFieldPath];
       plot.removeSeries(msgFieldPath);

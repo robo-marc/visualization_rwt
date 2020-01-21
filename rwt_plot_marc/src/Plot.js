@@ -2,7 +2,7 @@
 
 /**
  * @fileOverview a file to define RWTPlot class.
- * @author Ryohei Ueda
+ * @author F-ROSROBO
  */
 
 
@@ -78,7 +78,6 @@ ROSLIB.RWTPlot.prototype.resizePlot = function () {
   var xEndTime = this.xScale.domain()[1];
   var xEndRosTime = ROSLIB.Time.fromDate(xEndTime);
 
-  // this.drawTimestampedData(xEndRosTime);
   this.lineDrawingThrottle(xEndRosTime);
 };
 
@@ -219,6 +218,10 @@ ROSLIB.RWTPlot.prototype.setMouseHandler = function () {
       // start scrolling only from above svg
       that.beginScroll(this, that);
     })
+    .on('touchstart', function () {
+      // start scrolling only from above svg
+      that.beginScroll(this, that);
+    })
     .on('mousemove', function () {
       that.paintPosition(this, that, $positionLabel);
     })
@@ -236,21 +239,27 @@ ROSLIB.RWTPlot.prototype.setMouseHandler = function () {
       // End scrolling when dragging ends
       that.endScroll(this, that);
     })
+    .on('touchend', function () {
+      that.endScroll(this, that);
+    })
+    .on('touchcancel', function () {
+      that.endScroll(this, that);
+    })
     .on('mousemove', function () {
+      that.scroll(this, that);
+    })
+    .on('touchmove', function () {
       that.scroll(this, that);
     })
     ;
 
-  // $('#' + this.contentId + ' svg').on('mouseout', function () {
-  //   $positionLabel.empty();
-  // });
 };
 
 ROSLIB.RWTPlot.prototype.paintPosition = function (e, plot, positionLabel) {
-  // マウスの物理座標を取得
+  // get mouse physical coordinates
   var m = d3.mouse(e);
 
-  // 物理座標からグラフ上の座標に変換
+  // convert from physical coordinates to coordinates on graph
   var x = plot.xScale.invert(m[0] - plot.margin.left);
   x = plot.round10((x.getTime() - plot.startTs) / 1000.0);
 
@@ -261,15 +270,13 @@ ROSLIB.RWTPlot.prototype.paintPosition = function (e, plot, positionLabel) {
 
 ROSLIB.RWTPlot.prototype.beginScroll = function (e, plot) {
   if (!plot.isPaused) {
-    // console.log('dont starting scroll because not paused');
     return;
   }
-  // console.log('begin scroll');
 
-  // マウスの物理座標を取得
+  // get mouse physical coordinates
   var m = d3.mouse(e);
 
-  // 物理座標からグラフ上の座標に変換
+  // convert from physical coordinates to coordinates on graph
   // date value of clicked position
   var xPointedTime = plot.xScale.invert(m[0] - plot.margin.left);
 
@@ -281,7 +288,6 @@ ROSLIB.RWTPlot.prototype.beginScroll = function (e, plot) {
 };
 
 ROSLIB.RWTPlot.prototype.endScroll = function (e, plot) {
-  // console.log('end scroll');
   plot.scrollBeginPosX = undefined;
   plot.scrollBeginMaxX = undefined;
 };
@@ -295,14 +301,13 @@ ROSLIB.RWTPlot.prototype.scroll = function (e, plot) {
   var xPointedTime = plot.scrollBeginPosX;
   var xEndTime = plot.scrollBeginMaxX;
   if (!xPointedTime || !xEndTime) {
-    // console.log('dont scroll because scrolling not started');
     return;
   }
 
-  // マウスの物理座標を取得
+  // get mouse physical coordinates
   var m = d3.mouse(e);
 
-  // 物理座標からグラフ上の座標に変換
+  // convert from physical coordinates to coordinates on graph
   // date value of current position
   var xPointingTime = plot.xScale.invert(m[0] - plot.margin.left);
 
@@ -356,8 +361,6 @@ ROSLIB.RWTPlot.prototype.paintLegend = function () {
 };
 
 ROSLIB.RWTPlot.prototype.allocatePath = function (id, color) {
-  var that = this;
-  // this.color.domain(_.range(num)); // update the domain of the color
   return this.svg.append('g')
     .attr('id', id)
     .attr('clip-path', 'url(#clip)')
@@ -582,7 +585,6 @@ ROSLIB.RWTPlot.prototype.addRawData = function (data) {
         .attr('d', this.line)
         .attr('transform', null)
         .transition()
-        //.duration(0)
         .ease('linear')
         .attr('transform', 'translate(' + this.xScale(-1) + ',0)');
     }
@@ -636,6 +638,12 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
   if (dataDimension === 0) {
     dataItem = [dataItem];          // force to encapsulate into array
   }
+
+  // isNumeric
+  if (!($.isNumeric(dataItem[0]))) {
+    return;
+  }
+
   this.checkYAxisMinMax(dataItem);
 
   this.allocatePathForArr(msgFieldPath, dataItem);
@@ -645,12 +653,6 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
     dataArr = [];
   }
 
-  // var beforeChopOldestStamp = null;
-  // if (dataArr.length > 0) {
-  //   beforeChopOldestStamp = dataArr[0].stamp;
-  // }
-
-  // var needToAnimate = this.chopTimestampedData(stamp);
   this.chopTimestampedData(stamp);
 
   dataArr = this.seriesMap[msgFieldPath]; // get chopped data array
@@ -669,46 +671,25 @@ ROSLIB.RWTPlot.prototype.addTimestampedData = function (msgFieldPath, stamp, dat
     return;
   }
 
-  // this.drawTimestampedData(stamp);
   this.lineDrawingThrottle(stamp);
 
-  // this.refreshXAxisDomainByRosTime(stamp);
+};
 
-  // // var dispDataTmp = this.getDisplayData(stamp, dataArr);
-  // // var dispData = dispDataTmp.data;
-  // // needToAnimate = dispDataTmp.animate;
-
-  // var afterChopOldestStamp = dataArr[0].stamp;
-  // for (var i = 0; i < dataItem.length; i++) { // x_i := i
-  //   var fieldPathId = this.getFieldPathId(msgFieldPath, i);
-
-  //   var plotData = [];
-  //   for (var j = 0; j < dataArr.length; j++) {
-  //     var value = dataArr[j][i];
-  //     // scale x(i) here
-  //     if (!stamp.equal(afterChopOldestStamp)) {
-  //       var newData = [dataArr[j].stamp, value]; // [x1, y1] or [x1, z1]
-  //       plotData.push(newData);
-  //     }
-  //   }
-
-  //   if (needToAnimate) {
-  //     var translation = afterChopOldestStamp.substract(beforeChopOldestStamp).toSec();
-
-  //     this.paths[fieldPathId]
-  //       .datum(plotData)
-  //       .attr('d', this.line)
-  //       .attr('transform', null)
-  //       .transition()
-  //       //.duration(0)
-  //       .ease('linear')
-  //       .attr('transform', 'translate(' + (-translation) + ',0)');
-  //   } else {
-  //     this.paths[fieldPathId]
-  //       .datum(plotData)lineDrawingThrottle
-  //       .transition();
-  //   }
-  // }
+ROSLIB.RWTPlot.prototype.getBeginIndex = function (beginTime, searchTarget) {
+  //binary search
+  var left = 0;
+  var right = searchTarget.length - 1;
+  while (left < right) {
+    var middle = Math.floor(left + (right - left) / 2);
+    var stamp = searchTarget[middle].stamp.toNanoSec();
+    if (stamp <= beginTime) {
+      left = middle + 1;
+    } else {
+      right = middle;
+    }
+  }
+  var beginIndex = left;
+  return beginIndex;
 };
 
 ROSLIB.RWTPlot.prototype.drawTimestampedData = function (xEndTime) {
@@ -719,9 +700,8 @@ ROSLIB.RWTPlot.prototype.drawTimestampedData = function (xEndTime) {
   }
   var xBeginTime = xEndTime.substract(ROSLIB.Time.fromSec(this.xDomainWidth));
 
-  xEndTime = xEndTime.toDate().getTime();
-  xBeginTime = xBeginTime.toDate().getTime() - 500; // begin before 0.5 sec from y-axis position
-
+  xEndTime = xEndTime.toNanoSec();
+  xBeginTime = xBeginTime.toNanoSec() - 500000000; // begin before 0.5 sec from y-axis position
   var that = this;
   _.each(this.seriesMap, function (dataArr, msgFieldPath) {
     if (!dataArr) {
@@ -732,33 +712,31 @@ ROSLIB.RWTPlot.prototype.drawTimestampedData = function (xEndTime) {
     if (dataArr.length > 0) {
       dataItemLength = dataArr[0].length;
     }
+    var beginIndex = that.getBeginIndex(xBeginTime, dataArr);
     for (var i = 0; i < dataItemLength; i++) { // x_i := i
       var fieldPathId = that.getFieldPathId(msgFieldPath, i);
 
       var plotData = [];
       var dataArrLength = dataArr.length;
-      for (var j = 0; j < dataArrLength; j++) {
-        var stamp = dataArr[j].stamp.toDate().getTime();
-        var value = dataArr[j][i];
-        // scale x(i) here
-        // if (!stamp.equal(afterChopOldestStamp)) {
-        if (xBeginTime <= stamp && stamp <= xEndTime) {
+      for (var j = beginIndex; j < dataArrLength; j++) {
+        var stamp = dataArr[j].stamp.toNanoSec();
+        if (stamp <= xEndTime) {
+          var value = dataArr[j][i];
           var newData = [dataArr[j].stamp, value]; // [x1, y1] or [x1, z1]
           plotData.push(newData);
+        } else {
+          break;
         }
-        // }
       }
 
       var needToAnimate = false;
       if (needToAnimate) {
-        // var translation = afterChopOldestStamp.substract(beforeChopOldestStamp).toSec();
         var translation = 0;
         that.paths[fieldPathId]
           .datum(plotData)
           .attr('d', that.line)
           .attr('transform', null)
           .transition()
-          //.duration(0)
           .ease('linear')
           .attr('transform', 'translate(' + (-translation) + ',0)');
       } else {

@@ -10,7 +10,7 @@
  * @class DiagnosticsStatus
  * @param spec
  */
-ROSLIB.DiagnosticsStatus = function(spec) {
+ROSLIB.DiagnosticsStatus = function (spec) {
   if (typeof spec === 'undefined') {
     spec = {};
   }
@@ -26,7 +26,7 @@ ROSLIB.DiagnosticsStatus = function(spec) {
 
   // parsing name
   // name has a directory separated by /
-  this.path = _.filter(this.name.split('/'), function(str) {
+  this.path = _.filter(this.name.split('/'), function (str) {
     return str.toString() !== ''.toString();
   });
 };
@@ -34,37 +34,46 @@ ROSLIB.DiagnosticsStatus = function(spec) {
 ROSLIB.DiagnosticsStatus.LEVEL = {
   OK: 0,
   WARN: 1,
-  ERROR: 2
+  ERROR: 2,
+  STALE: 3
 };
 
 /**
  * return true if the level is OK
  */
-ROSLIB.DiagnosticsStatus.prototype.isOK = function() {
+ROSLIB.DiagnosticsStatus.prototype.isOK = function () {
   return this.level === ROSLIB.DiagnosticsStatus.LEVEL.OK;
 };
 
 /**
  * return true if the level is WARN
  */
-ROSLIB.DiagnosticsStatus.prototype.isWARN = function() {
+ROSLIB.DiagnosticsStatus.prototype.isWARN = function () {
   return this.level === ROSLIB.DiagnosticsStatus.LEVEL.WARN;
 };
 
 /**
  * return true if the level is ERROR
  */
-ROSLIB.DiagnosticsStatus.prototype.isERROR = function() {
+ROSLIB.DiagnosticsStatus.prototype.isERROR = function () {
   return this.level === ROSLIB.DiagnosticsStatus.LEVEL.ERROR;
 };
 
 /**
+ * return true if the level is STALE
+ */
+ROSLIB.DiagnosticsStatus.prototype.isSTALE = function () {
+  return this.level === ROSLIB.DiagnosticsStatus.LEVEL.STALE;
+};
+
+
+/**
  * create DiagnosticsStatus instances from DiagnosticArray
  */
-ROSLIB.DiagnosticsStatus.createFromArray = function(msg) {
+ROSLIB.DiagnosticsStatus.createFromArray = function (msg) {
   var header = msg.header;
   var header_stamp = ROSLIB.Time.fromROSMsg(header);
-  return _.map(msg.status, function(status) {
+  return _.map(msg.status, function (status) {
     return new ROSLIB.DiagnosticsStatus({
       timestamp: header_stamp,
       name: status.name,
@@ -80,14 +89,14 @@ ROSLIB.DiagnosticsStatus.createFromArray = function(msg) {
  * return the level as string
  */
 
-ROSLIB.DiagnosticsStatus.prototype.levelString = function() {
-  if (this.isERROR()) {
-    return 'Error';
-  }
-  else if (this.isWARN()) {
-    return 'Warn';
-  }
-  else if (this.isOK()){
+ROSLIB.DiagnosticsStatus.prototype.levelString = function () {
+  if (this.isSTALE()) {
+    return 'STALE';
+  } else if (this.isERROR()) {
+    return 'ERROR';
+  } else if (this.isWARN()) {
+    return 'WARNING';
+  } else if (this.isOK()) {
     return 'OK';
   }
 };

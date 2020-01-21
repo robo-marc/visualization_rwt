@@ -9,7 +9,7 @@
  * @class DiagnosticsDirectory
  * @param spec
  */
-ROSLIB.DiagnosticsDirectory = function(spec, parent, children) {
+ROSLIB.DiagnosticsDirectory = function (spec, parent, children) {
   if (typeof parent === 'undefined') {
     parent = null;
   }
@@ -29,7 +29,7 @@ ROSLIB.DiagnosticsDirectory = function(spec, parent, children) {
  * of ROSLIB.DiagnosticsDirectory. if failed, returns null.
  * @param name - the name of directory
  */
-ROSLIB.DiagnosticsDirectory.prototype.findDirectory = function(name) {
+ROSLIB.DiagnosticsDirectory.prototype.findDirectory = function (name) {
   if (this.name.toString() === name.toString()) {
     return this;
   }
@@ -51,7 +51,7 @@ ROSLIB.DiagnosticsDirectory.prototype.findDirectory = function(name) {
  * add child directory to this directory
  * @param directory - an instance of ROSLIB.DiagnosticsDirectory
  */
-ROSLIB.DiagnosticsDirectory.prototype.addChild = function(directory) {
+ROSLIB.DiagnosticsDirectory.prototype.addChild = function (directory) {
   this.children.push(directory);
   directory.parent = this;
 };
@@ -60,7 +60,7 @@ ROSLIB.DiagnosticsDirectory.prototype.addChild = function(directory) {
  * create a child directory which has this directory as parent
  * @ param name - name of child directory
  */
-ROSLIB.DiagnosticsDirectory.prototype.createChild = function(name) {
+ROSLIB.DiagnosticsDirectory.prototype.createChild = function (name) {
   var child = new ROSLIB.DiagnosticsDirectory({
     name: name
   }, this);
@@ -72,7 +72,7 @@ ROSLIB.DiagnosticsDirectory.prototype.createChild = function(name) {
  * register a status to the directory
  * @param status - instance of ROSLIB.DiagnosticsStatus
  */
-ROSLIB.DiagnosticsDirectory.prototype.registerStatus = function(status) {
+ROSLIB.DiagnosticsDirectory.prototype.registerStatus = function (status) {
   this.status = status;
   return status;
 };
@@ -81,7 +81,7 @@ ROSLIB.DiagnosticsDirectory.prototype.registerStatus = function(status) {
  * return the instance of directory if the directory has error instance 
  * as children.
  */
-ROSLIB.DiagnosticsDirectory.prototype.isChildrenHasError = function() {
+ROSLIB.DiagnosticsDirectory.prototype.isChildrenHasError = function () {
   if (this.isErrorStatus()) {
     return this;
   }
@@ -98,7 +98,7 @@ ROSLIB.DiagnosticsDirectory.prototype.isChildrenHasError = function() {
 /**
  * return true if the status registered to the directory has error level.
  */
-ROSLIB.DiagnosticsDirectory.prototype.isErrorStatus = function() {
+ROSLIB.DiagnosticsDirectory.prototype.isErrorStatus = function () {
   if (this.status) {
     return this.status.isERROR();
   }
@@ -110,8 +110,8 @@ ROSLIB.DiagnosticsDirectory.prototype.isErrorStatus = function() {
 /**
  * return full path of the directory
  */
-ROSLIB.DiagnosticsDirectory.prototype.fullName = function() {
-  var rec = function(target_dir) {
+ROSLIB.DiagnosticsDirectory.prototype.fullName = function () {
+  var rec = function (target_dir) {
     if (target_dir.parent === null) { // root
       return '';
     }
@@ -126,8 +126,8 @@ ROSLIB.DiagnosticsDirectory.prototype.fullName = function() {
 /**
  * get the uniq id which is available as html id
  */
-ROSLIB.DiagnosticsDirectory.prototype.uniqID = function() {
-  var rec = function(target_dir) {
+ROSLIB.DiagnosticsDirectory.prototype.uniqID = function () {
+  var rec = function (target_dir) {
     if (target_dir.parent === null) { // root
       return '';
     }
@@ -148,10 +148,10 @@ ROSLIB.DiagnosticsDirectory.prototype.uniqID = function() {
 /**
  * get an array of all the directories without root itself
  */
-ROSLIB.DiagnosticsDirectory.prototype.getAllDirectoriesWithoutRoot = function() {
+ROSLIB.DiagnosticsDirectory.prototype.getAllDirectoriesWithoutRoot = function () {
   var self = this;
   var directories = self.getAllDirectories();
-  _.remove(directories, function(dir) {
+  _.remove(directories, function (dir) {
     return dir === self;
   });
   return directories;
@@ -160,8 +160,8 @@ ROSLIB.DiagnosticsDirectory.prototype.getAllDirectoriesWithoutRoot = function() 
 /**
  * get an array of all the directories
  */
-ROSLIB.DiagnosticsDirectory.prototype.getAllDirectories = function() {
-  var rec = function(target_dir) {
+ROSLIB.DiagnosticsDirectory.prototype.getAllDirectories = function () {
+  var rec = function (target_dir) {
     if (target_dir.children.length === 0) {
       return [target_dir];
     }
@@ -182,8 +182,8 @@ ROSLIB.DiagnosticsDirectory.prototype.getAllDirectories = function() {
 /**
  * get an array of directories which has `level' such as error, warning and ok.
  */
-ROSLIB.DiagnosticsDirectory.prototype.getDirectories = function(level) {
-  var rec = function(target_dir) {
+ROSLIB.DiagnosticsDirectory.prototype.getDirectories = function (level) {
+  var rec = function (target_dir) {
     if (target_dir.children.length === 0) {
       if (target_dir.status && target_dir.status.level === level) {
         return [target_dir];
@@ -210,28 +210,28 @@ ROSLIB.DiagnosticsDirectory.prototype.getDirectories = function(level) {
 /**
  * return an array of directories which has error status
  */
-ROSLIB.DiagnosticsDirectory.prototype.getErrorDirectories = function() {
+ROSLIB.DiagnosticsDirectory.prototype.getErrorDirectories = function () {
   return this.getDirectories(ROSLIB.DiagnosticsStatus.LEVEL.ERROR);
 };
 
 /**
  * return an array of directories which has warn status
  */
-ROSLIB.DiagnosticsDirectory.prototype.getWarnDirectories = function() {
+ROSLIB.DiagnosticsDirectory.prototype.getWarnDirectories = function () {
   return this.getDirectories(ROSLIB.DiagnosticsStatus.LEVEL.WARN);
 };
 
 /**
  * return an array of directories which has ok status
  */
-ROSLIB.DiagnosticsDirectory.prototype.getOkDirectories = function() {
+ROSLIB.DiagnosticsDirectory.prototype.getOkDirectories = function () {
   return this.getDirectories(ROSLIB.DiagnosticsStatus.LEVEL.OK);
 };
 
 /**
  * look up the directory by name throught directory tree return the instance of the directory
  */
-ROSLIB.DiagnosticsDirectory.prototype.findByName = function(name) {
+ROSLIB.DiagnosticsDirectory.prototype.findByName = function (name) {
   if (this.status && this.status.name.toString() === name.toString()) {
     return this;
   }
@@ -249,34 +249,22 @@ ROSLIB.DiagnosticsDirectory.prototype.findByName = function(name) {
 /**
  * return html to show icon suitable for error status of the directory
  */
-ROSLIB.DiagnosticsDirectory.prototype.getIconHTML = function() {
-  if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.OK) {
-    return '<span class="glyphicon-ok glyphicon"></span>';
-  }
-  else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.WARN) {
-    return '<span class="glyphicon-exclamation-sign glyphicon"></span>';
-  }
-  else if (this.status.level === ROSLIB.DiagnosticsStatus.LEVEL.ERROR) {
-    return '<span class="glyphicon-minus-sign glyphicon"></span>';
-  }
-};
-
-/**
- * return html of icon to show this directory has child
- */
-ROSLIB.DiagnosticsDirectory.prototype.getCollapseIconHTML = function() {
-  if (this.children.length !== 0) {
-    return '<span class="glyphicon-chevron-right glyphicon"></span>';
-  }
-  else {
-    return '';
+ROSLIB.DiagnosticsDirectory.prototype.getIcon = function () {
+  switch (this.status.level) {
+    case ROSLIB.DiagnosticsStatus.LEVEL.OK:
+      return 'ok';
+    case ROSLIB.DiagnosticsStatus.LEVEL.WARN:
+      return 'warn';
+    case ROSLIB.DiagnosticsStatus.LEVEL.ERROR:
+      return 'error';
+    case ROSLIB.DiagnosticsStatus.LEVEL.STALE:
+      return 'stale';
   }
 };
-
 
 /**
  * return true if the directory has any children
  */
-ROSLIB.DiagnosticsDirectory.prototype.hasChildren = function() {
+ROSLIB.DiagnosticsDirectory.prototype.hasChildren = function () {
   return this.children.length !== 0;
 };

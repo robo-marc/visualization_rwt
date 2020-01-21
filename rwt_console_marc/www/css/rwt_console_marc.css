@@ -1,9 +1,15 @@
-/* css */
+/* contents_header */
 
 .hidden {
-    display: none !important;
-    visibility: hidden !important;
+    display: none;
 }
+
+/* contents_body - grid */
+
+.ui-widget {
+    margin-bottom: 0;
+}
+
 .cell-title {
     font-weight: bold;
 }
@@ -12,16 +18,73 @@
     text-align: center;
 }
 
-.toggle {
-    height: 9px;
-    width: 9px;
+.slick-cell.r2 {
+    padding-left: 16px;
+}
+
+span.severity {
+    color: #fff;
+    font-size: 0.5625rem;
+    padding: 1px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
     display: inline-block;
+    width: 2.2rem;
+    text-align: center;
 }
 
-.toggle.expand {
-    background: url(../images/expand.gif) no-repeat center center;
+span.severity.Debug {
+    background-color: rgb(177, 170, 171);
 }
 
-.toggle.collapse {
-    background: url(../images/collapse.gif) no-repeat center center;
+span.severity.Info {
+    background-color: rgb(105, 189, 245);
+}
+
+span.severity.Warn {
+    background-color: rgb(87, 209, 16);
+}
+
+span.severity.Error {
+    background-color: rgb(255, 157, 29);
+}
+
+span.severity.Fatal {
+    background-color: #EC5363;
+}
+
+.notMatched {
+    color: #b0b0b0;
+}
+
+span.severity.notMatched {
+    color: #b0b0b0;
+    background-color: rgb(224, 224, 224);
+}
+
+/* contents_sub (filter) */
+.contents_sub label.disabled {
+    color: #a0a0a0;
+}
+
+span.label.and {
+    letter-spacing: 0.7px;
+    font-size: 0.625rem;
+    border-radius: 30px;
+    box-sizing: border-box;
+    padding: 1px 12px;
+    margin: 2px 6px 2px 2px;
+    display: block;
+    color: #fff;
+    background-color: #58A0D6;
+    transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.console_sub .filter-list>li .stamp {
+    width: 100%;
+}
+
+.console_sub .filter-list>li .stamp input {
+    height: 2rem;
+    width: 50%;
 }

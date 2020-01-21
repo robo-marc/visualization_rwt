@@ -1,6 +1,25 @@
 /**
  * 
  */
+ROSLIB.Ros.prototype.autoConnect = function () {
+  var value = "ws://" + location.hostname + ":8888/";
+  this.connect(value);
+};
+
+/**
+ * 
+ */
+ROSLIB.Ros.prototype.url = function () {
+  if (this.socket) {
+    return new URL(this.socket.url);
+  } else {
+    return null;
+  }
+};
+
+/**
+ * 
+ */
 ROSLIB.Ros.prototype.getSrvList = function (callback, failedCallback) {
   var client = new ROSLIB.Service({
     ros: this,
@@ -103,6 +122,7 @@ ROSLIB.Ros.prototype.loadParams = function (params, callback, failedCallback) {
   }
 };
 
+// TODO del
 /**
  * Retrieves Hz Bandwidth in ROS from Topic
  * @class Ros
@@ -113,13 +133,108 @@ ROSLIB.Ros.prototype.getTopicInfo = function (topicName, topicType, callback, fa
   var client = new ROSLIB.Service({
     ros: this,
     name: '/topic_hz_bw',
-    serviceType: 'rwt_rostopic_marc/TopicHzBw'
+    serviceType: 'rwt_topic_content_marc/TopicHzBw'
   });
 
   var request = new ROSLIB.ServiceRequest({
     name: topicName,
     type: topicType
   });
+  if (typeof failedCallback === 'function') {
+    client.callService(request,
+      function (result) {
+        callback(result);
+      },
+      function (message) {
+        failedCallback(message);
+      }
+    );
+  } else {
+    client.callService(request, function (result) {
+      callback(result);
+    });
+  }
+};
+
+/**
+ * Start monitoring to retrieves Hz Bandwidth in ROS from Topic
+ * @class Ros
+ * @param topicName topic name to find:
+ * @param topicType topic type to find:
+ */
+ROSLIB.Ros.prototype.startMonitoring = function (topicName, topicType, callback, failedCallback) {
+  var client = new ROSLIB.Service({
+    ros: this,
+    name: '/start_monitoring',
+    serviceType: 'rwt_topic_content_marc/StartMonitoring'
+  });
+
+  var request = new ROSLIB.ServiceRequest({
+    name: topicName,
+    type: topicType
+  });
+  if (typeof failedCallback === 'function') {
+    client.callService(request,
+      function (result) {
+        callback(result);
+      },
+      function (message) {
+        failedCallback(message);
+      }
+    );
+  } else {
+    client.callService(request, function (result) {
+      callback(result);
+    });
+  }
+};
+
+/**
+ * Stop monitoring to retrieves Hz Bandwidth in ROS from Topic
+ * @class Ros
+ * @param topicName topic name to find:
+ * @param topicType topic type to find:
+ */
+ROSLIB.Ros.prototype.stopMonitoring = function (topicName, topicType, callback, failedCallback) {
+  var client = new ROSLIB.Service({
+    ros: this,
+    name: '/stop_monitoring',
+    serviceType: 'rwt_topic_content_marc/StopMonitoring'
+  });
+
+  var request = new ROSLIB.ServiceRequest({
+    name: topicName,
+    type: topicType
+  });
+  if (typeof failedCallback === 'function') {
+    client.callService(request,
+      function (result) {
+        callback(result);
+      },
+      function (message) {
+        failedCallback(message);
+      }
+    );
+  } else {
+    client.callService(request, function (result) {
+      callback(result);
+    });
+  }
+};
+
+/**
+ * Retrieves Hz Bandwidth in ROS from Topic
+ * @class Ros
+ */
+ROSLIB.Ros.prototype.getMonitoringInfo = function (callback, failedCallback) {
+  var client = new ROSLIB.Service({
+    ros: this,
+    name: '/get_monitoring_info',
+    serviceType: 'rwt_topic_content_marc/GetMonitoringInfo'
+  });
+
+  var request = new ROSLIB.ServiceRequest(
+  );
   if (typeof failedCallback === 'function') {
     client.callService(request,
       function (result) {
@@ -163,6 +278,10 @@ ROSLIB.Time.prototype.toSec = function () {
 
 ROSLIB.Time.prototype.toMillSec = function () {
   return this.secs * 1000 + this.nsecs / 1000000.0;
+};
+
+ROSLIB.Time.prototype.toNanoSec = function () {
+  return this.secs * 1000000000 + this.nsecs;
 };
 
 ROSLIB.Time.prototype.add = function (another) {

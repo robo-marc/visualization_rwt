@@ -41,6 +41,7 @@ module.exports = function (grunt) {
       files: [
         'Gruntfile.js',
         '../src/*.js',
+        '../www/js/config.js',
         '../www/js/rwt_moveit_monitor_marc_main.js'
       ]
     },
@@ -65,7 +66,7 @@ module.exports = function (grunt) {
     }
   }
 
-//  grunt.registerTask('build', ['concat', 'jshint', 'uglify', 'less']);
+  //  grunt.registerTask('build', ['concat', 'jshint', 'uglify', 'less']);
   grunt.registerTask('build', ['jshint', 'less']);
   grunt.registerTask('default', ['build']);
   grunt.registerTask('doc', ['jsdoc']);

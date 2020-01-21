@@ -7,14 +7,10 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   rwt_utils_3rdparty
   rwt_utils_marc
+  rwt_topic_content_marc
   std_msgs
   message_generation  
   roswww
-)
-
-add_service_files(
-   FILES
-   TopicHzBw.srv
 )
 
 generate_messages(
@@ -23,10 +19,10 @@ generate_messages(
   geometry_msgs
 )
 
-
 catkin_package(
   CATKIN_DEPENDS geometry_msgs rosbridge_server rospy std_msgs rwt_utils_3rdparty rwt_utils_marc roswww
 )
+
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )

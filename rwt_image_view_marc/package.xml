@@ -12,18 +12,21 @@
   <url type="repository">https://github.com/robo-marc/visualization_rwt</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+
   <build_depend>web_video_server</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>message_generation</build_depend>
-  <build_depend>rwt_utils_3rdparty</build_depend>
   <build_depend>std_srvs</build_depend>
+  <build_depend>rwt_utils_3rdparty</build_depend>
   <build_depend>roswww</build_depend>
+
   <run_depend>web_video_server</run_depend>
   <run_depend>rospy</run_depend>
-  <run_depend>rwt_utils_3rdparty</run_depend>
   <run_depend>std_srvs</run_depend>
-  <run_depend>roswww</run_depend>
   <run_depend>message_runtime</run_depend>
+  <run_depend>rwt_utils_3rdparty</run_depend>
+  <run_depend>rwt_utils_marc</run_depend>
+  <run_depend>roswww</run_depend>
 
   <export>
   </export>

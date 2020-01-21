@@ -1,0 +1,14 @@
+<launch>
+  <arg name="launch_roswww" default="true" />
+  <arg name="display" default=":102" />
+  <include file="$(find rwt_graph_marc)/launch/www.launch" if="$(arg launch_roswww)" />
+
+  <node pkg="rwt_graph_marc" type="xvnc.sh" args="$(arg display)" name="$(anon xvnc)" output="screen" />
+  <node pkg="rwt_graph_marc" type="launch_websockify.sh" args="$(arg display)" name="$(anon websocktify)" output="screen" />
+  <node pkg="rwt_graph_marc" type="wm.sh" args="-f $(find rwt_graph_marc)/config/ratpoisonrc" name="$(anon wm)" output="screen" respawn="true" respawn_delay="1">
+    <env name="DISPLAY" value="$(arg display)" />
+  </node>
+  <node pkg="rqt_graph" type="rqt_graph" name="graph" output="screen" respawn="true" respawn_delay="1">
+    <env name="DISPLAY" value="$(arg display)" />
+  </node>
+</launch>

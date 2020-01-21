@@ -3,6 +3,8 @@
     "module": true,
     "EventEmitter2": true,
     "ROSLIB": true,
+    "RwtUtils": true,
+    "Slick": true,
     "_": true,
     "$": true
   },

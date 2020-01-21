@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!--
+    noVNC example: lightweight example using minimal UI and features
+
+    This is a self-contained file which doesn't import WebUtil or external CSS.
+
+    Copyright (C) 2019 The noVNC Authors
+    noVNC is licensed under the MPL 2.0 (see LICENSE.txt)
+    This file is licensed under the 2-Clause BSD license (see LICENSE.txt).
+
+    Connect parameters are provided in query string:
+        http://example.com/?host=HOST&port=PORT&scale=true
+    -->
+    <title>rwt_rviz_marc</title>
+
+    <meta charset="utf-8">
+
+    <style>
+
+        body {
+            margin: 0;
+            background-color: white;
+            height: 100%;
+        }
+        html {
+            height: 100%;
+        }
+
+        #top_bar {
+            background-color: #6e84a3;
+            color: white;
+            font: bold 12px Helvetica;
+            padding: 6px 5px 4px 5px;
+            border-bottom: 1px outset;
+        }
+        #status {
+            text-align: center;
+        }
+        #sendCtrlAltDelButton {
+            position: fixed;
+            top: 0px;
+            right: 0px;
+            border: 1px outset;
+            padding: 5px 5px 4px 5px;
+            cursor: pointer;
+        }
+
+        #screen {
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+
+    <!-- Promise polyfill for IE11 -->
+    <script src="../rwt_utils_3rdparty/noVNC/vendor/promise.js"></script>
+
+    <!-- ES2015/ES6 modules polyfill -->
+    <script nomodule src="../rwt_utils_3rdparty/noVNC/vendor/browser-es-module-loader/dist/browser-es-module-loader.js"></script>
+
+    <!-- actual script modules -->
+    <script type="module" crossorigin="anonymous">
+        // RFB holds the API to connect and communicate with a VNC server
+        import RFB from '../rwt_utils_3rdparty/noVNC/core/rfb.js';
+
+        let rfb;
+        let desktopName;
+
+        // When this function is called we have received
+        // a desktop name from the server
+        function updateDesktopName(e) {
+            desktopName = e.detail.name;
+        }
+
+        // This function extracts the value of one variable from the
+        // query string. If the variable isn't defined in the URL
+        // it returns the default value instead.
+        function readQueryVariable(name, defaultValue) {
+            // A URL with a query parameter can look like this:
+            // https://www.example.com?myqueryparam=myvalue
+            //
+            // Note that we use location.href instead of location.search
+            // because Firefox < 53 has a bug w.r.t location.search
+            const re = new RegExp('.*[?&]' + name + '=([^&#]*)'),
+                  match = document.location.href.match(re);
+            if (typeof defaultValue === 'undefined') { defaultValue = null; }
+
+            if (match) {
+                // We have to decode the URL since want the cleartext value
+                return decodeURIComponent(match[1]);
+            }
+
+            return defaultValue;
+        }
+
+        // Read parameters specified in the URL query string
+        // By default, use the host and port of server that served this file
+        const host = readQueryVariable('host', window.location.hostname);
+        let port = 6081;
+        const path = readQueryVariable('path', 'websockify');
+
+        // | | |         | | |
+        // | | | Connect | | |
+        // v v v         v v v
+
+        // Build the websocket URL used to connect
+        let url;
+        if (window.location.protocol === "https:") {
+            url = 'wss';
+        } else {
+            url = 'ws';
+        }
+        url += '://' + host;
+        if(port) {
+            url += ':' + port;
+        }
+        url += '/' + path;
+
+        // Creating a new RFB object will start a new connection
+        rfb = new RFB(document.getElementById('screen'), url,
+                        { wsProtocols: ['binary', 'base64']  });
+
+        // Add listeners to important events from the RFB module
+        rfb.addEventListener("desktopname", updateDesktopName);
+
+        // Set parameters that can be changed on an active connection
+        rfb.viewOnly = readQueryVariable('view_only', false);
+        rfb.scaleViewport = readQueryVariable('scale', false);
+        rfb.resizeSession = readQueryVariable('resize', true);
+    </script>
+</head>
+
+<body>
+    <div id="screen" style="padding: 0; margin: 0">
+        <!-- This is where the remote screen will appear -->
+    </div>
+</body>
+</html>

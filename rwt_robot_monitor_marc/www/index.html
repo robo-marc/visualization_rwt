@@ -1,99 +1,227 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 
 <head>
-  <meta charset="utf-8" />
-  <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css">
+  <meta charset="UTF-8">
+  <title>rwt_robot_monitor_marc</title>
+  <meta name="author" content="Prototype">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../rwt_utils_marc/common/iconfont/material-icons.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/common/css/common.css">
   <link rel="stylesheet" type="text/css" href="css/rwt_robot_monitor.css">
-  <link rel="stylesheet" href="common/iconfont/material-icons.css">
-  <link rel="stylesheet" href="common/css/common.css">
   </link>
-  <title>rwt_robot_monitor</title>
 </head>
 
 <body>
-  <div class="container">
+  <div class="root">
 
-    <div class="page-header">
-      <h1>rwt_robot_monitor_marc
-        <!-- <a href="/rwt_robot_monitor/plotter.html">plotter is here</a></small></h1> -->
-        <a href="http://wiki.ros.org/rqt_robot_monitor" target="_blank" class="icon"><i
+    <header>
+      <div class="column">
+        <h2>rwt_robot_monitor_marc</h2>
+        <a href="http://wiki.ros.org/rwt_robot_monitor" target="_blank" class="icon"><i
             class="material-icons">help_outline</i></a>
+      </div>
+    </header>
+
+    <div class="contents robot_monitor">
+
+      <div class="contents_header">
+        <nav>
+          <ul>
+            <li>
+              <a id="pause-button" href class="icon"><i class="material-icons">pause</i>Pause</a>
+              <a id="start-button" href class="icon"><i class="material-icons">play_arrow</i>Resume</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="container">
+        <div class="contents_body">
+
+          <div class="contents-box">
+            <h3>Errors Device</h3>
+            <div class="table-wrap">
+              <table class="table-type-2" id="error-table">
+                <thead>
+                  <tr>
+                    <th class="name_1">Name</th>
+                    <th class="name_2">Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <td class="data_1" id=error_data_1></td>
+                  <td class="data_2" id=error_data_2></td>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="contents-box">
+            <h3>Warning Device</h3>
+            <div class="table-wrap">
+              <table class="table-type-2" id="warn-table">
+                <thead>
+                  <tr>
+                    <th class="name_1">Name</th>
+                    <th class="name_2">Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <td class="data_1" id=warn_data_1></td>
+                  <td class="data_2" id=warn_data_2></td>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- hide status stale -->
+        <div class="contents-box" hidden>
+          <h3>Stale Device</h3>
+          <div class="table-wrap">
+            <table class="table-type-2" id="stale-table">
+              <thead>
+                <tr>
+                  <th class="name_1">Name</th>
+                  <th class="name_2">Message</th>
+                </tr>
+              </thead>
+              <tbody>
+                <td class="data_1" id=error_data_1></td>
+                <td class="data_2" id=error_data_2></td>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="contents-box">
+          <h3>All Device</h3>
+          <div class="table-wrap all">
+            <table class="table-type-2 tree" id="all-table">
+              <thead>
+                <tr>
+                  <th class="name_1">Name</th>
+                  <th class="name_2">Message</th>
+                </tr>
+              </thead>
+              <tbody>
+                <td class="data_1"><span></span></td>
+                <td class="data_2"></td>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="contents-box">
+          <h3>Time</h3>
+          <div class="time-box_1">
+            <div class="text left">old</div>
+            <div class="time-list">
+              <ul>
+                <li a href="#" class="time-item no" id="btn29" name="btn29"></a></li>
+                <li a href="#" class="time-item no" id="btn28" name="btn28"></a></li>
+                <li a href="#" class="time-item no" id="btn27" name="btn27"></a></li>
+                <li a href="#" class="time-item no" id="btn26" name="btn26"></a></li>
+                <li a href="#" class="time-item no" id="btn25" name="btn25"></a></li>
+                <li a href="#" class="time-item no" id="btn24" name="btn24"></a></li>
+                <li a href="#" class="time-item no" id="btn23" name="btn23"></a></li>
+                <li a href="#" class="time-item no" id="btn22" name="btn22"></a></li>
+                <li a href="#" class="time-item no" id="btn21" name="btn21"></a></li>
+                <li a href="#" class="time-item no" id="btn20" name="btn20"></a></li>
+                <li a href="#" class="time-item no" id="btn19" name="btn19"></a></li>
+                <li a href="#" class="time-item no" id="btn18" name="btn18"></a></li>
+                <li a href="#" class="time-item no" id="btn17" name="btn17"></a></li>
+                <li a href="#" class="time-item no" id="btn16" name="btn16"></a></li>
+                <li a href="#" class="time-item no" id="btn15" name="btn15"></a></li>
+                <li a href="#" class="time-item no" id="btn14" name="btn14"></a></li>
+                <li a href="#" class="time-item no" id="btn13" name="btn13"></a></li>
+                <li a href="#" class="time-item no" id="btn12" name="btn12"></a></li>
+                <li a href="#" class="time-item no" id="btn11" name="btn11"></a></li>
+                <li a href="#" class="time-item no" id="btn10" name="btn10"></a></li>
+                <li a href="#" class="time-item no" id="btn9" name="btn9"></a></li>
+                <li a href="#" class="time-item no" id="btn8" name="btn8"></a></li>
+                <li a href="#" class="time-item no" id="btn7" name="btn7"></a></li>
+                <li a href="#" class="time-item no" id="btn6" name="btn6"></a></li>
+                <li a href="#" class="time-item no" id="btn5" name="btn5"></a></li>
+                <li a href="#" class="time-item no" id="btn4" name="btn4"></a></li>
+                <li a href="#" class="time-item no" id="btn3" name="btn3"></a></li>
+                <li a href="#" class="time-item no" id="btn2" name="btn2"></a></li>
+                <li a href="#" class="time-item no" id="btn1" name="btn1"></a></li>
+                <li a href="#" class="time-item no" id="btn0" name="btn0"></a></li>
+              </ul>
+            </div>
+            <div class="text right">new</div>
+          </div>
+        </div>
+
+        <div class="time-box_2">
+          <div class="text">Last message received <span class="number" id="number">0</span> seconds ago
+          </div>
+        </div>
+
+        <div class="dialog_back" id="status-dialog">
+          <div class="dialog">
+            <div class="dialog_wrap">
+              <div class="dialog_header" id="dialog_header">
+                <h4 id="dialog_header_title"></h4>
+              </div>
+
+              <div class="dialog_body">
+                <div class="dialog_box_1">
+                  <table class="table-type-3" id="table-type-3">
+                    <tbody>
+                      <tr>
+                        <th>Full name</th>
+                        <td id="dialog_full_name"></td>
+                      </tr>
+                      <tr>
+                        <th>Component</th>
+                        <td id="dialog_component"></td>
+                      </tr>
+                      <tr>
+                        <th>Hardware ID</th>
+                        <td id="dialog_hardware"></td>
+                      </tr>
+                      <tr>
+                        <th>Level</th>
+                        <td id="dialog_level"></td>
+                      </tr>
+                      <tr>
+                        <th>Message</th>
+                        <td id="dialog_message"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="dialog_box_2">
+                  <table class="table-type-4" id="table-type-4">
+                  </table>
+                </div>
+
+              </div>
+              <div class="dialog_footer">
+                <button id="close">OK</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <button type="button" id="pause-button" class="btn btn-warning"><span
-        class="glyphicon glyphicon glyphicon-pause"></span></button>
-    <button type="button" id="start-button" class="btn btn-info"><span
-        class="glyphicon glyphicon glyphicon-play"></span></button>
-    <div class="contents">
-      <div class="">
-        <h2>Errors</h2>
-        <div class="inner-list-window short-window">
-          <ul class="list-group" id="error-list">
-          </ul>
-        </div>
-      </div>
-      <div class="">
-        <h2>Warnings</h2>
-        <div class="inner-list-window short-window">
-          <ul class="list-group" id="warn-list">
-          </ul>
-        </div>
-      </div>
-      <div class="">
-        <h2>All</h2>
-        <div class="inner-list-window long-window">
-          <ul class="list-group" id="all-list">
-          </ul>
-        </div>
-        <div class="history" id="history">
-          <a href="#" class="btn-circle-flat" id="btn0" name="btn0">0</a>
-          <a href="#" class="btn-circle-flat" id="btn1" name="btn1">1</a>
-          <a href="#" class="btn-circle-flat" id="btn2" name="btn2">2</a>
-          <a href="#" class="btn-circle-flat" id="btn3" name="btn3">3</a>
-          <a href="#" class="btn-circle-flat" id="btn4" name="btn4">4</a>
-          <a href="#" class="btn-circle-flat" id="btn5" name="btn5">5</a>
-          <a href="#" class="btn-circle-flat" id="btn6" name="btn6">6</a>
-          <a href="#" class="btn-circle-flat" id="btn7" name="btn7">7</a>
-          <a href="#" class="btn-circle-flat" id="btn8" name="btn8">8</a>
-          <a href="#" class="btn-circle-flat" id="btn9" name="btn9">9</a>
-          <a href="#" class="btn-circle-flat" id="btn10" name="btn10">10</a>
-          <a href="#" class="btn-circle-flat" id="btn11" name="btn11">11</a>
-          <a href="#" class="btn-circle-flat" id="btn12" name="btn12">12</a>
-          <a href="#" class="btn-circle-flat" id="btn13" name="btn13">13</a>
-          <a href="#" class="btn-circle-flat" id="btn14" name="btn14">14</a>
-          <a href="#" class="btn-circle-flat" id="btn15" name="btn15">15</a>
-          <a href="#" class="btn-circle-flat" id="btn16" name="btn16">16</a>
-          <a href="#" class="btn-circle-flat" id="btn17" name="btn17">17</a>
-          <a href="#" class="btn-circle-flat" id="btn18" name="btn18">18</a>
-          <a href="#" class="btn-circle-flat" id="btn19" name="btn19">19</a>
-          <a href="#" class="btn-circle-flat" id="btn20" name="btn20">20</a>
-          <a href="#" class="btn-circle-flat" id="btn21" name="btn21">21</a>
-          <a href="#" class="btn-circle-flat" id="btn22" name="btn22">22</a>
-          <a href="#" class="btn-circle-flat" id="btn23" name="btn23">23</a>
-          <a href="#" class="btn-circle-flat" id="btn24" name="btn24">24</a>
-          <a href="#" class="btn-circle-flat" id="btn25" name="btn25">25</a>
-          <a href="#" class="btn-circle-flat" id="btn26" name="btn26">26</a>
-          <a href="#" class="btn-circle-flat" id="btn27" name="btn27">27</a>
-          <a href="#" class="btn-circle-flat" id="btn28" name="btn28">28</a>
-          <a href="#" class="btn-circle-flat" id="btn29" name="btn29">29</a>
-          <!-- <a href="#" class="btn-circle-flat" id="btn30" name="btn30">30</a> -->
-        </div>
-        <div class="footer-stats">
-          <p>Last message received <span id="last-message-sec">0</span> secnods ago
-        </div>
-      </div>
-    </div>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/d3/d3.min.js"></script>
-    <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
-    <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
-    <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
-    <script type="text/javascript" src="rwt_robot_monitor.js"></script>
-    <script type="text/javascript" src="rwt_robot_monitor_main.js"></script>
+
+  </div>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
+  <script type="text/javascript" src="rwt_robot_monitor.js"></script>
+  <script type="text/javascript" src="rwt_robot_monitor_main.js"></script>
 </body>
 
 </html>

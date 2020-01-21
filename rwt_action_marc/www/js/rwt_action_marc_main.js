@@ -11,8 +11,8 @@ $(function () {
   var serviceMap = {};
 
   var columns = [
-    { id: 'tree', name: 'Tree', field: 'tree', width: 170, minWidth: 20, maxWidth: 400, formatter: treeFormatter },
-    { id: 'type', name: 'Type', field: 'type', width: 170, minWidth: 20, maxWidth: 400, },
+    { id: 'tree', name: 'Tree', field: 'tree', width: 170, minWidth: 20, formatter: treeFormatter },
+    { id: 'type', name: 'Type', field: 'type', width: 170, minWidth: 20, },
     { id: 'path', name: 'Path', field: 'path', width: 380, minWidth: 20, },
     { id: 'remove', name: '', field: 'remove', width: 30, minWidth: 30, maxWidth: 30, formatter: removeButtonFormatter }
   ];
@@ -117,16 +117,16 @@ $(function () {
     if (value === null || value === undefined || dataContext === undefined) { return ''; }
 
     value = value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    var spacer = '<span style="display:inline-block;height:1px;width:' + (15 * dataContext['indent']) + 'px"></span>';
+    var spacer = RwtUtils.getTreeSpacer(dataContext['indent']);
     var idx = dataView.getIdxById(dataContext.id);
     if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
       if (dataContext._collapsed) {
-        return spacer + '<span class="toggle expand"></span>' + value;
+        return spacer + RwtUtils.getTreeExpandButton() + value;
       } else {
-        return spacer + '<span class="toggle collapse"></span>' + value;
+        return spacer + RwtUtils.getTreeCollapseButton() + value;
       }
     } else {
-      return spacer + '<span class="toggle leaf"></span>' + value;
+      return spacer + RwtUtils.getTreeLeafButton() + value;
     }
   }
 
@@ -224,18 +224,18 @@ $(function () {
                     parentPath: path + '.' + actionId
                   });
                   actionId++;
-                } // loop end of i4
+                }
                 excludeTypeList.push(parentInfo.typeName);
               }
 
-            } // loop end of i3
+            }
             excludeTypeList.length = 0; // clear array
 
-          } // loop end of i2
+          }
           parentInfoList = _.cloneDeep(keepParentData);
           keepParentData.length = 0; // clear array
 
-        } // loop end of i
+        }
 
         requestDefer.resolve({ key: 'ActionRoot', value: dataList });
       },
@@ -246,15 +246,14 @@ $(function () {
     );
 
     $.when.apply(null, promises).done(function () {
-      // 非同期処理が全部終わったときの処理
 
       var actionData;
-      for (var i = 0; i < arguments.length; i++) { // arguments は forEach() 使えない
+      for (var i = 0; i < arguments.length; i++) {
         var key = arguments[i].key;
         var value = arguments[i].value;
 
         if (key === 'ActionRoot') {
-          actionData = value; // dataList
+          actionData = value;
         } else {
           actionData = '';
         }
@@ -324,7 +323,7 @@ $(function () {
     var $target = $(e.target);
 
     // event handler: toggle tree button
-    if ($target.hasClass('toggle')) {
+    if (RwtUtils.isTreeToggleButton($target)) {
       toggleTree(e, args);
     }
 

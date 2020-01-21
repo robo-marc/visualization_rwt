@@ -1,49 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 
 <head>
-  <meta charset="utf-8" />
-  <link rel="stylesheet" href="../rwt_utils_3rdparty/bootstrap/css/bootstrap.min.css">
-  </link>
-  <link rel="stylesheet" type="text/css" href="css/rwt_image_view_marc.css">
-  </link>
-  <title>rwt_image_view</title>
+  <meta charset="UTF-8">
+  <title>rwt_image_view_marc</title>
+  <meta name="author" content="F-ROSROBO">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../rwt_utils_marc/common/iconfont/material-icons.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/common/css/common.css">
+  <link rel="stylesheet" href="css/rwt_image_view_marc.css">
 </head>
 
 <body>
-  <div class="container">
-    <div class="page-header">
-      <h1><span class="glyphicon glyphicon-star"></span>rwt_image_view_marc <small>robotwebtools image view</small>
-        <span id="config-button"></span></h1>
-    </div>
+  <div class="root">
+    <header>
+      <div class="column">
+        <h2>rwt_image_view_marc</h2>
+        <a href="http://wiki.ros.org/rwt_image_view_marc" target="_blank" class="icon"><i
+            class="material-icons">help_outline</i></a>
+      </div>
+    </header>
+    <div class="contents image_view">
 
-    <div id="topic-area">
+      <div class="contents_header">
+        <nav>
+          <ul>
+            <li><a id="save-button" href class="icon"><i class="material-icons">get_app</i>Save Image</a><a
+                id="save-image-link" style="display: none;"></a></li>
+          </ul>
+        </nav>
+      </div>
 
-      <form id="topic-form" role="form" class="form-inline">
-        <div class="form-group">
-          <label class="sr-only" for="topic-select">topic</label>
-          <select id="topic-select" class="form-control">
-          </select>
+      <div class="contents_body">
+
+        <div class="contents-box box_1">
+          <div class="parts-set select-btn">
+            <select type="select" id="topic-select">
+            </select>
+            <button id="view-button">VIEW</button>
+          </div>
+          <div class="parts-set btn">
+            <button class="outline icon_text" id="refresh-button"><i class="material-icons">refresh</i>Refresh</button>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary">view</button>
-        <button type="button" id="record-button" class="btn btn-success">record</button>
-      </form>
 
-    </div>
-    <div class="row">
-      <div id="canvas-area" class="col-md-12"></div>
+        <div class="contents-box box_2">
+          <div class="img-area">
+            <div id="canvas-area"></div>
+          </div>
+        </div>
+
+        <div class="contents-box box_3">
+          <div class="parts-set btn"><button class="outline icon_text" id="rotate-right-button"><i
+                class="material-icons">rotate_right</i><span class="sm_none">Right 90&deg;</span></button></div>
+          <div class="parts-set btn"><button class="outline icon_text" id="rotate-left-button"><i
+                class="material-icons">rotate_left</i><span class="sm_none">Left 90&deg;</span></button></div>
+          <div class="angle-text"><span id="angle">0</span id="angle">&deg;</div>
+          <div class="parts-set btn"><button class="outline icon_text" id="fit-button"><i
+                class="material-icons">aspect_ratio</i><span class="sm_none">Fit</span></button></div>
+        </div>
+
+      </div>
     </div>
   </div>
 
   <script type="text/javascript" src="../rwt_utils_3rdparty/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash.min.js"></script>
+
   <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
   <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/bootstrap/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/mjpegcanvasjs/build/mjpegcanvas.min.js"></script>
-  <script type="text/javascript" src="../rwt_utils_3rdparty/rwt_utils.js"></script>
-  <script type="text/javascript" src="js/rwt_image_view_marc_main.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/mjpegcanvasjs/build/mjpegcanvas.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
 
+  <script type="text/javascript" src="js/mjpegcanvasjs_viewer.js"></script>
+  <script type="text/javascript" src="js/rwt_image_view_marc_main.js"></script>
 </body>
 
 </html>

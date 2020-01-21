@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>rwt_topic_content_marc</title>
+  <meta name="author" content="F-ROSROBO">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/slick.grid.css" />
+  <link rel="stylesheet" href="../rwt_utils_3rdparty/SlickGrid/css/smoothness/jquery-ui-1.11.3.custom.css" />
+  <link rel="stylesheet" href="../rwt_utils_marc/common/iconfont/material-icons.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/common/css/common.css">
+  <link rel="stylesheet" href="../rwt_utils_marc/css/rwt_utils_marc.css" />
+</head>
+
+<body>
+  <div class="">
+
+    <div id="topic-content" class="contents topic">
+
+      <div class="contents_header">
+        <nav>
+          <ul>
+            <li><a href id="expand-button" class="icon"><i class="material-icons">zoom_out_map</i>Expand All</a></li>
+            <li><a href id="collapse-button" class="icon"><i class="material-icons">storage</i>Collapse All</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="contents_body">
+        <div class="myGrid" id="myGrid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-1.11.2.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery-ui-1.11.3.min.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/lib/jquery.event.drag-2.3.0.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.core.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/plugins/slick.checkboxselectcolumn.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.formatters.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.grid.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/SlickGrid/slick.dataview.js"></script>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/lodash/dist/lodash.min.js"></script>
+
+  <script type="text/javascript" src="../rwt_utils_3rdparty/eventemitter2/eventemitter2.js"></script>
+  <script type="text/javascript" src="../rwt_utils_3rdparty/roslibjs/roslib.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/roslibjs/roslib_ext.js"></script>
+  <script type="text/javascript" src="../rwt_utils_marc/rwt_utils_marc.js"></script>
+
+  <script type="text/javascript" src="js/rwt_topic_content_marc_main.js"></script>
+</body>
+
+</html>

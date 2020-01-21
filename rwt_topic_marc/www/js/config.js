@@ -1,0 +1,3 @@
+function getTargetTopicData() {
+    return undefined;
+}

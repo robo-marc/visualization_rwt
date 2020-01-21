@@ -1,6 +1,6 @@
 /* grid - overall*/
 .ui-widget {
-  margin: calc(0.75rem + 35px) 1.75rem 2.5rem;
+  margin: 0.75rem 1.75rem 2.5rem;
   padding: 2px;
 
   border: 0;
@@ -46,6 +46,15 @@
   padding-left: 8px;
 }
 
+.toggle-wrap {
+  display: inline-block;
+  height: 8px;
+  width: 12px;
+  padding: 2px;
+  position: relative;
+  top: 4px;
+}
+
 .toggle {
   height: 4px;
   width: 4px;
@@ -54,14 +63,32 @@
   margin-right: 5px;
 }
 
+/* TODO: Obsolete */
 .toggle.expand {
   border: 4px solid transparent;
   border-left: 4px solid #474747;
 }
 
+.toggle-wrap>.toggle.expand {
+  border: 4px solid transparent;
+  border-left: 4px solid #474747;
+  position: relative;
+  top: -4px;
+  left: 4px;
+}
+
+/* TODO: Obsolete */
 .toggle.collapse {
   border: 4px solid transparent;
   border-top: 4px solid #474747;
+}
+
+.toggle-wrap>.toggle.collapse {
+  border: 4px solid transparent;
+  border-top: 4px solid #474747;
+  position: relative;
+  top: -2px;
+  left: 2px;
 }
 
 .toggle.leaf {
@@ -80,4 +107,11 @@
 
 .ui-widget-content a.icon i {
   font-size: 1rem;
+}
+
+/* grid - checkbox */
+.ui-widget-content .slick-cell-checkboxsel input {
+  height: auto;
+  margin: 0;
+  vertical-align: middle;
 }
