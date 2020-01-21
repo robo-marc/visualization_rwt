@@ -18,22 +18,6 @@ $(function () {
     ros.autoConnect();
   }
 
-  function getTopicsForTypeAsync(type) {
-    var defer = $.Deferred();
-
-    ros.getTopicsForType(type,
-      function (result) {
-        defer.resolve(result);
-      },
-      function (message) {
-        console.log('getTopicsForTypeAsync failed: ' + message);
-        defer.resolve([]);
-      }
-    );
-
-    return defer.promise();
-  }
-
   function rotateCanvas(degreeOffset) {
     currentAngle += degreeOffset;
     currentAngle = currentAngle % 360;
@@ -187,11 +171,20 @@ $(function () {
   // ros events
 
   ros.on('connection', function () {
-    var promises = [];
-    promises.push(getTopicsForTypeAsync('sensor_msgs/Image'));
-    promises.push(getTopicsForTypeAsync('sensor_msgs/CompressedImage'));
+    var topicDefer = $.Deferred();
+    var refineTypes = ['sensor_msgs/Image', 'sensor_msgs/CompressedImage'];
+    var excludeItem = '/compressedDepth';
+    ros.getTopics(function (result) {
+      var topicList = [];
+      for (var i = 0; i < result.types.length; i++) {
+        if (refineTypes.indexOf(result.types[i]) >= 0 && result.topics[i].indexOf(excludeItem) === -1) {
+          topicList.push(result.topics[i]);
+        }
+      }
+      topicDefer.resolve(topicList);
+    });
 
-    $.when.apply(null, promises).done(function () {
+    topicDefer.promise().done(function () {
       var topics = [];
       for (var i = 0; i < arguments.length; i++) {
         topics = topics.concat(arguments[i]);
