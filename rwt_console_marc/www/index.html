@@ -32,7 +32,7 @@
             <li><a id="load-button" href class="icon"><i class="material-icons">folder</i><span class="md_none">Load
                   File
                   (csv)</span></a></li>
-            <li><a id="download-button" href class="icon" download="rwt_console_marc.csv"><i
+            <li><a id="save-button" href class="icon" download="rwt_console_marc.csv"><i
                   class="material-icons">get_app</i><span class="md_none">Save
                   File
                   (csv)</span></a></li>
@@ -44,8 +44,8 @@
                   class="md_none">Clear</span></a></li>
           </ul>
         </nav>
-        <form id="fileform" name="fileform" class='hiddenFile' style="display:none;">
-          <input type="file" name="load" id="fileSelector" />
+        <form class='hidden'>
+          <input type="file" id="fileSelector" name="fileSelector" />
         </form>
       </div>
 

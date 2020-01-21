@@ -53,13 +53,13 @@ $(function () {
 
   // for grid
   var columns = [
-    { id: '#', name: '#', field: '#', width: 80, sortable: true },
-    { id: 'Message', name: FILTER_NAME.MESSAGE, field: 'Message', width: 300, sortable: true },
+    { id: '#', name: '#', field: '#', width: 80, sortable: true, formatter: highlightFormatter },
+    { id: 'Message', name: FILTER_NAME.MESSAGE, field: 'Message', width: 300, sortable: true, formatter: highlightFormatter },
     { id: 'Severity', name: FILTER_NAME.SEVERITY, field: 'Severity', width: 70, sortable: true, formatter: severityFormatter },
-    { id: 'Node', name: FILTER_NAME.NODE, field: 'Node', width: 100, sortable: true },
-    { id: 'Stamp', name: FILTER_NAME.STAMP, field: 'Stamp', width: 100, sortable: true },
-    { id: 'Topics', name: FILTER_NAME.TOPICS, field: 'Topics', width: 100, sortable: true },
-    { id: 'Location', name: FILTER_NAME.LOCATION, field: 'Location', width: 100, sortable: true },
+    { id: 'Node', name: FILTER_NAME.NODE, field: 'Node', width: 100, sortable: true, formatter: highlightFormatter },
+    { id: 'Stamp', name: FILTER_NAME.STAMP, field: 'Stamp', width: 100, sortable: true, formatter: highlightFormatter },
+    { id: 'Topics', name: FILTER_NAME.TOPICS, field: 'Topics', width: 100, sortable: true, formatter: highlightFormatter },
+    { id: 'Location', name: FILTER_NAME.LOCATION, field: 'Location', width: 100, sortable: true, formatter: highlightFormatter },
     { id: 'Number', name: FILTER_NAME.NUMBER, field: 'Number', width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
   ];
   var options = {
@@ -143,7 +143,7 @@ $(function () {
       }
       var mes = msg.msg;
       var severityNumber = msg.level;
-      var severity = getErrorLevel(msg.level);
+      var severity = getSeverityLabel(msg.level);
       var node = msg.name;
       var time = formatTime(msg.header.stamp.secs, msg.header.stamp.nsecs);
       var regular = ('0000000000' + msg.header.stamp.nsecs).slice(-9);
@@ -183,141 +183,75 @@ $(function () {
     });
   }
 
-  function severityFormatter(row, cell, value, columnDef, dataContext) {
-    // console.log(dataContext);
+  function highlightFormatter(row, cell, value, columnDef, dataContext) {
     if (value === null || value === undefined || dataContext === undefined) { return ''; }
-    return '<span class="severity ' + value + '">' + value + '</span>';
+    var matchedClass = '';
+    if (dataContext['_matched'] === false) {
+      matchedClass = 'notMatched';
+    }
+    return '<span class="' + matchedClass + '">' + value + '</span>';
   }
 
-  function isItemMatchFilter(item, filterList) {
-    // var filterList = args.excludeFilter;
-    var isExAnyGrpMatch = false;
-    for (var exGrpIdx = 0, exGrpLen = filterList.length; exGrpIdx < exGrpLen; exGrpIdx++) {
-      var exGrp = filterList[exGrpIdx]; // one filter group
-      var isExGrpMatch = true;
-
-      for (var exFltIdx = 0, exFltLen = exGrp.length; exFltIdx < exFltLen; exFltIdx++) {
-        var exFlt = exGrp[exFltIdx]; // one filter
-        // console.log(exFlt);
-
-        if (!exFlt.isEnabled) {
-          console.log('isExGrpMatch:' + (isExGrpMatch ? 'true' : 'false'));
-          continue;
-        }
-
-        var exFltVal = exFlt.value;
-        switch (exFlt.filterType) {
-          case FilterUtils.FILTER_TYPE.MESSAGE:
-            if (exFltVal.message + '' === '') {
-              isExGrpMatch = false;
-              console.log('isExGrpMatch:' + (isExGrpMatch ? 'true' : 'false'));
-              continue;
-            }
-            if (exFltVal.isRegex) {
-
-            } else {
-              isExGrpMatch &= item.Message.indexOf(exFltVal.message) !== -1;
-              // console.log('item.Message:' + item.Message);
-              // console.log('exFltVal.message:' + exFltVal.message);
-              // console.log('isMatch:' + (item.Message.indexOf(exFltVal.message) !== -1));
-            }
-            break;
-        }
-
-      }
-      console.log('isExGrpMatch result:' + (isExGrpMatch ? 'true' : 'false'));
-      isExAnyGrpMatch |= isExGrpMatch;
+  function severityFormatter(row, cell, value, columnDef, dataContext) {
+    if (value === null || value === undefined || dataContext === undefined) { return ''; }
+    var matchedClass = '';
+    if (dataContext['_matched'] === false) {
+      matchedClass = 'notMatched';
     }
-    console.log('isExAnyGrpMatch result:' + (isExAnyGrpMatch ? 'true' : 'false'));
-    return isExAnyGrpMatch;
+
+    return '<span class="severity ' + value + ' ' + matchedClass + '">' + value + '</span>';
   }
 
   function myFilter(item, args) {
     // console.log(args.excludeFilter);
     // console.log(args.highlightFilter);
     // console.log(args.showOnlyHighlighted);
-    var isVisible = true;
+    var isVisible;
 
     // excludeFilter
-    var isMatchToExcludeFilter = FilterUtils.isMatchToFilter(item, args.excludeFilter);
-    // var excludeFilter = args.excludeFilter;
-    // var isExAnyGrpMatch = false;
-    // for (var exGrpIdx = 0, exGrpLen = excludeFilter.length; exGrpIdx < exGrpLen; exGrpIdx++) {
-    //   var exGrp = excludeFilter[exGrpIdx]; // one filter group
-    //   var isExGrpMatch = true;
-
-    //   for (var exFltIdx = 0, exFltLen = exGrp.length; exFltIdx < exFltLen; exFltIdx++) {
-    //     var exFlt = exGrp[exFltIdx]; // one filter
-    //     // console.log(exFlt);
-
-    //     if (!exFlt.isEnabled) {
-    //       console.log('isExGrpMatch:' + (isExGrpMatch ? 'true' : 'false'));
-    //       continue;
-    //     }
-
-    //     var exFltVal = exFlt.value;
-    //     switch (exFlt.filterType) {
-    //       case FilterUtils.FILTER_TYPE.MESSAGE:
-    //         if (exFltVal.message + '' === '') {
-    //           isExGrpMatch = false;
-    //           console.log('isExGrpMatch:' + (isExGrpMatch ? 'true' : 'false'));
-    //           continue;
-    //         }
-    //         if (exFltVal.isRegex) {
-
-    //         } else {
-    //           isExGrpMatch &= item.Message.indexOf(exFltVal.message) !== -1;
-    //           // console.log('item.Message:' + item.Message);
-    //           // console.log('exFltVal.message:' + exFltVal.message);
-    //           // console.log('isMatch:' + (item.Message.indexOf(exFltVal.message) !== -1));
-    //         }
-    //         break;
-    //     }
-
-    //   }
-    //   console.log('isExGrpMatch result:' + (isExGrpMatch ? 'true' : 'false'));
-    //   isExAnyGrpMatch |= isExGrpMatch;
-    // }
-    // console.log('isExAnyGrpMatch result:' + (isExAnyGrpMatch ? 'true' : 'false'));
+    var isMatchToExcludeFilter = FilterUtils.isMatchedToAnyFilterGroup(item, args.excludeFilter, false);
     isVisible = !isMatchToExcludeFilter;
 
-    item['_highlited_test'] = true;
+    // highlightFilter
+    var isMatchToHighlightFilter = FilterUtils.isMatchedToAnyFilterGroup(item, args.highlightFilter, true);
+    if (args.showOnlyHighlighted && !isMatchToHighlightFilter) {
+      isVisible = false;
+    }
 
     return isVisible;
-    // return true; // for development(no filter)
   }
 
   function updateFilter() {
-    // console.log('filter update');
     dataView.setFilterArgs({
       excludeFilter: excludeFilter,
       highlightFilter: highlightFilter,
       showOnlyHighlighted: showOnlyHighlighted,
     });
     dataView.refresh();
+    grid.invalidateAllRows();
+    grid.render();
   }
 
-  // get error level
-  function getErrorLevel(level) {
-    var severity;
-    switch (level) {
+  function getSeverityLabel(value) {
+    var label;
+    switch (value) {
       case 1:
-        severity = 'Debug';
+        label = 'Debug';
         break;
       case 2:
-        severity = 'Info';
+        label = 'Info';
         break;
       case 4:
-        severity = 'Warn';
+        label = 'Warn';
         break;
       case 8:
-        severity = 'Error';
+        label = 'Error';
         break;
       case 16:
-        severity = 'Fatal';
+        label = 'Fatal';
         break;
     }
-    return severity;
+    return label;
   }
 
   // format time
@@ -339,8 +273,8 @@ $(function () {
   ////////////////////////////////////////
   // button events
 
-  // CSV download
-  $('#download-button').on('click', function (e) {
+  // CSV save
+  $('#save-button').on('click', function (e) {
     // do not preventDefault.
 
     var arr = [];
@@ -376,7 +310,7 @@ $(function () {
       window.navigator.msSaveBlob(blob, 'rwt_console_marc.csv');
       window.navigator.msSaveOrOpenBlob(blob, 'rwt_console_marc.csv');
     } else {
-      $('#download-button').attr('href', window.URL.createObjectURL(blob));
+      $('#save-button').attr('href', window.URL.createObjectURL(blob));
     }
   });
 
@@ -435,7 +369,7 @@ $(function () {
           '#': '#' + rowNumber,
           Message: dataList[i][0],
           SeverityNumber: severityNumber,
-          Severity: getErrorLevel(severityNumber),
+          Severity: getSeverityLabel(severityNumber),
           Node: dataList[i][2],
           Stamp: formatTime(secs, nsecs),
           // RawTime: msg.header.stamp.secs + '.' + regular,
@@ -866,14 +800,25 @@ $(function () {
 
   function getFilterValue($elm) {
     var isEnabled = $elm.find('input.isEffective').prop('checked');
+    var text;
+    var re;
 
     if ($elm.hasClass(FilterUtils.FILTER_TYPE.MESSAGE)) {
+      text = $elm.find('.message-value').val();
+      re = undefined;
+      if ($elm.find('.regex').prop('checked')) {
+        try {
+          re = new RegExp(text);
+        } catch (e) {
+          console.info(e);
+        }
+      }
       return {
         filterType: FilterUtils.FILTER_TYPE.MESSAGE,
         isEnabled: isEnabled,
         value: {
-          message: $elm.find('.message-value').val(),
-          isRegex: $elm.find('.regex').prop('checked'),
+          message: text,
+          regex: re,
         }
       };
 
@@ -912,12 +857,21 @@ $(function () {
       };
 
     } else if ($elm.hasClass(FilterUtils.FILTER_TYPE.LOCATION)) {
+      text = $elm.find('.location-value').val();
+      re = undefined;
+      if ($elm.find('.regex').prop('checked')) {
+        try {
+          re = new RegExp(text);
+        } catch (e) {
+          console.info(e);
+        }
+      }
       return {
         filterType: FilterUtils.FILTER_TYPE.NODE,
         isEnabled: isEnabled,
         value: {
-          location: $elm.find('.location-value').val(),
-          isRegex: $elm.find('.regex').prop('checked'),
+          location: text,
+          regex: re,
         }
       };
 

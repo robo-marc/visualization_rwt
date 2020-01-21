@@ -1,11 +1,13 @@
-/* css */
-.ui-widget {
-    margin-bottom: 0;
-}
+/* contents_header */
 
 .hidden {
-    display: none !important;
-    visibility: hidden !important;
+    display: none;
+}
+
+/* contents_body - grid */
+
+.ui-widget {
+    margin-bottom: 0;
 }
 
 .cell-title {
@@ -51,6 +53,16 @@ span.severity.Fatal {
     background-color: #EC5363;
 }
 
+.notMatched {
+    color: #b0b0b0;
+}
+
+span.severity.notMatched {
+    color: #b0b0b0;
+    background-color: rgb(224, 224, 224);
+}
+
+/* contents_sub (filter) */
 .contents_sub label.disabled {
     color: #a0a0a0;
 }

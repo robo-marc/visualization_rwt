@@ -13,57 +13,80 @@ var FilterUtils = {
     LOCATION: 'location',
   },
 
-  isMatchToFilterGroup: function (item, group) {
+  isMatchedToFilterGroup: function (item, group, useHighlight) {
     var isAnyFilterEffective = false;
     var isAllFilterMatched = true;
 
-    for (var filterIndex = 0, filterCount = group.length; filterIndex < filterCount; filterIndex++) {
-      var filter = group[filterIndex]; // one filter
+    for (var i = 0, filterCount = group.length; i < filterCount; i++) {
+      var filter = group[i]; // one filter
 
       if (!filter.isEnabled) {
-        // console.log('filter not enabled');
+        // filter not enabled
         continue;
       }
 
+      var isMatched = false;
       var filterValue = filter.value;
       switch (filter.filterType) {
         case FilterUtils.FILTER_TYPE.MESSAGE:
           if (filterValue.message + '' === '') {
-            // console.log('filter condition is empty');
+            // filter condition is empty
             continue;
           }
+
           isAnyFilterEffective = true;
-          if (filterValue.isRegex) {
-            // TODO: \ を \\ に置換
-            var re = new RegExp(filterValue.message);
-            isAllFilterMatched &= re.test(item.Message);
+          if (filterValue.regex) {
+            isMatched = filterValue.regex.test(item.Message);
           } else {
-            isAllFilterMatched &= item.Message.indexOf(filterValue.message) !== -1;
-            // console.log('item.Message:' + item.Message);
-            // console.log('exFltVal.message:' + exFltVal.message);
-            // console.log('isMatch:' + (item.Message.indexOf(exFltVal.message) !== -1));
+            isMatched = (item.Message.indexOf(filterValue.message) !== -1);
           }
           break;
-      }
 
-    } // for
+        case FilterUtils.FILTER_TYPE.SEVERITY:
+          // TODO
+          break;
+
+        case FilterUtils.FILTER_TYPE.NODE:
+          // TODO
+          break;
+
+        case FilterUtils.FILTER_TYPE.STAMP:
+          // TODO
+          break;
+
+        case FilterUtils.FILTER_TYPE.TOPICS:
+          // TODO
+          break;
+
+        case FilterUtils.FILTER_TYPE.LOCATION:
+          // TODO
+          break;
+
+      } // end switch (filter.filterType)
+
+      if (useHighlight) {
+        item['_matched'] = isMatched;
+      }
+      isAllFilterMatched &= isMatched;
+    } // end for
 
     return { isEffective: isAnyFilterEffective, isMatched: isAllFilterMatched };
   },
 
-  isMatchToFilter: function (item, filterGroupList) {
-    var isAnyGroupMatched = false;
-    for (var groupIndex = 0, groupCount = filterGroupList.length; groupIndex < groupCount; groupIndex++) {
-      var group = filterGroupList[groupIndex]; // one filter group
+  isMatchedToAnyFilterGroup: function (item, filterGroupList, useHighlight) {
+    if (useHighlight) {
+      item['_matched'] = undefined;
+    }
 
-      var groupResult = FilterUtils.isMatchToFilterGroup(item, group);
-      // console.log('groupResult:');
-      // console.log(groupResult);
+    var isAnyGroupMatched = false;
+    for (var i = 0, groupCount = filterGroupList.length; i < groupCount; i++) {
+      var group = filterGroupList[i]; // one filter group
+
+      var groupResult = FilterUtils.isMatchedToFilterGroup(item, group, useHighlight);
       if (groupResult.isEffective) {
         isAnyGroupMatched |= groupResult.isMatched;
       }
     }
-    // console.log('isAnyGroupMatched result:' + (isAnyGroupMatched ? 'true' : 'false'));
     return isAnyGroupMatched;
   },
 
