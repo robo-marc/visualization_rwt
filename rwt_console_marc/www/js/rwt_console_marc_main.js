@@ -102,24 +102,14 @@ $(function () {
   }
 
   function setDropdownList(selectId, valueList) {
-    $(selectId).append(valueList.map(function (value) {
-      return '<option value="' + value + '">' + value + '</option>';
-    }).join('\n'));
-    $(selectId).change();
-  }
-
-  // render grid
-  function renderList() {
-    if (isPaused) {
-      return;
+    var $selectElm = $(selectId);
+    var html = '';
+    for (var i = 0, len = valueList.length; i < len; i++) {
+      html += '<option value="' + valueList[i] + '">' + valueList[i] + '</option>';
     }
-    dataView.setItems(list);
-    // grid.invalidate();
-
-    $('#displaying-count').text(dataView.getLength());
-    $('#message-count').text(list.length);
-
-    //TODO: フィルタ条件の Node と Topic のドロップダウンに候補を追加する
+    $selectElm.empty();
+    $selectElm.append(html);
+    $selectElm.change();
   }
 
   // start subscribing
@@ -173,6 +163,79 @@ $(function () {
       }
       rowNumber++;
     });
+  }
+
+  // render grid
+  function renderList() {
+    if (isPaused) {
+      return;
+    }
+    dataView.setItems(list);
+    // grid.invalidate();
+
+    $('#displaying-count').text(dataView.getLength());
+    $('#message-count').text(list.length);
+
+    appendNodesToFilter();
+    appendTopicsToFilter();
+  }
+
+  function appendNodesToFilter() {
+    var $filterList = $('.node-value');
+    if ($filterList.length <= 0) {
+      return;
+    }
+    var listInGrid = getNodeList(list);
+    appendOptionsToFilter($filterList, listInGrid);
+  }
+
+  function appendTopicsToFilter() {
+    var $filterList = $('.topic-value');
+    if ($filterList.length <= 0) {
+      return;
+    }
+    var listInGrid = getTopicList(list);
+    appendOptionsToFilter($filterList, listInGrid);
+  }
+
+  function appendOptionsToFilter($filterList, listInGrid) {
+    $filterList.each(function (index, selectElm) {
+      var $selectElm = $(selectElm);
+
+      var selectedValue = $selectElm.val();
+      var optValueList = listInGrid.slice(0, listInGrid.length); // copy array
+      $selectElm.children().each(function (optIndex, optElm) {
+        optValueList.push($(optElm).val());
+      });
+      optValueList = distinct(optValueList);
+
+      var html = '';
+      for (var i = 0, len = optValueList.length; i < len; i++) {
+        html += '<option value="' + optValueList[i] + '">' + optValueList[i] + '</option>';
+      }
+      $selectElm.empty();
+      $selectElm.append(html);
+      $selectElm.val(selectedValue);
+    });
+  }
+
+  function distinct(arr) {
+    var result = [];
+    var isFirst = true;
+    var prevVal;
+    var tmpArr = arr.slice(0, arr.length);
+    tmpArr.sort();
+    for (var i = 0, len = tmpArr.length; i < len; i++) {
+      var val = tmpArr[i];
+      if (prevVal !== val || isFirst) {
+        result.push(val);
+        if (isFirst) {
+          isFirst = false;
+        }
+      }
+      prevVal = val;
+    }
+    return result;
   }
 
   function highlightFormatter(row, cell, value, columnDef, dataContext) {
@@ -416,6 +479,9 @@ $(function () {
 
     $('#displaying-count').text(dataView.getLength());
     $('#message-count').text(list.length);
+
+    appendNodesToFilter();
+    appendTopicsToFilter();
   }
 
   // pause
@@ -581,15 +647,13 @@ $(function () {
     _.each(dataViewItems, function (item, index) {
       tmpStr += item.Node + ',';
     });
+    if (tmpStr === '') {
+      return [];
+    }
     tmpStr = tmpStr.substr(0, tmpStr.length - 1);
 
-    var tmpList = tmpStr.split(',');
-
-    // distinct
-    var nodeList = tmpList.filter(function (item, idx, self) {
-      return self.indexOf(item) === idx;
-    });
-
+    var nodeList = tmpStr.split(',');
+    nodeList = distinct(nodeList);
     nodeList.sort();
 
     return nodeList;
@@ -601,15 +665,13 @@ $(function () {
     _.each(dataViewItems, function (item, index) {
       tmpStr += item.Topics + ',';
     });
+    if (tmpStr === '') {
+      return [];
+    }
     tmpStr = tmpStr.substr(0, tmpStr.length - 1);
 
-    var tmpList = tmpStr.split(',');
-
-    // distinct
-    var topicList = tmpList.filter(function (item, idx, self) {
-      return self.indexOf(item) === idx;
-    });
-
+    var topicList = tmpStr.split(',');
+    topicList = distinct(topicList);
     topicList.sort();
 
     return topicList;
