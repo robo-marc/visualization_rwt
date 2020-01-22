@@ -127,6 +127,7 @@ var FilterUtils = {
     }
 
     if (useHighlight && isAnyGroupEffective) {
+      // Converts isAnyGroupMatched to Boolean because it was converted to Number by logical operation
       item['_matched'] = (isAnyGroupMatched ? true : false);
     }
 

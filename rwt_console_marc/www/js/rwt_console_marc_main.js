@@ -12,7 +12,6 @@ $(function () {
     STAMP: 'Stamp',
     TOPICS: 'Topics',
     LOCATION: 'Location',
-    NUMBER: '',
   };
 
   var FILTER_NAME_LIST = [
@@ -37,19 +36,18 @@ $(function () {
   // status
   var isPaused = false;
   var rowNumber = 1;
-  var sortCol;
+  var sortCol = '#';
   var isAsc = false;
 
   // for grid
   var columns = [
     { id: '#', name: COLUMN_NAMES.DISPLAY_NUMBER, field: '#', width: 80, sortable: true, formatter: highlightFormatter },
     { id: 'Message', name: COLUMN_NAMES.MESSAGE, field: 'Message', width: 300, sortable: true, formatter: highlightFormatter },
-    { id: 'Severity', name: COLUMN_NAMES.SEVERITY, field: 'Severity', width: 70, sortable: true, formatter: severityFormatter },
+    { id: 'Severity', name: COLUMN_NAMES.SEVERITY, field: 'Severity', width: 75, sortable: true, formatter: severityFormatter },
     { id: 'Node', name: COLUMN_NAMES.NODE, field: 'Node', width: 100, sortable: true, formatter: highlightFormatter },
     { id: 'Stamp', name: COLUMN_NAMES.STAMP, field: 'Stamp', width: 100, sortable: true, formatter: highlightFormatter },
     { id: 'Topics', name: COLUMN_NAMES.TOPICS, field: 'Topics', width: 100, sortable: true, formatter: highlightFormatter },
     { id: 'Location', name: COLUMN_NAMES.LOCATION, field: 'Location', width: 100, sortable: true, formatter: highlightFormatter },
-    { id: 'Number', name: COLUMN_NAMES.NUMBER, field: 'Number', width: -1, maxWidth: -1, minWidth: -1, resizable: false, headerCssClass: 'hidden', sortable: true }
   ];
   var options = {
     editable: true,
@@ -88,6 +86,7 @@ $(function () {
     updateFilter();
     dataView.setFilter(myFilter);
     dataView.endUpdate();
+    grid.setSortColumn(sortCol, isAsc);
 
     setCountLabelStatus();
 
@@ -112,7 +111,6 @@ $(function () {
     $selectElm.change();
   }
 
-  // start subscribing
   function startSubscribing() {
     var sub = null;
     sub = new ROSLIB.Topic({
@@ -124,42 +122,39 @@ $(function () {
       if (isPaused) {
         return;
       }
-      var mes = msg.msg;
+      var message = msg.msg;
+
       var severityNumber = msg.level;
       var severityLabel = getSeverityLabel(msg.level);
+
       var node = msg.name;
+
       var stamp = formatTime(msg.header.stamp.secs, msg.header.stamp.nsecs);
       var milliSec = toMilliSec(msg.header.stamp.secs, msg.header.stamp.nsecs);
       var regular = ('0000000000' + msg.header.stamp.nsecs).slice(-9);
+      var rawTime = msg.header.stamp.secs + '.' + regular;
+
       var topics = msg.topics.join(',');
+
       var location = msg.file + ':' + msg.function + ':' + msg.line;
 
       var associationItem = {
         id: rowNumber,
-        indent: 0,
         '#': '#' + rowNumber,
-        Message: mes,
+        Message: message,
         SeverityNumber: severityNumber,
         Severity: severityLabel,
         Node: node,
         Stamp: stamp,
         MilliSec: milliSec,
-        RawTime: msg.header.stamp.secs + '.' + regular,
+        RawTime: rawTime,
         Topics: topics,
         Location: location,
-        // Number: count
       };
 
-      if (isAsc === false) {
-        list.unshift(associationItem);
-        if (list.length > maxCount) {
-          list.pop();
-        }
-      } else {
-        list.push(associationItem);
-        if (list.length > maxCount) {
-          list.shift();
-        }
+      list.unshift(associationItem);
+      if (list.length > maxCount) {
+        list.pop();
       }
       rowNumber++;
     });
@@ -170,7 +165,9 @@ $(function () {
     if (isPaused) {
       return;
     }
+
     dataView.setItems(list);
+    sortDataView();
     // grid.invalidate();
 
     $('#displaying-count').text(dataView.getLength());
@@ -345,35 +342,26 @@ $(function () {
   $('#save-button').on('click', function (e) {
     // do not preventDefault.
 
-    var arr = [];
-    var itemList = _.cloneDeep(dataView.getItems().reverse());
-    _.each(itemList, function (value, index) {
-      delete value.id;
-      delete value['#'];
-      delete value.Stamp;
-      delete value.MilliSec;
-      // delete value.RawTime;
-      delete value.indent;
-      delete value.Severity;
-      // delete value.Number;
-      // delete value.SeverityNumber;
-      arr.push(Object.keys(value).map(function (key) {
-        return value[key];
-      })
-      );
-    });
-    var csvData = '';
-    _.each(arr, function (value, index) {
-      var row = value.join('";"');
-      console.log(row);
-      if (row) {
-        csvData = '"' + row + '"' + '\n' + csvData;
-      }
-    });
-    if (csvData !== '') {
-      csvData = csvData.slice(0, -1) + '"' + '\n';
+    var csvText = FILTER_NAME_LIST.join(';').toLowerCase();
+
+    var displayCount = dataView.getLength();
+    var lineList = [];
+    for (var i = 0; i < displayCount; i++) {
+      var item = dataView.getItem(i);
+
+      var lineData = [];
+      lineData.push(item['Message'].replace(/"/g, '\\"'));
+      lineData.push(item['SeverityNumber'].toString());
+      lineData.push(item['Node']);
+      lineData.push(item['RawTime']); // nsecs already zero filled
+      lineData.push(item['Topics']); // topics already joind with ','
+      lineData.push(item['Location']);
+
+      var lineText = '\"' + lineData.join('\";\"') + '\"';
+      lineList.push(lineText);
     }
-    var csvText = 'message;severity;node;stamp;topics;location\n' + csvData;
+    csvText += '\n' + lineList.join('\n') + '\n';
+
     var blob = new Blob([csvText], { 'type': 'text/plain' });
     if (window.navigator.msSaveBlob) {
       window.navigator.msSaveBlob(blob, 'rwt_console_marc.csv');
@@ -391,90 +379,124 @@ $(function () {
   });
   $('#fileSelector').on('change', function (evt) {
     var file = evt.target.files[0];
-    // console.log(file);
     if (!file) {
       return;
     }
 
-    // should check extension?
+    // if check extension, uncomment this.
     // if (!file.name.match('\.csv$')) {
     //   alert('.csv file only');
     //   return;
     // }
 
     $('#pause-button').click();
-
-    // read text
     var reader = new FileReader();
     reader.readAsText(file);
 
     reader.onload = function () {
       var rows = reader.result.split('\n');
-      var data = [];
-      var tmp;
-      for (var i = 0; i < rows.length; i++) {
-        tmp = rows[i].substr(1, rows[i].length - 2); // remove heading and trailing double-quotation
-        data[i] = tmp.split('";"'); // split and remove double-quotation
+      if (rows.length < 2) {
+        return;
       }
 
-      addDataToGrid(data);
+      var columns = rows[0].split(';');
+      var colIndexs = {};
+      for (var i = 0; i < columns.length; i++) {
+        var str = columns[i];
+        switch (str) {
+          case 'message':
+            colIndexs[COLUMN_NAMES.MESSAGE] = i;
+            break;
+          case 'severity':
+            colIndexs[COLUMN_NAMES.SEVERITY] = i;
+            break;
+          case 'node':
+            colIndexs[COLUMN_NAMES.NODE] = i;
+            break;
+          case 'stamp':
+            colIndexs[COLUMN_NAMES.STAMP] = i;
+            break;
+          case 'topics':
+            colIndexs[COLUMN_NAMES.TOPICS] = i;
+            break;
+          case 'location':
+            colIndexs[COLUMN_NAMES.LOCATION] = i;
+            break;
+          default:
+            console.info('Unknown column: %s', str);
+            return;
+        }
+      }
+
+      addDataToGrid(colIndexs, rows);
     };
   });
 
-  function addDataToGrid(dataList) {
-    dataList = dataList.slice().reverse();
-
-    // ignore header row and trailing empty row
-    for (var i = 1; i < dataList.length - 1; i++) {
-      if (dataList[i]) {
-        var severityNumber = parseInt(dataList[i][1], 10);
-        var severityLabel = getSeverityLabel(severityNumber);
-        var time = dataList[i][3].split('.');
-        var secs = time[0];
-        var nsecs = time[1];
-        var stamp = formatTime(secs, nsecs);
-        var milliSec;
-        try {
-          milliSec = toMilliSec(parseInt(secs, 10), parseInt(nsecs, 10));
-        } catch (e) {
-          console.info(e);
-        }
-        var regular = ('0000000000' + nsecs).slice(-9);
-
-        var associationItem = {
-          id: rowNumber,
-          indent: 0,
-          '#': '#' + rowNumber,
-          Message: dataList[i][0],
-          SeverityNumber: severityNumber,
-          Severity: severityLabel,
-          Node: dataList[i][2],
-          Stamp: stamp,
-          MilliSec: milliSec,
-          RawTime: secs + '.' + regular,
-          Topics: dataList[i][4],
-          Location: dataList[i][5],
-          // Number: dataList[i][6]
-        };
-        // console.log(associationItem);
-
-        if (isAsc === false) {
-          list.unshift(associationItem);
-          if (list.length > maxCount) {
-            list.pop();
-          }
-        } else {
-          list.push(associationItem);
-          if (list.length > maxCount) {
-            list.shift();
-          }
-        }
-        rowNumber++;
+  function addDataToGrid(colIndexs, rows) {
+    for (var i = 1, rowCount = rows.length; i < rowCount; i++) {
+      var row = rows[i];
+      if (!row) {
+        continue;
       }
+      row = row.substring(1, row.length - 1); // remove heading and trailing double-quotation
+      var cells = row.split('";"'); // split and remove double-quotation
+
+      var message = cells[colIndexs[COLUMN_NAMES.MESSAGE]].replace(/\\"/g, '"');
+
+      var severityNumber = parseInt(cells[colIndexs[COLUMN_NAMES.SEVERITY]], 10);
+      var severityLabel = getSeverityLabel(severityNumber);
+      if (severityLabel === undefined) {
+        console.info('Unknown severity value: %s', cells[colIndexs[COLUMN_NAMES.SEVERITY]]);
+        continue;
+      }
+
+      var node = cells[colIndexs[COLUMN_NAMES.NODE]];
+
+      var time = cells[colIndexs[COLUMN_NAMES.STAMP]].split('.');
+      if (time.length !== 2) {
+        console.info('Unknown timestamp format: %s', cells[colIndexs[COLUMN_NAMES.STAMP]]);
+        continue;
+      }
+      var secs = time[0];
+      var nsecs = time[1];
+      var stamp = formatTime(secs, nsecs);
+      var milliSec;
+      try {
+        milliSec = toMilliSec(parseInt(secs, 10), parseInt(nsecs, 10));
+      } catch (e) {
+        console.info(e);
+        continue;
+      }
+      var regular = ('0000000000' + nsecs).slice(-9);
+      var rawTime = secs + '.' + regular;
+
+      var topics = cells[colIndexs[COLUMN_NAMES.TOPICS]]; // donot split by ','
+
+      var location = cells[colIndexs[COLUMN_NAMES.LOCATION]];
+
+      var associationItem = {
+        id: rowNumber,
+        '#': '#' + rowNumber,
+        Message: message,
+        SeverityNumber: severityNumber,
+        Severity: severityLabel,
+        Node: node,
+        Stamp: stamp,
+        MilliSec: milliSec,
+        RawTime: rawTime,
+        Topics: topics,
+        Location: location,
+      };
+
+      list.unshift(associationItem);
+      if (list.length > maxCount) {
+        list.pop();
+      }
+      rowNumber++;
     }
 
-    var view = list.slice().reverse();
-    dataView.setItems(view);
+    dataView.setItems(list);
+    sortDataView();
     grid.invalidate();
 
     $('#displaying-count').text(dataView.getLength());
@@ -536,26 +558,74 @@ $(function () {
     isAsc = args.sortAsc;
 
     if (sortCol === '#') {
-      sortCol = 'Stamp';
+      isAsc = false;
+      args.sortAsc = false;
+      grid.setSortColumn(sortCol, isAsc);
     }
-    if (sortCol === 'Stamp') {
-      dataView.sort(comparer, isAsc);
-    } else if (sortCol !== 'Stamp') {
-      // dataView.sort(comparer, isAsc);
-      dataView.sort(comparer2, isAsc);
-    }
+
+    sortDataView();
 
     grid.invalidateAllRows();
     grid.render();
   });
-  function comparer(a, b) {
-    var x = a[sortCol], y = b[sortCol];
-    return (x === y ? 0 : (x > y ? 1 : -1));
+
+  function sortDataView() {
+    var func;
+    switch (sortCol) {
+      case '#':
+        func = comparerNumber;
+        break;
+      case 'Severity':
+        func = comparerSeverity;
+        break;
+      case 'Stamp':
+        func = comparerStamp;
+        break;
+      default:
+        func = comparerCommon;
+        break;
+    }
+    dataView.sort(func, isAsc);
   }
-  function comparer2(a, b) {
+
+  function comparerNumber(a, b) {
+    var x = a['id'];
+    var y = b['id'];
+    if (x < y) {
+      return -1;
+    } else if (x > y) {
+      return 1;
+    }
+    return comparerStamp(a, b);
+  }
+  function comparerSeverity(a, b) {
+    var x = a['SeverityNumber'];
+    var y = b['SeverityNumber'];
+    if (x < y) {
+      return -1;
+    } else if (x > y) {
+      return 1;
+    }
+    return comparerStamp(a, b);
+  }
+  function comparerStamp(a, b) {
+    var x = a['MilliSec'];
+    var y = b['MilliSec'];
+    if (x < y) {
+      return -1;
+    } else if (x > y) {
+      return 1;
+    }
+    return 0;
+  }
+  function comparerCommon(a, b) {
     var x = a[sortCol], y = b[sortCol];
-    var z = a['Stamp'], w = b['Stamp'];
-    return (x === y ? (z > w ? 1 : -1) : 0);
+    if (x < y) {
+      return -1;
+    } else if (x > y) {
+      return 1;
+    }
+    return 0;
   }
 
   dataView.onRowCountChanged.subscribe(function (e, args) {
@@ -594,7 +664,7 @@ $(function () {
     var conditionType = $('input[name="' + parentId + '_input"]:checked').val();
     if (conditionType === 'AND') {
       if ($('#' + parentId + ' > li').length === 0) {
-        // return alert('No groups to add.');
+        console.info('No groups to add.');
         return;
       }
     }
