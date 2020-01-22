@@ -2,7 +2,7 @@
 
 /**
  * @fileOverview a file to define RWTRobotMonitor.DiagnosticsStatus class.
- * @author Ryohei Ueda
+ * @author F-ROSROBO
  */
 
 
