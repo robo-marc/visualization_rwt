@@ -3,9 +3,10 @@
 
 var dataView = new Slick.Data.DataView({ inlineFilters: true });
 
-function getTargetTopicData() {
+function getTargetTopicTypeList() {
   return undefined;
 }
+
 
 $(function () {
 
@@ -14,9 +15,17 @@ $(function () {
 
   var ros = new ROSLIB.Ros();
 
+  // config
+  var refleshRate = 1;
+
+  // status
   var subscribingMap = {};
   var subscribingValueMap = {};
+  var topicDetailMap = {}; // key: topic name, value: message detail
+  var targetTopicTypeList;
+  var isFirstAdjusted = false; // adjust column width
 
+  // for grid
   var checkboxSelector = new Slick.CheckboxSelectColumn({
     cssClass: 'slick-cell-checkboxsel',
     hideInColumnTitleRow: true,
@@ -36,8 +45,6 @@ $(function () {
   var data = [];
   var grid = new Slick.Grid('#myGrid', dataView, columns);
 
-  var topicDetailMap = {}; // key: topic name, value: message detail
-  var topicList;
 
   ////////////////////////////////////////
   // functions
@@ -47,6 +54,9 @@ $(function () {
     // common
     ros.autoConnect();
 
+    // If not an iframe, parent equals to myself
+    targetTopicTypeList = window.parent.getTargetTopicTypeList();
+
     // for grid
     dataView.beginUpdate();
     dataView.setItems(data);
@@ -54,7 +64,7 @@ $(function () {
     dataView.endUpdate();
 
     // start
-    setInterval(refreshTopics, 1000);
+    setInterval(refreshTopics, 1000 / refleshRate);
   }
 
   function checkboxCustomFormatter(row, cell, value, columnDef, dataContext) {
@@ -183,7 +193,7 @@ $(function () {
             break;
           }
         } else {
-          // name missmatchget
+          // name missmatch
           value = undefined;
         }
       }
@@ -317,14 +327,13 @@ $(function () {
   }
 
   function refreshTopics() {
-
-    var messageDetailPromises = [];
-    var monitoringInfoDefer = $.Deferred();
-
     ros.getTopics(function (topicInfo) {
-      if (topicList !== undefined) {
+      var monitoringInfoDefer = $.Deferred();
+      var messageDetailPromises = [];
+
+      if (targetTopicTypeList !== undefined) {
         // moveit only
-        var comparisonItem = _.cloneDeep(topicList);
+        var comparisonItem = _.cloneDeep(targetTopicTypeList);
         var keepInfo = { topics: [], types: [] };
 
         for (var i = 0; i < topicInfo.topics.length; i++) {
@@ -437,6 +446,11 @@ $(function () {
         // draw grid
         dataView.setItems(fieldList);
         grid.invalidate();
+
+        if (!isFirstAdjusted) {
+          adjustColumnWidth();
+          isFirstAdjusted = true;
+        }
       });
     });
   }
@@ -507,8 +521,6 @@ $(function () {
   dataView.onRowCountChanged.subscribe(function (e, args) {
     grid.updateRowCount();
     grid.render();
-    grid.resizeCanvas();
-    grid.autosizeColumns();
   });
 
   dataView.onRowsChanged.subscribe(function (e, args) {
@@ -516,23 +528,15 @@ $(function () {
     grid.render();
   });
 
+  $(window).on('load resize', function () {
+    adjustColumnWidth();
+  });
 
-  ////////////////////////////////////////
-  // resize events
-
-  $(window).on('load resize', function (e) {
-
+  function adjustColumnWidth() {
     grid.resizeCanvas();
     grid.autosizeColumns();
+  }
 
-    // prevent the delete button from being hidden when switching screens vertically
-    grid.resizeCanvas();
-  });
-
-  $(window).on('load', function () {
-    // If not an iframe, parent equals to myself
-    topicList = window.parent.getTargetTopicData();
-  });
 
   ////////////////////////////////////////
   // button events
