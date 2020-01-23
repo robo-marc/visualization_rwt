@@ -21,7 +21,6 @@ $(function () {
   // status
   var subscribingMap = {};
   var subscribingValueMap = {};
-  var topicDetailMap = {}; // key: topic name, value: message detail
   var targetTopicTypeList;
   var isFirstAdjusted = false; // adjust column width
 
@@ -65,6 +64,7 @@ $(function () {
 
     // start
     setInterval(refreshTopics, 1000 / refleshRate);
+    // refreshTopics(); // for debug
   }
 
   function checkboxCustomFormatter(row, cell, value, columnDef, dataContext) {
@@ -74,7 +74,6 @@ $(function () {
     } else if (data[idx] && data[idx].parent === null) {
       return '<input type="checkbox" class="checkbox" checked="checked">';
     }
-
     return '';
   }
 
@@ -172,41 +171,15 @@ $(function () {
     return defer.promise();
   }
 
-  function getValueFromObj(name, valueObj, path) {
-    var keys = Object.keys(valueObj);
-    var value;
-    for (var i = 0; i < keys.length; i++) {
-      var key = keys[i];
-      value = valueObj[keys[i]];
-      if (keys[i] === name) {
-        if (typeof value === 'object') {
-          value = undefined; // hide value of object 
-        }
-        path = path + '.' + key;
-        break;
-      } else {
-        if (typeof value === 'object') {
-          var result = getValueFromObj(name, value, path);
-          if (result.path !== '') {
-            path = '.' + key + result.path;
-            value = result.value;
-            break;
-          }
-        } else {
-          // name missmatch
-          value = undefined;
-        }
-      }
-    }
-    return { path: path, value: value };
-  }
-
   function decodeTypeDefs(type_defs, root) {
     // It calls itself recursively to resolve type definition
     // using hint_defs.
-    var decodeTypeDefsRec = function (theType, parent, hint_defs) {
+    var decodeTypeDefsRec = function (theType, theValue, parent, hint_defs) {
       var typeList = [];
-      var sub_type;
+      var fieldValue;
+      var subType;
+      var subTypeTmpResult;
+      var arrValue;
 
       for (var i = 0; i < theType.fieldnames.length; i++) {
         var arrayLen = theType.fieldarraylen[i];
@@ -225,36 +198,35 @@ $(function () {
           parent: parent.id,
           indent: parent.indent + 1,
           root: root.topic,
-          subType: true,
           _collapsed: true,
         };
         typeList.push(item);
 
-        // lookup the name
-        sub_type = undefined;
+        // get value
+        fieldValue = undefined;
+        if (theValue !== undefined) {
+          fieldValue = theValue[fieldName];
+        }
+
+        // get subtype
+        subType = undefined;
         for (var j = 0; j < hint_defs.length; j++) {
           if (hint_defs[j].type.toString() === fieldType.toString()) {
-            sub_type = hint_defs[j];
+            subType = hint_defs[j];
             break;
           }
         }
-        if (sub_type) {
-          var sub_type_result = decodeTypeDefsRec(sub_type, item, hint_defs);
-          if (isArray) {
-            // get object array value
-            var valueObj2 = subscribingValueMap[root.topic];
-            if (valueObj2) {
-              var itemPropNames2 = item.id.split('.');
 
-              // start search from 1 because itemPropNames2[0] is topicName
-              for (var k2 = 1; k2 < itemPropNames2.length; k2++) {
-                var propName2 = itemPropNames2[k2];
-                if (propName2 in valueObj2) {
-                  valueObj2 = valueObj2[propName2];
-                }
-              }
-              for (var valueObjIndex = 0; valueObjIndex < valueObj2.length; valueObjIndex++) {
-                var indexName = '[' + valueObjIndex + ']';
+        if (subType) {
+          if (isArray) {
+            // object array
+            if (_.isArray(fieldValue) && fieldValue.length > 0) {
+              for (var valueIndex = 0; valueIndex < fieldValue.length; valueIndex++) {
+                arrValue = fieldValue[valueIndex];
+                subTypeTmpResult = decodeTypeDefsRec(subType, arrValue, item, hint_defs);
+
+                // build subtype parent like '[0]'
+                var indexName = '[' + valueIndex + ']';
                 var arrItemParent = _.cloneDeep(item);
                 arrItemParent.id = item.id + '.' + indexName;
                 arrItemParent.topic = indexName;
@@ -263,47 +235,46 @@ $(function () {
                 arrItemParent.indent = item.indent + 1;
                 typeList.push(arrItemParent);
 
-                for (var subTypeIndex = 0; subTypeIndex < sub_type_result.length; subTypeIndex++) {
-                  var arrItem = _.cloneDeep(sub_type_result[subTypeIndex]);
-                  var result = getValueFromObj(arrItem.topic, valueObj2[valueObjIndex], '');
+                for (var subTypeIndex = 0; subTypeIndex < subTypeTmpResult.length; subTypeIndex++) {
+                  var arrItem = _.cloneDeep(subTypeTmpResult[subTypeIndex]);
 
-                  arrItem.id = arrItemParent.id + result.path;
+                  var tmpId = arrItem.id;
+                  var relativePathFromParent = tmpId.replace(arrItemParent.parent, '');
+
+                  arrItem.id = arrItemParent.id + relativePathFromParent;
                   arrItem.parent = arrItem.id.substring(0, arrItem.id.lastIndexOf('.'));
                   arrItem.indent = arrItem.indent + 1;
-                  arrItem.value = result.value;
 
                   typeList.push(arrItem);
                 }
               }
+            } else {
+              // cannot build subtype tree because no value of object array
             }
           } else {
-            typeList = typeList.concat(sub_type_result);
+            // simple object, not array
+            subTypeTmpResult = decodeTypeDefsRec(subType, fieldValue, item, hint_defs);
+            typeList = typeList.concat(subTypeTmpResult);
           }
         } else {
-          item.subType = false;
+          // primitive type
 
-          // get value
-          var valueObj = subscribingValueMap[root.topic];
-          if (valueObj) {
-            var itemPropNames = item.id.split('.');
-
-            // start search from 1 because itemPropNames[0] is topicName
-            for (var k = 1; k < itemPropNames.length; k++) {
-              var propName = itemPropNames[k];
-              if (propName in valueObj) {
-                valueObj = valueObj[propName];
-              }
-            }
-
-            if (_.isArray(valueObj) && valueObj.length > 0) {
-              if (typeof valueObj[0] === 'object') {
-                // object array valueis already set
+          // format value and set
+          if (isArray && _.isArray(fieldValue)) {
+            if ((fieldType === 'string' || fieldType === 'char')) {
+              if (fieldValue.length <= 0) {
+                item.value = '[]';
               } else {
-                item.value = '(' + valueObj.join(', ') + ')';
+                item.value = '[\'' + fieldValue.join('\', \'') + '\']';
               }
             } else {
-              item.value = valueObj;
+              item.value = '(' + fieldValue.join(', ') + ')';
             }
+          } else {
+            if ((fieldType === 'string' || fieldType === 'char') && fieldValue) {
+              fieldValue = '\'' + fieldValue + '\'';
+            }
+            item.value = fieldValue;
           }
         }
       }
@@ -311,7 +282,8 @@ $(function () {
       return typeList;
     }; // end of decodeTypeDefsRec
 
-    return decodeTypeDefsRec(type_defs[0], root, type_defs);
+    var value = subscribingValueMap[root.topic];
+    return decodeTypeDefsRec(type_defs[0], value, root, type_defs);
   }
 
   function getMonitoringInfoByName(list, name) {
@@ -330,6 +302,7 @@ $(function () {
     ros.getTopics(function (topicInfo) {
       var monitoringInfoDefer = $.Deferred();
       var messageDetailPromises = [];
+      var topicDetailMap = {}; // key: topic name, value: message detail
 
       if (targetTopicTypeList !== undefined) {
         // moveit only
@@ -387,16 +360,13 @@ $(function () {
             parent: null,
             indent: 0,
             root: topicName,
-            subType: true,
             _collapsed: true,
             _checked: false,
           };
-
           fieldList.push(parent);
 
           var decoded = decodeTypeDefs(details.detail, parent);
           fieldList = fieldList.concat(decoded);
-
         });
 
         if (data.length > 0) {
@@ -496,11 +466,12 @@ $(function () {
       } else {
         item._checked = false;
 
-        //unsubscribe
-        subscribingMap[item.topic].unsubscribe();
-        delete subscribingValueMap[item.topic];
-        delete subscribingMap[item.topic];
-
+        if (item.topic in subscribingMap) {
+          //unsubscribe
+          subscribingMap[item.topic].unsubscribe();
+          delete subscribingValueMap[item.topic];
+          delete subscribingMap[item.topic];
+        }
         // stop monitoring of bandwidth, Hz
         stopMonitoringAsync(item.topic, item.type);
       }
