@@ -5,7 +5,7 @@
   <description>The rwt_image_view_marc package</description>
 
   <maintainer email="F-ROSROBO@fsi.co.jp">F-ROSROBO</maintainer>
-  <author email="F-ROSROBO@fsi.co.jp">F-ROSROBO</author>
+  <author>fsi Nanami</author>
   <license>BSD</license>
   <url type="website">http://wiki.ros.org/rwt_image_view_marc</url>
   <url type="bugtracker">https://github.com/robo-marc/visualization_rwt/issues</url>
