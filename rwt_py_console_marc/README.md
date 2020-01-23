@@ -3,10 +3,10 @@ rwt_py_console_marc
 
 Installation
 ------------
-1. Install TigerVNC Server and Websockify
-    ```sh
-    sudo apt install tigervnc-standalone-server websockify
-    ```
+1. Install
+ [TigerVNC Server](https://tigervnc.org/),
+ [Ratpoison](https://www.nongnu.org/ratpoison/) and
+ [Websockify](https://github.com/novnc/websockify)
 
 2. Build ROS package
     ```
@@ -24,7 +24,7 @@ Installation
 Usage
 -----
 ```sh
-roslaunch rwt_py_console_marc rwt_py_console.launch
+roslaunch rwt_py_console_marc rwt_py_console_marc.launch
 ```
 
 and access to http://localhost:8000/rwt_py_console_marc/ using your browser
