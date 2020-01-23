@@ -2,7 +2,7 @@
 
 /**
  * @fileOverview a file to define RWTRobotMonitor.DiagnosticsDirectory class
- * @author F-ROSROBO
+ * @author fsi Nanami
  */
 
 /**
@@ -314,7 +314,7 @@ ROSLIB.DiagnosticsHistory.prototype.registerStatus = function(status) {
 
 /**
  * @fileOverview a file to define RWTRobotMonitor.DiagnosticsStatus class.
- * @author F-ROSROBO
+ * @author fsi Nanami
  */
 
 
@@ -475,7 +475,7 @@ ROSLIB.RingBuffer.prototype.length = function () {
 
 /**
  * @fileOverview a file to define RWTRobotMonitor class.
- * @author F-ROSROBO
+ * @author fsi Nanami
  */
 
 // previous data

@@ -5,7 +5,7 @@
   <description>The rwt_robot_monitor_marc package</description>
 
   <maintainer email="F-ROSROBO@fsi.co.jp">F-ROSROBO</maintainer>
-  <author email="F-ROSROBO@fsi.co.jp">F-ROSROBO</author>
+  <author>fsi Nanami</author>
   <url type="website">http://wiki.ros.org/rwt_robot_monitor_marc</url>
   <url type="bugtracker">https://github.com/robo-marc/visualization_rwt/issues</url>
   <url type="repository">https://github.com/robo-marc/visualization_rwt</url>
@@ -15,14 +15,12 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>rosbridge_server</build_depend>
-  <!-- <build_depend>roslibjs_experimental</build_depend> -->
   <build_depend>rwt_plot</build_depend>
   <build_depend>rwt_utils_3rdparty</build_depend>
   <build_depend>rwt_utils_marc</build_depend>
   <build_depend>roswww</build_depend>
   <run_depend>diagnostic_msgs</run_depend>
   <run_depend>rosbridge_server</run_depend>
-  <!-- <run_depend>roslibjs_experimental</run_depend> -->
   <run_depend>rwt_plot</run_depend>
   <run_depend>rwt_utils_3rdparty</run_depend>
   <run_depend>rwt_utils_marc</run_depend>

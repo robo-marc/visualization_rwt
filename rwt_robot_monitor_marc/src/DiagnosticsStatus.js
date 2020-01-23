@@ -2,7 +2,7 @@
 
 /**
  * @fileOverview a file to define RWTRobotMonitor.DiagnosticsStatus class.
- * @author F-ROSROBO
+ * @author fsi Nanami
  */
 
 
