@@ -1,10 +1,10 @@
-rwt_nav
+rwt_nav_view_marc
 ====================
 
 Usage
 -----
 ```
-roslaunch rwt_nav_view_marc rwt_nav.launch
+roslaunch rwt_nav_view_marc rwt_nav_view_marc.launch
 ```
 
 Open your browser, and access to:
