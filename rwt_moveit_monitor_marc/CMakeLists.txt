@@ -6,7 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
   rosbridge_server
   rospy
   rwt_utils_3rdparty
-  rwt_topic_content_marc
   std_msgs
   roswww
 )

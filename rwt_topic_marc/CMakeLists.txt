@@ -7,7 +7,6 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   rwt_utils_3rdparty
   rwt_utils_marc
-  rwt_topic_content_marc
   std_msgs
   message_generation  
   roswww
