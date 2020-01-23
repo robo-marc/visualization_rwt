@@ -4,7 +4,17 @@
 ROSLIB.Ros.prototype.autoConnect = function () {
   var value = "ws://" + location.hostname + ":8888/";
   this.connect(value);
+  var ros = this;
+  setInterval(function () {
+    checkConnect(ros, value);
+  }, 1000);
 };
+
+function checkConnect(ros, value) {
+  if (!ros.isConnected) {
+    ros.connect(value);
+  }
+}
 
 /**
  * 
