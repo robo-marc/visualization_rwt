@@ -1,0 +1,1168 @@
+// main: common.scss
+
+@mixin inner-lm($top, $bottom) {
+  padding-left: 1.75rem;
+  padding-right: 1.75rem;
+  padding-top: $top;
+  padding-bottom: $bottom;
+}
+@mixin inner-s($top, $bottom) {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: $top;
+  padding-bottom: $bottom;
+}
+@mixin link-icon($color, $size){
+  a.icon {
+    display: block;
+    font-size: 0;
+    i {
+      color: $color;
+      font-size: $size;
+    }
+  }
+}
+@mixin link-icon-text($color, $size){
+  a.icon {
+    display: block;
+    i {
+      color: $color;
+      font-size: $size;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+  }
+}
+
+
+//////// common ////////
+.root {
+  border: 1px solid #CBCBCB;
+  border-radius: 5px;
+  background-color: #fff;
+}
+header {
+  @include inner-lm(0.75rem, 0.75rem);
+  border-bottom: 1px solid #CBCBCB;
+  box-sizing: border-box;
+  div.column {
+    justify-content: space-between;
+    align-items: center;
+  }
+  h2{
+    margin: 0;
+    @include font-size(16);
+  }
+  a.icon {
+    display: block;
+    font-size: 0;
+    i {
+      color: #989898;
+      font-size: 1.3rem;
+    }
+    &:hover {
+      opacity: 0.6;
+      transition: 0.3s $easeOutQuad;
+    }
+  }
+}
+.contents {
+  h3 {
+    margin: 0;
+    font-weight: normal;
+    color: #292929;
+    @include font-size(16);
+  }
+  &_header {
+    @include inner-lm(0.8rem, 0.8rem);
+    nav ul {
+      margin: 0;
+      padding-left: 0;
+      display: flex;
+      justify-content: flex-end;
+      list-style-type: none;
+      li {
+        margin-left: 1.75rem;
+        @include font-size(12);
+        a.icon {
+          display: block;
+          i {
+            font-size: 1.2rem;
+            margin-right: 5px;
+            vertical-align: text-bottom;
+            width: 1.2rem;
+          }
+        }
+      }
+    }
+    &.parts-box {
+      background-color: #F7F7F7;
+      .column {
+        max-width: 800px;
+        padding: 1.25rem 0;
+        align-items: center;
+        flex-wrap: wrap;
+        &>* {
+          margin-top: 0.25rem;
+          margin-bottom: 0.25rem;
+          margin-right: 0.75rem;
+        }
+        &>*:last-child {
+          margin-right: 0;
+        }
+      }
+      label, span.label {
+        @include font-size(13);
+      }
+      select, input {
+        flex: 2 0 auto;
+        min-width: 180px;
+      }
+      @media #{$small} {
+        .column {
+          display: block;
+          padding: 0.25rem 0;
+          @include clearfix;
+          &>*:nth-child(n+2) {
+            margin-left: 0;
+          }
+          &>* {
+            display: block;
+            margin: 0.25rem;
+          }
+        }
+        select, input {
+          width: 100%;
+        }
+        button {
+          float: right;
+        }
+      }
+    }
+  }
+  &_sub {
+    background-color: #F6F6F6;
+    label {
+      color: #484848;
+      @include font-size(13);
+      word-break: break-all;
+      font-family: $sans-serif;
+    }
+  }
+  button {
+    width: 120px;
+    min-width: 120px;
+    @include font-size(12);
+    color: #fff;
+    font-weight: bold;
+    padding: 0.65rem 1.75rem;
+    box-sizing: border-box;
+    background-color: #74C2D6;
+    border: none;
+    border-radius: 3px;
+    &:hover {
+      background-color: #63d2ef;
+      transition: background-color 0.3s $easeOutQuad;
+    }
+    &.icon {
+      width: auto;
+      min-width: auto;
+      padding: 0 0.5rem;
+      i {
+        font-size: 1.5rem;
+        vertical-align: middle;
+      }
+    }
+  }
+  select {
+    height: 2.2rem;
+    @include font-size(14);
+    color: #808080;
+    padding: 0.25rem 0.5rem;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #808080;
+    &:disabled {
+      background-color: #EEEEEE;
+    }
+  }
+  input {
+    height: 2.2rem;
+    @include font-size(14);
+    padding: 0.25rem 0.5rem;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #808080;
+    &:disabled {
+      background-color: #EEEEEE;
+    }
+  }
+  &_footer {
+    a.footer_btn {
+      display: none;
+      text-align: center;
+      border-top: 1px solid #CBCBCB;
+      padding: 0.5rem 0;
+      color: #656565;
+      @include font-size(11);
+      i {
+        font-size: 1.2rem;
+        margin-right: 5px;
+        vertical-align: middle;
+      }
+      &.active {
+        display: block;
+      }
+      &.close {
+        background-color: #F6F6F6;
+      }
+    }
+    a:hover.footer_btn.close {
+        background-color: #ececec;
+        transition: 0.2s $easeOutQuad;
+    }
+    a:hover.footer_btn.open {
+        background-color: #F6F6F6;
+        transition: 0.2s $easeOutQuad;
+        border-top: 1px solid transparent;
+    }
+  }
+}
+
+
+//////// rwt_plot_marc ////////
+.plot_body {
+  .graph {
+    &-box {
+      @include inner-lm(0, 2rem);
+    }
+    &-header {
+      color: #5A5A5A;
+      .position {
+        @include font-size(12);
+        margin-left: 20px;
+        margin-bottom: 10px;
+        i {
+          font-size: 1.25rem;
+          vertical-align: middle;
+          margin-right: 10px;
+        }
+      }
+    }
+    &-body {
+      width: 100%;
+      height: 240px;
+      background-color: #ccc;
+    }
+    &-footer {
+      @include font-size(12);
+      ul {
+        list-style-type: none;
+        margin: 1rem auto;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        width: 80%;
+        max-width: 600px;
+        @media #{$small}{
+          width: 90%;
+        }
+        li {
+          padding: 0.25rem 1.75rem;
+          position: relative;
+          word-break: break-all;
+          color: #5A5A5A;
+          &:before {
+            content: "";
+            display: inline-block;
+            width: 1.5rem;
+            height: 0.25rem;
+            background: #ccc;
+            position: absolute;
+            left: 0;
+            top: 0.75rem;
+          }
+        }
+        li.color_01:before {background: #8FA9DC;}
+        li.color_02:before {background: #DEB2C4;}
+        li.color_03:before {background: #F8D9A3;}
+        li.color_04:before {background: #B2DEB9;}
+      }
+    }
+  }
+}
+
+.plot_sub {
+  .column {
+    @media #{$medium}{
+      display: block;
+    }
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .column-box {
+    padding: 1.75rem;
+    box-sizing: border-box;
+    overflow: hidden;
+    @media #{$large}{
+      width: 50%;
+    }
+    @media #{$medium}{
+      width: 100%;
+    }
+  }
+  .parts-box {
+    @include clearfix;
+    & + .parts-box {
+      margin-top: 2rem;
+    }
+  }
+  button {
+    float: right;
+  }
+  .parts-set {
+    box-sizing: border-box;
+    margin: 0.8rem 0;
+    &.select {
+      display: flex;
+      label {
+        flex: 0 0 30%;
+        max-width: 30%;
+        margin-top: 0.5rem;
+      }
+      select {
+        flex: 0 0 70%;
+        max-width: 70%;
+      }
+    }
+    &.textbox {
+      display: flex;
+      label {
+        flex: 0 0 40%;
+        max-width: 40%;
+        margin-top: 0.5rem;
+      }
+      input {
+        flex: 0 0 60%;
+        max-width: 60%;
+      }
+    }
+    &.checkbox {
+      margin-top: 1.25rem;
+      input {
+        margin: 0 8px 0 0;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+
+
+//////// rwt_srv_marc, rwt_action_marc ////////
+.srv,
+.action {
+  .tree {
+    &-box {
+      margin: calc(0.75rem + 35px) 1.75rem 2.5rem;
+    }
+    &-wrap {
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      height: 300px;
+      position: relative;
+    }
+    &-table {
+      width: 100%;
+      overflow-x: scroll;
+      border-collapse: collapse;
+      border-spacing: 0;
+      position: absolute;
+      top: -35px;
+      table-layout: fixed;
+      thead {
+        tr {
+          height: 35px;
+        }
+        th {
+          @include font-size(13);
+          text-align: left;
+          padding: 0.25rem 0 0.25rem 10px;
+          box-sizing: border-box;
+        }
+        th.tree {
+          padding: 0.25rem 0 0.25rem 22px;
+        }
+      }
+      tbody {
+        @include font-size(11);
+        text-align: left;
+        tr:nth-child(odd) {
+          background-color: #F7F7F7;
+        }
+        th {
+          font-weight: normal;
+          padding: 0.25rem 0 0.25rem 10px;
+          box-sizing: border-box;
+        }
+        td {
+          padding: 0.25rem 0 0.25rem 10px;
+          box-sizing: border-box;
+        }
+      }
+      th,td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: left;
+      }
+      th.tree {
+        width: 20%;
+      }
+      th.type, td.type {
+        width: 20%;
+      }
+      th.path, td.path {
+        width: 55%;
+        position: relative;
+        padding-right: calc(16px + 1rem);
+        a.icon {
+          position: absolute;
+          right: 10px;
+          font-size: 0;
+          color: #E85454;
+          i {
+            font-size: 1rem;
+          }
+        }
+      }
+
+      tr {
+        padding-left: 16px;
+      }
+      tr.end {
+        border-bottom: 1px solid #D1D1D1;
+      }
+      @mixin leaf($num) {
+        position: relative;
+        padding-left: calc(16px + #{$num}rem);
+      }
+      tr.leaf1 th.tree {@include leaf(1);}
+      tr.leaf2 th.tree {@include leaf(2);}
+      tr.leaf3 th.tree {@include leaf(3);}
+      tr.leaf4 th.tree {@include leaf(4);}
+      tr.leaf5 th.tree {@include leaf(5);}
+
+      tr.leaf th.tree > span {
+        position: relative;
+        padding-left: 14px;
+        &:before {
+          content: "";
+          position: absolute;
+          display: block;
+          top: 0.5rem;
+          width: 6px;
+          height: 1px;
+          border-left: 6px solid #474747;
+          margin: auto;
+          vertical-align: middle;
+          box-sizing: border-box;
+        }
+      }
+      tr.expand th.tree > span {
+        position: relative;
+        padding-left: 14px;
+        &:before {
+          content: "";
+          position: absolute;
+          display: block;
+          top: 0.4rem;
+          width: 4px;
+          height: 4px;
+          border: 4px solid transparent;
+          border-top: 4px solid #474747;
+          margin: auto;
+          vertical-align: middle;
+          box-sizing: border-box;
+        }
+      }
+      tr.collapse th.tree > span {
+        position: relative;
+        padding-left: 14px;
+        &:before {
+          position: absolute;
+          display: block;
+          top: 0.25rem;
+          width: 4px;
+          height: 4px;
+          border: 4px solid transparent;
+          border-left: 4px solid #474747;
+          margin: auto;
+          vertical-align: middle;
+          box-sizing: border-box;
+        }
+      }
+    }
+  }
+}
+
+//////// rwt_rosparam_marc ////////
+.rosparam {
+  .contents_header.parts-box {
+    input {
+      flex: 2 0 auto;
+      min-width: 150px;
+    }
+    select.mini {
+      flex: 1.5 0 auto;
+      min-width: 120px;
+    }
+  }
+  .table {
+    &-wrap {
+      width: 100%;
+      height: 186px;
+      overflow: auto;
+      box-sizing: border-box;
+      margin-top: 0.75rem;
+      border-bottom: 1px solid #B8B8B8;
+      @media #{$small}{
+        height: 240px;
+      }
+    }
+    &-type-1 {
+      width: 100%;
+      min-width: 400px;
+      margin-bottom: 0;
+      border-spacing: 0;
+      border-collapse: separate;
+      background-color: #fff;
+      table-layout: fixed;
+      thead tr th, tbody tr td {
+        width: 50%;
+        text-align: left;
+        vertical-align: middle;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        box-sizing: border-box;
+        &:first-child {
+          padding-left: 1.75rem;
+        }
+        &:last-child {
+          padding-right: 1.75rem;
+        }
+      }
+      thead tr th {
+        position: sticky;
+        top: 0;
+        @include font-size(13);
+        padding: 0.4rem 0.5rem;
+        border-bottom: 1px solid #B8B8B8;
+        background-color: #fff;
+        box-sizing: border-box;
+      }
+      tbody tr td {
+        @include font-size(11);
+        padding: 0.4rem 0.5rem;
+        box-sizing: border-box;
+        border-bottom: 1px solid #E5E5E5;
+      }
+    }
+  }
+  .sys-message {
+    &-box {
+      @include inner-lm(1.75rem, 2.5rem);
+    }
+    &-text {
+      height: 90px;
+      border: 1px solid #9E9E9E;
+      background-color: #F9F9F9;
+      border-radius: 3px;
+      padding: 12px;
+      color: #525252;
+      @include font-size(11);
+      .placeholder {
+        color: #B8B8B8;
+      }
+      @media #{$small}{
+        height: 120px;
+      }
+    }
+  }
+}
+
+//////// rwt_console_marc ////////
+.console {
+  .contents_header nav ul {
+    @media #{$medium}{
+      flex-wrap: wrap;
+      li {
+        margin-left: 1rem;
+         a.icon i {
+           margin-right: 0;
+         }
+      }
+    }
+  }
+  .table {
+    &-wrap {
+      width: 100%;
+      height: 240px;
+      overflow: auto;
+      box-sizing: border-box;
+      margin-top: 0.75rem;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid #B8B8B8;
+      @media #{$small}{
+        height: 240px;
+      }
+    }
+    &-type-1 {
+      width: 100%;
+      min-width: 600px;
+      margin-bottom: 0;
+      border-spacing: 0;
+      border-collapse: separate;
+      background-color: #fff;
+      table-layout: fixed;
+      thead tr th, tbody tr td {
+        text-align: left;
+        vertical-align: middle;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        box-sizing: border-box;
+        &:first-child {
+          padding-left: 1.75rem;
+        }
+        &:last-child {
+          padding-right: 1.75rem;
+        }
+      }
+      thead tr th {
+        position: sticky;
+        top: 0;
+        @include font-size(13);
+        padding: 0.5rem 0.5rem;
+        border-top: 1px solid #B8B8B8;
+        border-bottom: 1px solid #B8B8B8;
+        background-color: #fff;
+        box-sizing: border-box;
+      }
+      tbody tr td {
+        @include font-size(11);
+        padding: 0.5rem 0.5rem;
+        box-sizing: border-box;
+        border-bottom: 1px solid #E5E5E5;
+      }
+      // tbody tr {
+      //   &:first-child {
+      //     border-top: 1px solid #B8B8B8;
+      //   }
+      // }
+      .name_1, .data_1 { width: 10%;}
+      .name_2, .data_2 { width: 40%;}
+      .name_3, .data_3 { width: 10%;}
+      .name_4, .data_4 { width: 10%;}
+      .name_5, .data_5 { width: 10%;}
+      .name_6, .data_6 { width: 10%;}
+      .name_7, .data_7 { width: 10%;}
+      .data_3 span.label.warn {
+        color: #fff;
+        @include font-size(7);
+        padding: 1px 6px;
+        border-radius: 3px;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        background-color: #EC5363;
+      }
+    }
+  }
+  &_sub {
+    @include inner-lm(1.75rem, 1.75rem);
+    .parts-box {
+      h3 {
+        margin-bottom: 0.75rem;
+      }
+      .column {
+        flex-wrap: wrap;
+        @media #{$medium}{
+          display: block;
+        }
+      }
+      & + .parts-box {
+        margin-top: 1.75rem;
+      }
+    }
+    .parts-set {
+      box-sizing: border-box;
+      margin: 0.25rem 1rem 0.25rem 0;
+      &.select-btn {
+        display: flex;
+        flex-basis: 320px;
+        max-width: 400px;
+        margin-right: 2rem;
+        @media #{$medium}{
+          width: 100%;
+          max-width: none;
+        }
+        select {
+          flex: 2 0 auto;
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+        }
+        button {
+          flex: 0 0 auto;
+          margin-left: -1px;
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+        }
+      }
+      &.checkbox, &.radio {
+        input {
+          margin: 0 8px 0 0;
+          vertical-align: middle;
+        }
+        @media #{$medium}{
+          float: left;
+        }
+      }
+    }
+
+  .filter {
+    &-box {
+      margin-top: 0.75rem;
+      @media #{$medium}{
+          margin-top: 0;
+      }
+    }
+    &-wrap {
+      background-color: #fff;
+      border: 1px solid #B8B8B8;
+      height: 180px;
+      overflow: scroll;
+    }
+    &-list {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      min-width: 500px;
+      @include font-size(11);
+      > li {
+         border-bottom: 1px solid #E5E5E5;
+         padding: 0.4rem 50px 0.4rem 0.75rem;
+         position: relative;
+         min-width: 500px;
+         box-sizing: border-box;
+         .column {
+           display: flex;
+           align-items: center;
+         }
+         .name {
+           flex: 0 0 30%;
+           max-width: 180px;
+           // padding-right: 8px;
+           box-sizing: border-box;
+         }
+         .data {
+           flex: 0 0 70%;
+         }
+         .delete {
+           position: absolute;
+           right: 15px;
+           top: 0.75rem;
+           a.icon i {
+             font-size: 1.25rem;
+             color: #E85454;
+           }
+         }
+         .parts-set {
+           margin: 0;
+         }
+         select {
+           height: 2rem;
+           width: 100%;
+           max-width: 600px;
+         }
+         .textbox input {
+           height: 2rem;
+           width: 100%;
+           max-width: 600px;
+         }
+         &.message .data, &.location .data {
+           display: flex;
+           max-width: 600px;
+           .textbox {
+              flex: 2 0 auto;
+           }
+           .checkbox {
+             flex: 0 0 auto;
+             padding-left: 16px;
+             min-width: 85px;
+           }
+         }
+         &.time .data {
+           display: flex;
+           align-items: center;
+           max-width: 600px;
+           input.checkbox {
+             height: auto;
+           }
+         }
+         &.severities ul.chips {
+           display: flex;
+           flex-wrap: wrap;
+           list-style-type: none;
+           margin: 0;
+           padding: 0;
+           li{
+             margin-right: 5px;
+             a {
+               @include font-size(10);
+               color: #58A0D6;
+               background-color: #fff;
+               border: 1px solid #58A0D6;
+               border-radius: 30px;
+               box-sizing: border-box;
+               padding: 2px 12px;
+               margin: 2px;
+               display: block;
+               &:hover, &.active {
+                 color: #fff;
+                 background-color: #58A0D6;
+                 transition: background-color 0.3s $easeOutQuad;
+               }
+             }
+           }
+         }
+         &.active {
+           background-color: #EAF4FA;
+         }
+      }
+    }
+  }
+  }
+}
+
+
+//////// rwt_robot_monitor_marc ////////
+.robot_monitor {
+  position: relative;
+  .contents-box {
+    @include inner-lm(0, 1.75rem);
+  }
+  .table {
+    &-wrap {
+      width: 100%;
+      height: 180px;
+      overflow: auto;
+      border: 1px solid #B8B8B8;
+      border-radius: 3px;
+      box-sizing: border-box;
+      margin-top: 10px;
+      &.all {
+        height: 200px;
+      }
+    }
+    &-type-2 {
+      width: 100%;
+      min-width: 400px;
+      margin-bottom: 0;
+      border-spacing: 0;
+      border-collapse: separate;
+      background-color: #fff;
+      table-layout: fixed;
+      thead tr th, tbody tr td {
+        width: 50%;
+        text-align: left;
+        vertical-align: middle;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        box-sizing: border-box;
+        &:first-child {
+          padding-left: 2.25rem;
+        }
+        &:last-child {
+          padding-right: 1.75rem;
+        }
+      }
+      thead tr th {
+        position: sticky;
+        top: 0;
+        @include font-size(13);
+        padding: 0.5rem;
+        border-bottom: 1px solid #B8B8B8;
+        background-color: #F0F0F0;
+        box-sizing: border-box;
+        z-index: 5;
+      }
+      tbody tr td {
+        @include font-size(11);
+        padding: 0.3rem 0.5rem;
+      }
+      .name_1, .data_1 {
+        padding-left: 2.5rem;
+      }
+      @mixin data_icon($name,$color) {
+        &:before {
+          font-family: 'Material Icons';
+          content: $name;
+          position: absolute;
+          left: 0.5rem;
+          font-size: 1.25rem;
+          vertical-align: middle;
+          color: $color;
+        }
+      }
+      .data_1 {
+        position: relative;
+        z-index: 1;
+      }
+      tr {
+        &.error td.data_1 {@include data_icon("\e000", #EC5363);}
+        &.warn td.data_1 {@include data_icon("\e7f4", #fbc655);}
+        &.ok td.data_1 {@include data_icon("\e86c", #32C8C8);}
+      }
+      &.tree {
+        tbody tr {
+          &.end td {
+              border-bottom: 1px solid #D1D1D1;
+          }
+          @mixin leaf($num) {
+            position: relative;
+            padding-left: calc(2.5rem + #{$num}rem );
+            &:before {
+              left:  calc(0.75rem + #{$num}rem);
+              font-size: 1.25rem;
+            }
+          }
+          &.leaf1 td.data_1 {@include leaf(1);}
+          &.leaf2 td.data_1 {@include leaf(2);}
+          &.leaf3 td.data_1 {@include leaf(3);}
+          &.leaf4 td.data_1 {@include leaf(4);}
+          &.leaf5 td.data_1 {@include leaf(5);}
+
+          &.expand td.data_1 > span{
+            position: relative;
+            &:before {
+              content: "";
+              position: absolute;
+              display: inline;
+              top: 0.5rem;
+              left: calc(-2.5rem + -2px);
+              width: 4px;
+              height: 4px;
+              border: 4px solid transparent;
+              border-top: 4px solid #474747;
+              margin: auto;
+              vertical-align: middle;
+              box-sizing: border-box;
+            }
+          }
+          &.collapse td.data_1 > span{
+            position: relative;
+            &:before {
+              content: "";
+              position: absolute;
+              display: block;
+              top: 0.4rem;
+              left: calc(-2.5rem + 2px);
+              width: 4px;
+              height: 4px;
+              border: 4px solid transparent;
+              border-left: 4px solid #474747;
+              margin: auto;
+              vertical-align: middle;
+              box-sizing: border-box;
+            }
+          }
+        }
+      }
+    }
+  }
+  .time {
+    &-box_1 {
+      display: flex;
+      justify-content: space-between;
+      margin: 1.75rem auto 1.25rem;
+      max-width: 700px;
+      .text {
+        flex: 0 0 8%;
+        text-align: center;
+        @include font-size(12);
+        font-weight: bold;
+        color: #676767;
+        @media #{$medium} {
+          &.left { text-align: left;padding-right: 5px;box-sizing: border-box;}
+          &.right { text-align: right;padding-left: 5px;box-sizing: border-box;}
+        }
+      }
+      @media #{$medium} {
+        align-items: center;
+      }
+    }
+    &-list {
+      flex: 0 0 calc(84% - 10px);
+      &> ul {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        list-style-type: none;
+        justify-content: space-between;
+        @media #{$medium} {
+          flex-wrap: wrap;
+          justify-content: flex-start;
+          li {
+            margin: 2px;
+            box-sizing: border-box;
+          }
+        }
+      }
+    }
+    &-item {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      &.ok { background-color: #74CFD6; }
+      &.error { background-color: #EC5363; }
+      &.warn { background-color: #F1B743; }
+    }
+    &-box_2 {
+      .text {
+        text-align: center;
+        @include font-size(12);
+        span.number {
+          @include font-size(26);
+          font-weight: bold;
+          margin: 0 0.25rem;
+          color: #676767;
+        }
+      }
+    }
+  }
+  .dialog {
+      display: block;
+      background-color: #fff;
+      border: 1px solid #707070;
+      border-radius: 5px;
+      max-width: 500px;
+      margin: 0 auto;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+      &_header {
+        h4 {
+          @include font-size(13);
+          margin: 0.75rem 1rem;
+        }
+        border-bottom: 1px solid #BEBEBE;
+      }
+      &_body {
+        margin: 1rem auto;
+      }
+      &_box_1 {
+        // width: 80%;
+        margin: 0 auto;
+        .table {
+          &-type-3 {
+          border: none;
+          margin: 0 auto;
+          border-spacing: 0;
+          border-collapse: separate;
+          @media #{$small} {
+            width: 90%;
+            tr {
+              display: block;
+              padding: 3px 0;
+            }
+          }
+          @include font-size(12);
+            th, td {
+              padding: 0 0.25rem;
+              box-sizing: border-box;
+              @media #{$small} {
+                display: block;
+                width: 100%;
+              }
+            }
+            th {
+              text-align: right;
+              &:after {
+                content: ":";
+              }
+              @media #{$small} {
+                text-align: left;
+              }
+            }
+          }
+        }
+      }
+      &_box_2 {
+        margin: 1rem auto;
+        .table {
+          &-type-4 {
+          margin: 0 auto;
+          border-spacing: 0;
+          border-collapse: collapse;
+          @media #{$small} {
+            width: 90%;
+          }
+          @include font-size(12);
+            th, td {
+              padding: 2px 0.75rem;
+              border: 1px solid #CECECE;
+              box-sizing: border-box;
+              @media #{$small} {
+                display: block;
+                width: 100%;
+                text-align: center;
+              }
+            }
+            th {
+              text-align: right;
+              background-color: #E6F1F9;
+              @media #{$small} {
+                text-align: center;
+              }
+            }
+          }
+        }
+      }
+      &_footer {
+        border-top: 1px solid #BEBEBE;
+        button {
+          display: block;
+          margin: 10px auto;
+          text-align: center;
+        }
+      }
+  }
+}
+
+
+//////// rwt_nav_view_marc ////////
+.nav_view {
+  .contents-box {
+    @include inner-lm(1.75rem, 1.75rem);
+    @media #{$small} {
+      @include inner-s(1.75rem, 1.75rem);
+    }
+  }
+  .img {
+    &-area {
+      text-align: center;
+    }
+    &-text {
+      @include font-size(12);
+      text-align: center;
+      color: #8B8B8B;
+      margin-top: 1rem;
+      i {
+        font-size: 1.2rem;
+        margin-left: 5px;
+      }
+    }
+  }
+}
