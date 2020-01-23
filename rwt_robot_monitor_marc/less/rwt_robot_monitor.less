@@ -7,13 +7,14 @@
 .dialog_hidden {
     display: none;
 }
+
 .robot_monitor .dialog_back {
-    position: fixed; 
+    position: fixed;
     top: 0;
-    left:0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
 }
 
@@ -25,10 +26,12 @@
 
 .robot_monitor .table-type-2.tree tbody tr.leaf0 td.data_1 {
     position: relative;
-    padding-left: calc(2.5rem + 0.3rem); }
-    .robot_monitor .table-type-2.tree tbody tr.leaf0 td.data_1:before {
+    padding-left: calc(2.5rem + 0.3rem);
+}
+
+.robot_monitor .table-type-2.tree tbody tr.leaf0 td.data_1:before {
     left: calc(0.75rem + 0.3rem);
-    font-size: 1.25rem; 
+    font-size: 1.25rem;
 }
 
 .robot_monitor .table-type-2 tr.stale td.data_1:before {
@@ -38,14 +41,49 @@
     left: 0.5rem;
     font-size: 1.25rem;
     vertical-align: middle;
-    color: rgb(50, 60, 200); 
+    color: rgb(50, 60, 200);
 }
-
 
 .robot_monitor .time-item.stale {
     background-color: rgb(50, 60, 200);
- }
+}
 
 .time-item.no {
-  background-color: #fff;
+    background-color: #fff;
+}
+
+.robot_monitor .table-type-2.tree tbody td.data_1 .toggle-button {
+    content: "";
+    position: absolute;
+    display: block;
+    top: calc(0.5rem);
+    width: 12px;
+    height: 12px;
+    margin: auto;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+.robot_monitor .table-type-2.tree tbody tr.leaf0 td.data_1 .toggle-button {
+    left: calc(0.1rem + 0rem);
+}
+
+.robot_monitor .table-type-2.tree tbody tr.leaf1 td.data_1 .toggle-button {
+    left: calc(-0.2rem + 1rem);
+}
+
+.robot_monitor .table-type-2.tree tbody tr.leaf2 td.data_1 .toggle-button {
+    left: calc(-0.2rem + 2rem);
+}
+
+.robot_monitor .table-type-2.tree tbody tr.leaf3 td.data_1 .toggle-button {
+    left: calc(-0.2rem + 3rem);
+}
+
+.robot_monitor .table-type-2.tree tbody tr.leaf4 td.data_1 .toggle-button {
+    left: calc(-0.2rem + 4rem);
+}
+
+.robot_monitor .table-type-2.tree tbody tr.leaf5 td.data_1 .toggle-button {
+    left: calc(-0.2rem + 5rem);
 }

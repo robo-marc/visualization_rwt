@@ -18,10 +18,10 @@ import yaml
 import time
 import rosgraph
 from rosgraph.names import script_resolve_name, ns_join, get_ros_namespace, make_caller_id, make_global_ns, GLOBALNS
-from rwt_topic_marc.srv import StartMonitoring, StartMonitoringResponse, \
+from rwt_topic_content_marc.srv import StartMonitoring, StartMonitoringResponse, \
     StopMonitoring, StopMonitoringResponse, \
     GetMonitoringInfo, GetMonitoringInfoResponse
-from rwt_topic_marc.msg import MonitoringInfo
+from rwt_topic_content_marc.msg import MonitoringInfo
 from std_srvs.srv import Trigger, TriggerResponse
 
 # def topic_info(argv):

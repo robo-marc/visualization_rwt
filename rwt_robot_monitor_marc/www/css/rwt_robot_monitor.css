@@ -41,3 +41,32 @@
 .time-item.no {
   background-color: #fff;
 }
+.robot_monitor .table-type-2.tree tbody td.data_1 .toggle-button {
+  content: "";
+  position: absolute;
+  display: block;
+  top: calc(0.5rem);
+  width: 12px;
+  height: 12px;
+  margin: auto;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+.robot_monitor .table-type-2.tree tbody tr.leaf0 td.data_1 .toggle-button {
+  left: calc(0.1rem);
+}
+.robot_monitor .table-type-2.tree tbody tr.leaf1 td.data_1 .toggle-button {
+  left: calc(0.8rem);
+}
+.robot_monitor .table-type-2.tree tbody tr.leaf2 td.data_1 .toggle-button {
+  left: calc(1.8rem);
+}
+.robot_monitor .table-type-2.tree tbody tr.leaf3 td.data_1 .toggle-button {
+  left: calc(2.8rem);
+}
+.robot_monitor .table-type-2.tree tbody tr.leaf4 td.data_1 .toggle-button {
+  left: calc(3.8rem);
+}
+.robot_monitor .table-type-2.tree tbody tr.leaf5 td.data_1 .toggle-button {
+  left: calc(4.8rem);
+}

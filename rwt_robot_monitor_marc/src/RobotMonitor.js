@@ -14,9 +14,6 @@ var dialogDataName = '';
 // all device init
 var allTableInit = true;
 
-// dialog hidden
-$('#status-dialog').addClass('dialog_hidden');
-
 /**
  * a class to visualize diagnostics messages
  * @class RWTRobotMonitor
@@ -28,8 +25,9 @@ ROSLIB.RWTRobotMonitor = function (spec) {
   var ros = spec.ros;
   this.last_diagnostics_update = null;
   this.last_time_id = spec.last_time_id;
+  this.is_paused = false;
 
-  // defaults to 100
+  // defaults to 30
   this.maxData = spec.maxData || 30;
   this.clearData();
 
@@ -60,7 +58,7 @@ ROSLIB.RWTRobotMonitor = function (spec) {
 ROSLIB.RWTRobotMonitor.prototype.diagnosticsCallback = function (msg) {
   this.last_diagnostics_update = ROSLIB.Time.now();
   // paused
-  if (ROSLIB.RWTRobotMonitor.prototype.is_paused) {
+  if (this.is_paused) {
     return;
   }
   var diagnostics_statuses
@@ -78,8 +76,6 @@ ROSLIB.RWTRobotMonitor.prototype.diagnosticsCallback = function (msg) {
  * @param msg - message of /diagnostics_agg.
  */
 ROSLIB.RWTRobotMonitor.prototype.showHistory = function (msg) {
-  var history = true;
-  this.last_diagnostics_update = ROSLIB.Time.now();
   this.history = new ROSLIB.DiagnosticsHistory();
   var diagnostics_statuses
     = ROSLIB.DiagnosticsStatus.createFromArray(msg);
@@ -128,7 +124,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, leve
 
   //delete table
   $('#' + list_id + ' tr:gt(0)').remove();
-  $('#' + list_id + ' tr:gt(0)').size();
 
   var directories = this.history.root.getDirectories(level);
 
@@ -168,7 +163,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateTable = function (list_id, tr_class, leve
   }
 };
 
-
 /**
  * update table view all device
  */
@@ -182,7 +176,6 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
 
   //delete table
   $('#all-table tr:gt(0)').remove();
-  $('#all-table tr:gt(0)').size();
 
   // return jquery object
   var rec = function (directory, indent, parentId, toggleParent, displayParent) {
@@ -213,8 +206,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
     // display check
     if (parentId && toggleParent === ' collapse') {
       display = ' collapsed';
-    }
-    if (parentId && displayParent === ' collapsed') {
+    } else if (parentId && displayParent === ' collapsed') {
       display = ' collapsed';
     }
 
@@ -233,6 +225,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateAllTable = function () {
       + '<td class="data_1" data-name="'
       + directory.fullName()
       + '">'
+      + '<div class="toggle-button"></div>'
       + '<span>'
       + directory.name
       + '</span>'
@@ -280,7 +273,7 @@ ROSLIB.RWTRobotMonitor.prototype.updateErrorList = function () {
 };
 
 /**
- * check stale list view
+ * check stale list view (hidden)
  */
 ROSLIB.RWTRobotMonitor.prototype.checkStale = function () {
   var resultSTALE = this.updateTable('stale-table', 'stale', ROSLIB.DiagnosticsStatus.LEVEL.STALE);
@@ -337,89 +330,12 @@ ROSLIB.RWTRobotMonitor.prototype.updateTimeList = function (resultError, resultW
 ROSLIB.RWTRobotMonitor.prototype.registerBrowserCallback = function () {
   var root = this.history.root;
 
-  // dialog_box
-  $('.data_1').on('dblclick', function () {
-    dialogDataName = $(this).attr('data-name');
-    var the_directory = root.findByName(dialogDataName);
-    dialogDisplay(the_directory);
-  });
-
-  // dialog close
-  $('#close').on('click', function () {
-    $('#status-dialog').addClass('dialog_hidden');
-    $('#table-type-4').empty();
-  });
-
   // dialog update
   if (!($('#status-dialog').hasClass('dialog_hidden'))) {
     $('#table-type-4').empty();
     var the_directory = root.findByName(dialogDataName);
-    dialogDisplay(the_directory);
+    showDialog(the_directory);
   }
-
-  // dialog
-  function dialogDisplay(the_directory) {
-    // dialog_box_1
-    $('#dialog_header_title').text(the_directory.fullName());
-    $('#dialog_full_name').text(the_directory.fullName());
-    $('#dialog_component').text(the_directory.name);
-    $('#dialog_hardware').text(the_directory.status.hardware_id);
-    $('#dialog_level').text(the_directory.status.levelString());
-    $('#dialog_message').text(the_directory.status.message);
-
-    // dialog_box_2
-    for (var key in the_directory.status.values) {
-      $('#table-type-4').append('<tr><th>'
-        + key + '</th><td>'
-        + the_directory.status.values[key]
-        + '</td></tr>');
-    }
-    $('#status-dialog').removeClass('dialog_hidden');
-  }
-
-  // all device tree tggle
-  $('tr.expand').on('click', function () {
-    toggleAllTable(this);
-  });
-
-  // all device tree tggle
-  $('tr.collapse').on('click', function () {
-    toggleAllTable(this);
-  });
-
-  // toggle (expand/collapse)
-  function toggleAllTable(parent) {
-
-    var rec = function (parentId, collapse) {
-      var parentClass = '.' + parentId;
-
-      if (collapse) {
-        $(parentClass).addClass('collapsed');
-      } else {
-        $(parentClass).toggleClass('collapsed');
-      }
-
-      var child = document.getElementsByClassName(parentId);
-      for (var i = 0; i < child.length; i++) {
-        var the_child = child[i];
-        if ($(the_child).hasClass('collapse')) {
-          collapse = 'collapse';
-        } else {
-          collapse = '';
-        }
-        rec($(the_child).attr('id'), collapse);
-      }
-    };
-
-    $(parent).toggleClass('collapse');
-    $(parent).toggleClass('expand');
-    var collapse = '';
-    if ($(parent).hasClass('collapse')) {
-      collapse = 'collapse';
-    }
-    var result = rec($(parent).attr('id'), collapse);
-  }
-
 };
 
 ROSLIB.RWTRobotMonitor.prototype.clearData = function () {
@@ -428,102 +344,73 @@ ROSLIB.RWTRobotMonitor.prototype.clearData = function () {
 
 ROSLIB.RWTRobotMonitor.prototype.addData = function (data) {
   // paused
-  if (ROSLIB.RWTRobotMonitor.prototype.is_paused) {
+  if (this.is_paused) {
     return;
   }
   // check the dimension
   var dataDimension = _.isArray(data) ? data.length : 0;
   if (dataDimension === 0) {
-    data = [data];          // force to encapsulate into array
+    // force to encapsulate into array
+    data = [data];
   }
   this.data.push(data);
   arrData = this.data.toArray();
 };
 
-/**
- * a class for ring buffer.
- * @class RingBuffer
- * @param spec
- * @property bufferCount
- * 
- */
-ROSLIB.RingBuffer = function (spec) {
-  this.bufferCount = (spec || {}).bufferCount || 30;
-  this.clear();
-};
+// toggle (expand/collapse)
+function toggleAllTable(parent) {
 
-ROSLIB.RingBuffer.prototype.push = function (data) {
-  this.endIndex++;
-  if (this.endIndex === this.bufferCount) {
-    this.endIndex = 0;
+  // last child skip
+  if (!parent.hasClass('collapse') && !parent.hasClass('expand')) {
+    return;
   }
-  if (this.count >= this.bufferCount) {
-    this.buffer[this.endIndex] = data;
-    // increment startIndex and endIndex
-    this.startIndex++;
-    if (this.startIndex === this.bufferCount) {
-      this.startIndex = 0;
+
+  var rec = function (parentId, collapse) {
+    // children has parendId in cssClass
+    var children = $('.' + parentId);
+    if (collapse) {
+      children.addClass('collapsed');
+    } else {
+      children.toggleClass('collapsed');
     }
-  } else {
-    this.buffer[this.endIndex] = data;
-  }
-  this.count++;
-  return data;
-};
 
-ROSLIB.RingBuffer.prototype.clear = function () {
-  this.buffer = new Array(this.bufferCount);
-  this.startIndex = 0;
-  this.endIndex = -1;
-  this.count = 0;
-};
-
-ROSLIB.RingBuffer.prototype.map = function (proc) {
-  var ret = [];
-  for (var i = this.startIndex; i < Math.min(this.count, this.bufferCount); i++) {
-    ret.push(proc.call(this, this.buffer[i]));
-  }
-  if (this.count > this.bufferCount) {
-    for (var j = 0; j < this.endIndex + 1; j++) {
-      ret.push(proc.call(this, this.buffer[j]));
+    // var child = document.getElementsByClassName(parentId);
+    for (var i = 0; i < children.length; i++) {
+      var the_child = children[i];
+      if ($(the_child).hasClass('collapse')) {
+        collapse = 'collapse';
+      } else {
+        collapse = '';
+      }
+      rec($(the_child).attr('id'), collapse);
     }
+  };
+
+  parent.toggleClass('collapse');
+  parent.toggleClass('expand');
+  var collapse = '';
+  if (parent.hasClass('collapse')) {
+    collapse = 'collapse';
   }
-  return ret;
-};
+  rec(parent.attr('id'), collapse);
+}
 
-ROSLIB.RingBuffer.prototype.toArray = function () {
-  return this.map(function (x) { return x; });
-};
+// dialog
+function showDialog(the_directory) {
+  // dialog_box_1
+  $('#dialog_header_title').text(the_directory.fullName());
+  $('#dialog_full_name').text(the_directory.fullName());
+  $('#dialog_component').text(the_directory.name);
+  $('#dialog_hardware').text(the_directory.status.hardware_id);
+  $('#dialog_level').text(the_directory.status.levelString());
+  $('#dialog_message').text(the_directory.status.message);
 
-ROSLIB.RingBuffer.prototype.length = function () {
-  return Math.min(this.bufferCount, this.count);
-};
-
-$('#pause-button').on('click', function (e) {
-  e.preventDefault();
-  ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
-  $('#pause-button').hide();
-  $('#start-button').show();
-});
-
-$('#start-button').on('click', function (e) {
-  e.preventDefault();
-  ROSLIB.RWTRobotMonitor.prototype.is_paused = false;
-  $('#pause-button').show();
-  $('#start-button').hide();
-});
-
-// time list botton click 
-$('.time-list').on('click', 'li', function () {
-  // monitor pause
-  ROSLIB.RWTRobotMonitor.prototype.is_paused = true;
-  $('#pause-button').hide();
-  $('#start-button').show();
-
-  var num = $(this).attr('id').substr(3);
-  var data = {};
-  data = arrData[Math.abs(parseInt(num, 10) - (arrData.length - 1))];
-
-  var msg = data[0];
-  ROSLIB.RWTRobotMonitor.prototype.showHistory(msg);
-});
+  // dialog_box_2
+  for (var key in the_directory.status.values) {
+    $('#table-type-4').append('<tr><th>'
+      + key + '</th><td>'
+      + the_directory.status.values[key]
+      + '</td></tr>');
+  }
+  $('#status-dialog').removeClass('dialog_hidden');
+}

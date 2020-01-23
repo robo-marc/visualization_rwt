@@ -18,4 +18,3 @@ All the dependending projects are included in `rwt_plot_marc` and `rwt_utils_3rd
 * [jquery](http://jquery.com) - well-known library
 * [lodash](https://github.com/lodash/lodash) - utlity functions
 * [d3.js](http://d3js.org/) - graph library
-* [bootstrap](http://getbootstrap.com) - css/js library
