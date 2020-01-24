@@ -135,6 +135,9 @@ $(function () {
 
   fileObj.addEventListener('change', function (evt) {
     var file = evt.target.files;
+    if (!file[0]) {
+      return;
+    }
     // read text
     var reader = new FileReader();
     reader.readAsText(file[0]);
