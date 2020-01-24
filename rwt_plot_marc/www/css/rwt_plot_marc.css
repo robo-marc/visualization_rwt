@@ -52,3 +52,23 @@ svg.rwt-plot .axis .tick text {
   left: 0;
   top: 0.75rem;
 }
+
+/*** setting area ***/
+
+
+#type-select {
+  height: 2.2rem;
+  font-size: 0.875rem;
+  color: #808080;
+  padding: 0.25rem 0.5rem;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid #808080;
+
+  flex: 0 0 70%;
+  max-width: 70%;
+}
+
+#type-select:disabled {
+  background-color: #EEEEEE;
+}

@@ -204,12 +204,13 @@ $(function () {
         var decoded = ros.decodeTypeDefs(details);
 
         var typeList = getFieldList(decoded);
-        $('#type-select').empty();
+        $('#type-select').val('');
+        $('#type-select-data').empty();
         _.each(typeList, function (value, index) {
           $('<option>', {
             value: value,
             text: value,
-          }).appendTo('#type-select');
+          }).appendTo('#type-select-data');
         });
       });
     });

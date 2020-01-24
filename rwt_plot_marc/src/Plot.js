@@ -761,6 +761,10 @@ ROSLIB.RWTPlot.prototype.addData = function (msgFieldPath, data, data2) {
   }
 };
 
+ROSLIB.RWTPlot.prototype.escapeSelectorString = function (val) {
+  return val.replace(/[ !"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, '\\$&');
+};
+
 ROSLIB.RWTPlot.prototype.removeTimestampedSeries = function (msgFieldPath) {
   if (msgFieldPath in this.seriesMap) {
     var dataArr = this.seriesMap[msgFieldPath];
@@ -768,7 +772,7 @@ ROSLIB.RWTPlot.prototype.removeTimestampedSeries = function (msgFieldPath) {
       var tmpData = dataArr[0];
       for (var i = 0; i < tmpData.length; i++) {
         var fieldPathId = this.getFieldPathId(msgFieldPath, i);
-        this.svg.select('#' + fieldPathId)
+        this.svg.select('#' + this.escapeSelectorString(fieldPathId))
           .remove();
         delete this.paths[fieldPathId];
         delete this.pathSettings[fieldPathId];
