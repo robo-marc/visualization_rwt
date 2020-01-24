@@ -4,7 +4,7 @@ rwt_robot_monitor_marc
 Usage
 -----
 ```sh
-roslaunch rwt_robot_monitor_marc example.launch # this starts roswww and rosbridge_server
+roslaunch rwt_robot_monitor_marc rwt_robot_monitor_marc.launch # this starts roswww and rosbridge_server
 
 and access to http://localhost:8000/rwt_robot_monitor_marc/ using your browser
 

@@ -4,7 +4,7 @@ rwt_topic_content_marc
 Usage
 -----
 ```sh
-roslaunch rwt_topic_content_marc example.launch # this starts roswww and rosbridge_server and node
+roslaunch rwt_topic_content_marc rwt_topic_content_marc.launch # this starts roswww and rosbridge_server and node
 ```
 
 and access to http://localhost:8000/rwt_topic_content_marc/ using your browser

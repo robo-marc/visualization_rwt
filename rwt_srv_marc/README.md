@@ -4,7 +4,7 @@ rwt_srv_marc
 Usage
 -----
 ```sh
-roslaunch rwt_srv_marc example.launch # this starts roswww and rosbridge_server and node
+roslaunch rwt_srv_marc rwt_srv_marc.launch # this starts roswww and rosbridge_server and node
 ```
 
 and access to http://localhost:8000/rwt_srv_marc/ using your browser
