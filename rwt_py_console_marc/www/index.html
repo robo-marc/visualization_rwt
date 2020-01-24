@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 
     <!--
@@ -32,6 +32,7 @@
     <title>rwt_py_console_marc</title>
 
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <style>
 
@@ -63,20 +64,26 @@
             border: 0;
             position: absolute;
             left: -40px;
-            z-index: -1;
+            z-index: -10;
             ime-mode: disabled;
         }
 
-        #noVNC_keyboard_button {
-          height: 20px;
-          margin: 3px;
-          padding: 0px;
+        .noVNC_button {
+            display: block;
+            padding: 2px 2px;
+            margin: 3px 3px;
+            border:1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+        }
+
+        .noVNC_button.noVNC_selected {
+            border-color: rgba(128, 128, 128, 0.8);
+            background: rgba(128, 128, 128, 0.5);
         }
 
         #noVNC_mobile_buttons {
           margin: 0px;
           padding: 0px;
-          height: 26px;
           background-color: #333;
         }
 
@@ -96,8 +103,10 @@
     <script type="module" crossorigin="anonymous">
         // RFB holds the API to connect and communicate with a VNC server
         import RFB from '../rwt_utils_3rdparty/noVNC/core/rfb.js';
-        import { isTouchDevice } from '../rwt_utils_3rdparty/noVNC/core/util/browser.js';
+        import { isTouchDevice, isIOS, isAndroid } from '../rwt_utils_3rdparty/noVNC/core/util/browser.js';
         import Keyboard from "../rwt_utils_3rdparty/noVNC/core/input/keyboard.js";
+        import KeyTable from "../rwt_utils_3rdparty/noVNC/core/input/keysym.js";
+        import keysyms from "../rwt_utils_3rdparty/noVNC/core/input/keysymdef.js"
 
         let rfb;
         let desktopName;
@@ -193,6 +202,7 @@
 
                 setRFB(rfb) {
                     UI.rfb = rfb;
+                    UI.keyboardinputReset();
                 },
 
                 showVirtualKeyboard() {
@@ -279,6 +289,12 @@
                 keyboardinputReset() {
                     const kbi = document.getElementById('noVNC_keyboardinput');
                     kbi.value = new Array(UI.defaultKeyboardinputLen).join("_");
+                    if (kbi.setSelectionRange) {
+                        let len = kbi.value.length * 2;
+                        setTimeout(function() {
+                            kbi.setSelectionRange(len, len);
+                        }, 1);
+                    }
                     UI.lastKeyboardinput = kbi.value;
                 },
 
@@ -385,14 +401,14 @@
 </head>
 
 <body>
+    <textarea id="noVNC_keyboardinput" autocapitalize="off"
+        autocomplete="off" spellcheck="false" tabindex="-1"></textarea>
     <div id="noVNC_mobile_buttons">
         <input type="image" alt="Keyboard" src="../rwt_utils_3rdparty/noVNC/app/images/keyboard.svg"
                     id="noVNC_keyboard_button" class="noVNC_button" title="Show Keyboard">
     </div>
     <div id="screen" style="padding: 0; margin: 0">
         <!-- This is where the remote screen will appear -->
-        <textarea id="noVNC_keyboardinput" autocapitalize="off"
-        autocomplete="off" spellcheck="false" tabindex="-1"></textarea>
     </div>
 </body>
 
