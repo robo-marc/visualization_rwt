@@ -10,9 +10,4 @@
    <param name="port" value="8080" />
    <!--param name="address" value="127.0.0.1" /-->
   </node>
-  <node pkg="rwt_image_view_marc" type="rosbag_record_server.py"
-        name="rosbag_record_server"
-        output="screen"
-        clear_params="true">
-  </node>
 </launch>
