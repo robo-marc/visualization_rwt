@@ -1,0 +1,63 @@
+<launch>
+
+<!-- rwt_action_marc -->           
+  <include file="$(find rwt_action_marc)/launch/rwt_action_marc.launch">
+    <arg name="launch_roswww" value="false" />
+  </include>
+
+<!-- rwt_srv_marc -->
+  <include file="$(find rwt_srv_marc)/launch/rwt_srv_marc.launch">
+    <arg name="launch_roswww" value="false" />
+  </include>
+
+<!-- rwt_rosparam_marc -->
+  <include file="$(find rwt_rosparam_marc)/launch/rwt_rosparam_marc.launch">
+    <arg name="launch_roswww" value="false" />
+  </include>
+
+<!-- rwt_topic_content_marc -->
+  <include file="$(find rwt_topic_content_marc)/launch/rwt_topic_content_marc.launch">
+    <arg name="launch_roswww" value="false" />
+  </include>
+
+<!-- rwt_moveit_monitor_marc -->
+  <include file="$(find rwt_moveit_monitor_marc)/launch/rwt_moveit_monitor_marc.launch">
+    <arg name="launch_roswww" value="false" />
+    <arg name="launch_rwt_topic_content_marc" value="false" />
+  </include>
+
+<!-- rwt_topic_marc -->
+  <include file="$(find rwt_topic_marc)/launch/rwt_topic_marc.launch">
+    <arg name="launch_roswww" value="false" />
+    <arg name="launch_rwt_topic_content_marc" value="false" />
+  </include>
+
+<!-- rwt_image_view_marc -->
+  <include file="$(find rwt_image_view_marc)/launch/rwt_image_view_marc.launch">
+    <arg name="launch_roswww" value="false" />
+  </include>
+
+<!-- rwt_rviz_marc -->
+  <include file="$(find rwt_rviz_marc)/launch/rwt_rviz_marc.launch">
+    <arg name="display" default=":101" />
+    <arg name="launch_roswww" value="false" />
+  </include>
+
+<!-- rwt_graph_marc -->
+  <include file="$(find rwt_graph_marc)/launch/rwt_graph_marc.launch">
+    <arg name="display" default=":102" />
+    <arg name="launch_roswww" value="false" />
+  </include>
+
+<!-- rwt_py_console_marc -->
+  <include file="$(find rwt_py_console_marc)/launch/rwt_py_console_marc.launch">
+    <arg name="display" default=":103" />
+    <arg name="launch_roswww" value="false" />
+  </include>
+
+<!-- webserver -->
+  <arg name="launch_roswww" default="true" />
+  <include file="$(find rwt_utils_marc)/launch/webserver.launch"
+           if="$(arg launch_roswww)" />
+
+</launch>

@@ -10,4 +10,6 @@
    <param name="port" value="8080" />
    <!--param name="address" value="127.0.0.1" /-->
   </node>
+  
+  <node pkg="uvc_camera" type="uvc_camera_node" name="uvc_camera_node" />
 </launch>

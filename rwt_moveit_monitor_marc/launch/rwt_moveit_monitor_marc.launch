@@ -1,9 +1,12 @@
 <launch>
   <arg name="launch_roswww" default="true" />
+  <arg name="launch_rwt_topic_content_marc" default="true" />
+
   <include file="$(find rwt_moveit_monitor_marc)/launch/webserver.launch"
            if="$(arg launch_roswww)" />
            
-  <include file="$(find rwt_topic_content_marc)/launch/rwt_topic_content_marc.launch">
+  <include file="$(find rwt_topic_content_marc)/launch/rwt_topic_content_marc.launch"
+           if="$(arg launch_rwt_topic_content_marc)">
       <arg name="launch_roswww" value="false" />
   </include>
 </launch>
