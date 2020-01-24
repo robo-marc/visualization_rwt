@@ -347,8 +347,6 @@ $(function () {
   dataView.onRowCountChanged.subscribe(function (e, args) {
     grid.updateRowCount();
     grid.render();
-    grid.resizeCanvas();
-    grid.autosizeColumns();
   });
 
   dataView.onRowsChanged.subscribe(function (e, args) {
