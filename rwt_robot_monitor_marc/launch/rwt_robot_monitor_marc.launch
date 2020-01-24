@@ -1,0 +1,5 @@
+<launch>
+  <arg name="launch_roswww" default="true" />
+  <include file="$(find rwt_robot_monitor_marc)/launch/webserver.launch"
+           if="$(arg launch_roswww)" />
+</launch>

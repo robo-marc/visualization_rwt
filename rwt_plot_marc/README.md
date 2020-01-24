@@ -4,7 +4,7 @@ rwt_plot_marc
 Usage
 -----
 ```sh
-roslaunch rwt_plot_marc example.launch # this starts roswww and rosbridge_server and example data publisher
+roslaunch rwt_plot_marc rwt_plot_marc.launch # this starts roswww and rosbridge_server
 ```
 
 and access to http://localhost:8000/rwt_plot_marc/ using your browser
