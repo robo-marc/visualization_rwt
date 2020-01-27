@@ -8,6 +8,8 @@ roslaunch rwt_topic_content_marc rwt_topic_content_marc.launch # this starts ros
 ```
 
 and access to http://localhost:8000/rwt_topic_content_marc/ using your browser
+rwt_topic_content_marc does not work alone.
+A package that standardizes the processing of rwt_moveit_marc and rwt_topic_marc.
 
 ![rwt_topic_content_marc.png](images/rwt_topic_content_marc.png "rwt_topic_content_marc.png")
 
