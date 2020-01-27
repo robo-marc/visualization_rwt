@@ -383,44 +383,75 @@ $(function () {
       return;
     }
 
-    // if check extension, uncomment this.
-    // if (!file.name.match('\.csv$')) {
-    //   alert('.csv file only');
-    //   return;
-    // }
-
     $('#pause-button').click();
     var reader = new FileReader();
     reader.readAsText(file);
 
     reader.onload = function () {
-      var rows = reader.result.split('\n');
-      if (rows.length < 2) {
+      var lines = reader.result.split('\n');
+      var hasPreFix;
+      var hasSuffix;
+      var lastWrapeed = false;
+      var keepRows = [];
+      var keepColumns = lines[0];
+
+      if (lines.length < 2) {
         return;
       }
 
+      for (var i = 1; i < lines.length; i++) {
+        if (lines[i].length === 0) {
+          continue;
+        }
+        if (lines[i] === '"') {
+          hasPreFix = !lastWrapeed;
+          hasSuffix = lastWrapeed;
+        } else {
+          hasPreFix = lines[i].charAt(0) === '"';
+          hasSuffix = lines[i].charAt(lines[i].length - 1) === '"';
+        }
+
+        if (!hasPreFix && !lastWrapeed) {
+          continue;
+        }
+
+        if (hasPreFix && lastWrapeed) {
+          keepRows.pop();
+        }
+
+        if (lastWrapeed) {
+          keepRows[keepRows.length - 1] = keepRows[keepRows.length - 1] + lines[i];
+        } else {
+          keepRows.push(lines[i]);
+        }
+
+        lastWrapeed = !hasSuffix;
+      }
+
+      keepRows.unshift(keepColumns);
+      var rows = keepRows;
       var columns = rows[0].split(';');
       var colIndexs = {};
-      for (var i = 0; i < columns.length; i++) {
-        var str = columns[i];
+      for (var j = 0; j < columns.length; j++) {
+        var str = columns[j];
         switch (str) {
           case 'message':
-            colIndexs[COLUMN_NAMES.MESSAGE] = i;
+            colIndexs[COLUMN_NAMES.MESSAGE] = j;
             break;
           case 'severity':
-            colIndexs[COLUMN_NAMES.SEVERITY] = i;
+            colIndexs[COLUMN_NAMES.SEVERITY] = j;
             break;
           case 'node':
-            colIndexs[COLUMN_NAMES.NODE] = i;
+            colIndexs[COLUMN_NAMES.NODE] = j;
             break;
           case 'stamp':
-            colIndexs[COLUMN_NAMES.STAMP] = i;
+            colIndexs[COLUMN_NAMES.STAMP] = j;
             break;
           case 'topics':
-            colIndexs[COLUMN_NAMES.TOPICS] = i;
+            colIndexs[COLUMN_NAMES.TOPICS] = j;
             break;
           case 'location':
-            colIndexs[COLUMN_NAMES.LOCATION] = i;
+            colIndexs[COLUMN_NAMES.LOCATION] = j;
             break;
           default:
             console.info('Unknown column: %s', str);
