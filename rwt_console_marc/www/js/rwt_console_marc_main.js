@@ -72,6 +72,9 @@ $(function () {
     // common
     ros.autoConnect();
 
+    // dialog hide
+    $('#status-dialog').addClass('dialog_hidden');
+
     $('#pause-button').show();
     $('#resume-button').hide();
     $('#open_sub_button').click();
@@ -537,6 +540,19 @@ $(function () {
     appendTopicsToFilter();
   }
 
+  // dialog display
+  function showDialog(dataViewItem) {
+    $('#dialog_header_title').text('Message Viewer');
+    $('#dialog_node').text(dataViewItem.Node);
+    $('#dialog_time').text(dataViewItem.Stamp);
+    $('#dialog_severity').text(dataViewItem.Severity);
+    $('#dialog_topics').text(dataViewItem.Topics);
+    $('#dialog_message').text(dataViewItem.Message);
+    $('#dialog_location').text(dataViewItem.Location);
+
+    $('#status-dialog').removeClass('dialog_hidden');
+  }
+
   // pause
   $('#pause-button').on('click', function (e) {
     e.preventDefault();
@@ -579,9 +595,19 @@ $(function () {
     $('#open_sub_button').show();
   });
 
+  // dialog close
+  $('#close').on('click', function () {
+    $('#status-dialog').addClass('dialog_hidden');
+  });
 
   ////////////////////////////////////////
   // grid events
+
+  //dialog
+  grid.onDblClick.subscribe(function (e, args) {
+    var item = dataView.getItem(args.row);
+    showDialog(item);
+  });
 
   // sort
   grid.onSort.subscribe(function (e, args) {
