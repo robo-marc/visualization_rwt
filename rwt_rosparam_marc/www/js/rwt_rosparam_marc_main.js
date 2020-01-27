@@ -256,7 +256,10 @@ $(function () {
 
   function formatPrimitiveValue(value) {
     var result;
-    if (typeof value === 'string' && $.isNumeric(value)) {
+    if (
+      (typeof value === 'string' && $.isNumeric(value))
+      || (value === '[*]')
+    ) {
       result = '\'' + value + '\'';
     } else {
       result = value;
