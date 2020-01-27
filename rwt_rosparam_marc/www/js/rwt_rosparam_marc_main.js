@@ -34,6 +34,11 @@ $(function () {
   function initScreen() {
     // common
     ros.autoConnect();
+
+    $('#rosparam-arg1').hide();
+    $('#rosparam-arg2').hide();
+    $('#folder').hide();
+
     // for dropdown
     getSelectList();
     // clear list
@@ -111,21 +116,18 @@ $(function () {
     $('#rosparam-arg1').val('');
     $('#rosparam-arg1-data').empty();
     $('#rosparam-arg2').val('');
-    ros.getParams(function (names) {
-      names.sort();
-      $('#rosparam-arg1-data').append(names.map(function (name) {
-        return '<option value="' + name + '">' + name + '</option>';
-      }).join('\n'));
-    },
+    ros.getParams(
+      function (names) {
+        names.sort();
+        $('#rosparam-arg1-data').append(names.map(function (name) {
+          return '<option value="' + name + '">' + name + '</option>';
+        }).join('\n'));
+      },
       function (message) {
         console.log('getParams failed: %s', message);
       }
     );
   }
-
-  $('#rosparam-arg1').hide();
-  $('#rosparam-arg2').hide();
-  $('#folder').hide();
 
   // file change
   $('#folder').on('click', function (e) {
@@ -198,10 +200,68 @@ $(function () {
   function getParam(name, param, rosparamList) {
     var defer = $.Deferred();
     param.get(function (value) {
-      rosparamList[name] = value;
+      rosparamList[name] = formatValue(value);
       defer.resolve();
     });
     return defer.promise();
+  }
+
+  function formatValue(value) {
+    var result = '';
+    if (_.isArray(value)) {
+      if (value.length <= 0) {
+        // empty array
+        result = '[]';
+      } else {
+        // array
+        result = formatArrayValue(value);
+      }
+    } else {
+      if (typeof value === 'object') {
+        // object(not array)
+        result = formatObjectValue(value);
+      } else {
+        // primitive
+        result = formatPrimitiveValue(value);
+      }
+    }
+    return result;
+  }
+
+  function formatArrayValue(arr) {
+    var resultList = [];
+    for (var i = 0; i < arr.length; i++) {
+      if (typeof arr[i] === 'object') {
+        // object element
+        resultList.push(formatObjectValue(arr[i]));
+      } else {
+        // primitive element
+        resultList.push(formatPrimitiveValue(arr[i]))
+      }
+    }
+    return '[' + resultList.join(', ') + ']';
+  }
+
+  function formatObjectValue(obj) {
+    var resultList = [];
+    var keys = Object.keys(obj);
+    keys.sort();
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var formattedValue = formatValue(obj[key]);
+      resultList.push(key + ': ' + formattedValue);
+    }
+    return '{' + resultList.join(', ') + '}';
+  }
+
+  function formatPrimitiveValue(value) {
+    var result;
+    if (typeof value === 'string' && $.isNumeric(value)) {
+      result = '\'' + value + '\'';
+    } else {
+      result = value;
+    }
+    return result;
   }
 
   $('#execute-button').on('click', function () {
@@ -249,9 +309,10 @@ $(function () {
             ros: ros,
             name: rosparamArg1,
           });
-          paramType.get(function (value) {
-            requestDefer.resolve();
-          },
+          paramType.get(
+            function (value) {
+              requestDefer.resolve();
+            },
             function (message) {
               setMessage(message);
               requestDefer.resolve();
@@ -265,8 +326,9 @@ $(function () {
               ros: ros,
               name: rosparamArg1,
             });
-            paramSet.set(rosparamArg, function (result) {
-            },
+            paramSet.set(rosparamArg,
+              function (result) {
+              },
               function (message) {
                 setMessage(message);
               }
@@ -299,7 +361,7 @@ $(function () {
               setMessage(message);
             } else {
               clearList();
-              rosparamList[rosparamArg1] = value;
+              rosparamList[rosparamArg1] = formatValue(value);
               gridList(rosparamList);
             }
           });
