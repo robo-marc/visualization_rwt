@@ -171,7 +171,7 @@ span.label.and {
     padding: 2px 0.75rem;
     border: 1px solid #CECECE;
     box-sizing: border-box;
-    word-break: normal;
+    word-break: break-all;
 }
 
 @media only screen and (max-width: 400px) {
