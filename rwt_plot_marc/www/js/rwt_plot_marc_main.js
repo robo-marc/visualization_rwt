@@ -55,23 +55,15 @@ $(function () {
 
   function printXAxisSec() {
     var xSec = plot.getXAxisSec();
-    $('#x-range').val(Math.round(xSec));
+    $('#x-range').val(myRound(xSec));
   }
 
   function printYAxisDomain() {
     var yDomain = plot.getYAxisMinMax();
     var yMin = yDomain.min;
     var yMax = yDomain.max;
-    $('#y-min').val(round10(yMin));
-    $('#y-max').val(round10(yMax));
-  }
-
-  function toInt(value) {
-    if ($.isNumeric(value)) {
-      return Math.round(parseFloat(value));
-    } else {
-      return undefined;
-    }
+    $('#y-min').val(myRound(yMin));
+    $('#y-max').val(myRound(yMax));
   }
 
   function toFloat(value) {
@@ -82,8 +74,8 @@ $(function () {
     }
   }
 
-  function round10(value) {
-    return Math.round(value * 10) / 10;
+  function myRound(value) {
+    return Math.round(value * 100000) / 100000;
   }
 
   function getValFromAccessor(msg, accessor) {
@@ -233,11 +225,11 @@ $(function () {
     }
 
     //set plot spec
-    var max = toInt($('#max-data').val());
+    var max = toFloat($('#max-data').val());
     plot.setMaxData(max);
 
     //set X-axis
-    var xSec = toInt($('#x-range').val());
+    var xSec = toFloat($('#x-range').val());
     plot.setXAxisScale(xSec);
 
     // set Y-axis

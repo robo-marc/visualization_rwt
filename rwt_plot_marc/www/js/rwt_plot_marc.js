@@ -163,7 +163,7 @@ ROSLIB.RWTPlot.prototype.initializePlot = function (contentId, posisionId, legen
     .tickFormat(function (d, i) {
       var tmp = Math.ceil((ticks - 1) / 10.0);
       if (i % tmp === 0) {
-        return Math.floor((d.getTime() - st) / 1000.0);
+        return that.floorXTickLabel((d.getTime() - st) / 1000.0);
       } else {
         return '';
       }
@@ -261,9 +261,9 @@ ROSLIB.RWTPlot.prototype.paintPosition = function (e, plot, positionLabel) {
 
   // convert from physical coordinates to coordinates on graph
   var x = plot.xScale.invert(m[0] - plot.margin.left);
-  x = plot.round10((x.getTime() - plot.startTs) / 1000.0);
+  x = plot.roundPos((x.getTime() - plot.startTs) / 1000.0);
 
-  var y = plot.round10(plot.yScale.invert(m[1] - plot.margin.top));
+  var y = plot.roundPos(plot.yScale.invert(m[1] - plot.margin.top));
 
   positionLabel.text('x = ' + x + '　y = ' + y);
 };
@@ -320,8 +320,12 @@ ROSLIB.RWTPlot.prototype.scroll = function (e, plot) {
   plot.lineDrawingThrottle(newRosTime);
 };
 
-ROSLIB.RWTPlot.prototype.round10 = function (value) {
-  return Math.round(value * 10) / 10;
+ROSLIB.RWTPlot.prototype.roundPos = function (value) {
+  return Math.round(value * 100000) / 100000;
+};
+
+ROSLIB.RWTPlot.prototype.floorXTickLabel = function (value) {
+  return Math.floor(value * 1000) / 1000;
 };
 
 ROSLIB.RWTPlot.prototype.getNextColor = function () {
@@ -510,6 +514,7 @@ ROSLIB.RWTPlot.prototype.refreshXAxisDomainByRosTime = function (xEndTime) {
 
 ROSLIB.RWTPlot.prototype.refreshXAxisDomainByDate = function (xEndTime) {
   if (this.useTimestamp) {
+    var that = this;
     var st = this.startTs;
     var ticks = this.xDomainWidth + 1;
 
@@ -524,7 +529,7 @@ ROSLIB.RWTPlot.prototype.refreshXAxisDomainByDate = function (xEndTime) {
       .tickFormat(function (d, i) {
         var tmp = Math.ceil((ticks - 1) / 10.0);
         if (i % tmp === 0) {
-          return Math.floor((d.getTime() - st) / 1000.0); // sec
+          return that.floorXTickLabel((d.getTime() - st) / 1000.0); // sec
         } else {
           return '';
         }
