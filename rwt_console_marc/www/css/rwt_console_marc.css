@@ -108,15 +108,22 @@ span.label.and {
     background-color: #fff;
     border: 1px solid #707070;
     border-radius: 5px;
-    max-width: 1000px;
+    max-width: 500px;
     margin: 0 auto;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
 }
 
-.console .dialog_box_1 .table-type-3 th {
-    text-align: left;
+.console .dialog {
+    position: relative;
+    top: 60px;
+    margin: auto;
 }
 
+@media only screen and (max-width: 599px) {
+    .console .dialog {
+        width: 90%;
+    }
+}
 
 .console .dialog_header {
     border-bottom: 1px solid #BEBEBE;
@@ -127,27 +134,63 @@ span.label.and {
     margin: 0.75rem 1rem;
 }
 
+.console .dialog_box_1 {
+    margin: 0 auto;
+}
+
 .console .dialog_body {
     margin: 1rem auto;
-}
-
-.console .dialog_box_1 .table-type-3 th,
-.console .dialog_box_1 .table-type-3 td {
-    padding: 0 0.25rem;
-    box-sizing: border-box;
-}
-
-
-.console .dialog_box_1 .table-type-3 {
-    border: none;
-    margin: 0 right;
-    border-spacing: 0;
-    border-collapse: separate;
-    font-size: 0.75rem;
 }
 
 .console .dialog_footer button {
     display: block;
     margin: 10px auto;
     text-align: center;
+}
+
+.console .dialog_box_2 {
+    margin: 1rem auto;
+    padding: 0 16px;
+}
+
+.console .dialog_box_2 .table-type-4 {
+    margin: 0 auto;
+    border-spacing: 0;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+}
+
+@media only screen and (max-width: 400px) {
+    .console .dialog_box_2 .table-type-4 {
+        width: 90%;
+    }
+}
+
+.console .dialog_box_2 .table-type-4 th,
+.console .dialog_box_2 .table-type-4 td {
+    padding: 2px 0.75rem;
+    border: 1px solid #CECECE;
+    box-sizing: border-box;
+    word-break: normal;
+}
+
+@media only screen and (max-width: 400px) {
+
+    .console .dialog_box_2 .table-type-4 th,
+    .console .dialog_box_2 .table-type-4 td {
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.console .dialog_box_2 .table-type-4 th {
+    text-align: right;
+    background-color: #E6F1F9;
+}
+
+@media only screen and (max-width: 400px) {
+    .console .dialog_box_2 .table-type-4 th {
+        text-align: center;
+    }
 }

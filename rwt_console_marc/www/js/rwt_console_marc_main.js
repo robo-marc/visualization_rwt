@@ -72,9 +72,6 @@ $(function () {
     // common
     ros.autoConnect();
 
-    // dialog hide
-    $('#status-dialog').addClass('dialog_hidden');
-
     $('#pause-button').show();
     $('#resume-button').hide();
     $('#open_sub_button').click();
