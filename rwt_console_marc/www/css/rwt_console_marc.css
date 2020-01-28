@@ -171,6 +171,9 @@ span.label.and {
     padding: 2px 0.75rem;
     border: 1px solid #CECECE;
     box-sizing: border-box;
+}
+
+.console .dialog_box_2 .table-type-4 td {
     word-break: break-all;
 }
 
