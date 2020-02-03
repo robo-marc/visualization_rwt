@@ -22,10 +22,10 @@ Following is an example with ROS Indigo.
 cd ~/catkin_ws
 wstool init src
 cd src/
-wstool set visualization_rwt --git https://github.com/tork-a/visualization_rwt/
+wstool set visualization_rwt --git https://github.com/robo-marc/visualization_rwt/
 wstool update
-rosdep install --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} -r -y
 cd ~/catkin_ws 
+rosdep install --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} -r -y
 catkin_make                (or any build commands available in ROS, e.g. `catkin build`)
 source devel/setup.bash
 ```
